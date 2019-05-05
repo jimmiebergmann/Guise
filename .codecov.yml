@@ -1,0 +1,7 @@
+ignore:
+  - "test"
+  - "example"
+coverage:
+  range: 50..80
+  round: down
+  precision: 2
