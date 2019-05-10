@@ -23,49 +23,50 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
+#ifndef GUISE_STYLE_HPP
+#define GUISE_STYLE_HPP
 
 #include "guise/build.hpp"
-#include "guise/control.hpp"
-#include "guise/renderer.hpp"
-#include <memory>
-#include <mutex>
-#include <vector>
 
 
 namespace Guise
 {
 
     /**
-    * Canvas class.
+    * Style class.
     *
     *
     */
-    class GUISE_API Canvas
+    class GUISE_API Style
     {
 
     public:
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
+        Style();
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        const Vector2f & getPosition() const;
 
-        void render(RendererInterface & renderInterface);
+        void setPosition(const Vector2f & position);
 
-        const Vector2ui32 & getSize() const;
+        const Vector2f & getSize() const;
 
-        void setSize(const Vector2ui32 & size);
+        void setSize(const Vector2f & size);
 
+        const Vector4f & getPadding() const;
+        Vector2f getPaddingLow() const;
+        Vector2f getPaddingHigh() const;
+
+        void setPadding(const float padding);
+        void setPadding(const Vector2f & padding);
+        void setPadding(const Vector4f & padding);
+        void setPaddingLow(const Vector2f & low);
+        void setPaddingHigh(const Vector2f & high);
+      
     private:
 
-        Canvas(const Vector2ui32 & size);
-
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
+        Vector2f   m_position;
+        Vector2f   m_size;
+        Vector4f   m_padding;
 
     };
 

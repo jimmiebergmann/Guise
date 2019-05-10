@@ -23,52 +23,55 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
-
-#include "guise/build.hpp"
-#include "guise/control.hpp"
-#include "guise/renderer.hpp"
-#include <memory>
-#include <mutex>
-#include <vector>
-
-
 namespace Guise
 {
 
-    /**
-    * Canvas class.
-    *
-    *
-    */
-    class GUISE_API Canvas
+    inline Semaphore::Semaphore() :
+        m_value(0)
+    { }
+
+    inline Semaphore::~Semaphore()
+    { }
+
+    inline void Semaphore::wait()
     {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        while (!m_value)
+        {
+            m_condition.wait(lock);
+        }
+        --m_value;
+    }
 
-    public:
+    inline bool Semaphore::tryWait()
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        if (m_value)
+        {
+            --m_value;
+            return true;
+        }
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
+        return false;
+    }
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+   /* inline void Semaphore::notifyAll()
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_value = 0;
+        m_condition.notify_all();
+    }*/
 
-        void render(RendererInterface & renderInterface);
+    inline void Semaphore::notifyOne()
+    {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        ++m_value;
+        m_condition.notify_one();
+    }
 
-        const Vector2ui32 & getSize() const;
-
-        void setSize(const Vector2ui32 & size);
-
-    private:
-
-        Canvas(const Vector2ui32 & size);
-
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
-
-    };
+    inline void Semaphore::reset()
+    {
+        m_value = 0;
+    }
 
 }
-
-#endif

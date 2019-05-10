@@ -25,12 +25,80 @@
 
 #include "guise/control/button.hpp"
 
-
 namespace Guise
 {
     std::shared_ptr<Button> Button::create()
     {
         return std::shared_ptr<Button>(new Button());
+    }
+
+    ControlType Button::getType() const
+    {
+        return ControlType::Button;
+    }
+
+    void Button::render(RendererInterface & renderer, const Vector2f & canvasPosition, const Vector2f & canvasSize)
+    {
+        Vector2f position = getPosition();
+        position.x = position.x > 0.0f ? position.x : 0.0f;
+        position.y = position.y > 0.0f ? position.y : 0.0f;
+
+        Vector2f size = getSize();
+        
+        if (size.x > 0.0f)
+        {
+            if (size.x + position.x > canvasSize.x)
+            {
+                size.x = canvasSize.x - position.x;
+            }
+            else
+            {
+                size.x = size.x;
+            }
+        }
+        else
+        {
+            size.x = canvasSize.x - position.x;
+        }
+
+        if (size.y > 0.0f)
+        {
+            if (size.y + position.y > canvasSize.y)
+            {
+                size.y = canvasSize.y - position.y;
+            }
+            else
+            {
+                size.y = size.y;
+            }
+        }
+        else
+        {
+            size.y = canvasSize.y - position.y;
+        }
+
+
+        position += canvasPosition;
+
+        //size.x = size.x > 0.0f ? (size.x < canvasSize.x ? size.x : canvasSize.x - position.x) : 0.0f;
+        //size.y = size.y > 0.0f ? (size.y < canvasSize.y ? size.y : canvasSize.y - position.y) : 0.0f;
+
+       if (size.x > 0.0f && size.y > 0.0f)
+       {
+           renderer.drawQuad(position, size);
+
+           auto child = getChilds()[0];
+           if (child)
+           {
+               Vector2f childPos = position + getPaddingLow();
+               Vector2f childSize = size - getPaddingLow() - getPaddingHigh();
+
+               if (childSize.x > 0.0f && childSize.y > 0.0f)
+               {
+                   child->render(renderer, childPos, childSize);
+               }
+           }
+       }
     }
 
     Button::Button()

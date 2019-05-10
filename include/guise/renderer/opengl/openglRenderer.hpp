@@ -23,52 +23,70 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
+#ifndef GUISE_OPENGL_RENDERER_HPP
+#define GUISE_OPENGL_RENDERER_HPP
 
 #include "guise/build.hpp"
-#include "guise/control.hpp"
+
+#if defined(GUISE_ENABLE_OPENGL_RENDERER)
+
+#if defined(GUISE_PLATFORM_WINDOWS)
+    #include "guise/platform/win32Headers.hpp"
+#endif
+#include <gl/GL.h>
 #include "guise/renderer.hpp"
 #include <memory>
-#include <mutex>
-#include <vector>
-
 
 namespace Guise
 {
 
+    // Forward declarations
+    class AppWindow;
+
     /**
-    * Canvas class.
+    * Context class.
     *
     *
     */
-    class GUISE_API Canvas
+
+    class GUISE_API OpenGLRenderer : public Renderer
     {
 
     public:
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
+        void setCulling(const Vector2f & position, const Vector2f & size);
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        void drawQuad(const Vector2f & position, const Vector2f & size);
+  
+        static std::shared_ptr<Renderer> create(const std::shared_ptr<AppWindow> & appWindow);
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        static std::shared_ptr<Renderer> create(HDC deviceContextHandle);
+    #endif
 
-        void render(RendererInterface & renderInterface);
 
-        const Vector2ui32 & getSize() const;
+        void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size);
 
-        void setSize(const Vector2ui32 & size);
+        void clearColor();
+
+        void present();
 
     private:
 
-        Canvas(const Vector2ui32 & size);
+        
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        OpenGLRenderer(HDC deviceContextHandle);
+    #endif
 
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
+        // Windows members.
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        HDC m_deviceContextHandle;  ///< Device context handle from the render output.
+        HGLRC m_context;            ///< The OpenGL context.      
+    #endif
 
     };
 
 }
+
+#endif
 
 #endif

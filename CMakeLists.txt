@@ -14,10 +14,11 @@ project (Guise)
 cmake_minimum_required(VERSION 2.8)
 
 option(CODE_COVERAGE "Enable coverage reporting" OFF)
+option(ENABLE_OPENGL_RENDERER "Enable default OpenGL renderer" ON)
 
 # Require C++17.
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(Threads)
@@ -45,19 +46,19 @@ endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
 
 # Find files
-file(GLOB_RECURSE test_files "${CMAKE_SOURCE_DIR}/tests/*.cpp" "${CMAKE_SOURCE_DIR}/tests/*.hpp")
 file(GLOB_RECURSE guise_src "${CMAKE_SOURCE_DIR}/source/*.cpp")
 file(GLOB_RECURSE guise_inc "${CMAKE_SOURCE_DIR}/include/*.hpp" "${CMAKE_SOURCE_DIR}/include/*.inl")
 file(GLOB guise_files ${guise_src} ${guise_inc})
-
+file(GLOB_RECURSE test_files "${CMAKE_SOURCE_DIR}/tests/*.cpp" "${CMAKE_SOURCE_DIR}/tests/*.hpp")
+file(GLOB_RECURSE example1_files "${CMAKE_SOURCE_DIR}/examples/example1.cpp")
 
 # Guise dynamic lib
 include_directories ("${CMAKE_SOURCE_DIR}/include") # Include header files
 add_library(guise SHARED ${guise_files}) # Create shared library
 
-#IF (WIN32)
-#	target_link_libraries(guise "ws2_32.lib")
-#ENDIF()
+if(ENABLE_OPENGL_RENDERER AND WIN32)
+	target_link_libraries(guise "opengl32.lib")
+endif(ENABLE_OPENGL_RENDERER AND WIN32)
 
 createSourceGroups("${guise_src}" "${CMAKE_SOURCE_DIR}/source")
 createSourceGroups("${guise_inc}" "${CMAKE_SOURCE_DIR}/include")
@@ -129,3 +130,16 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") ## Code coverage
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
 target_link_libraries(guise_tests gtest_main guise)
+
+
+# Example 1
+include_directories ("${CMAKE_SOURCE_DIR}/include")
+link_directories("${CMAKE_SOURCE_DIR}/lib")
+add_executable(example1 ${example1_files})
+set_target_properties( example1
+  PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin"
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin"
+)
+target_link_libraries(example1 guise ${CMAKE_THREAD_LIBS_INIT})

@@ -13,12 +13,12 @@ git submodule init
 git submodule update
 mkdir build
 cd build
-cmake ..
+cmake .. -DENABLE_OPENGL_RENDERER=ON
 ```
 ##### Linux
 ```sh
 make
 ```
 ##### Windows
-Open wepp.sln and compile in Visual Studio.
+Open Guise.sln and compile in Visual Studio.
 

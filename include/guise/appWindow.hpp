@@ -23,49 +23,68 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
+#ifndef GUISE_APPLICATION_WINDOW_HPP
+#define GUISE_APPLICATION_WINDOW_HPP
 
 #include "guise/build.hpp"
-#include "guise/control.hpp"
-#include "guise/renderer.hpp"
+#if defined(GUISE_PLATFORM_WINDOWS)
+    #include "guise/platform/win32Headers.hpp"
+#endif
+#include "guise/canvas.hpp"
 #include <memory>
-#include <mutex>
-#include <vector>
-
+#include <string>
+#include <thread>
 
 namespace Guise
 {
 
+    // Forward declarations.
+    //class Context;
+
     /**
-    * Canvas class.
+    * Application window base class.
     *
     *
     */
-    class GUISE_API Canvas
+    class GUISE_API AppWindow
     {
 
     public:
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
+        static std::shared_ptr<AppWindow> create(const std::wstring & title = L"", const Vector2ui32 & size = {0, 0});
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        virtual ~AppWindow();
 
-        void render(RendererInterface & renderInterface);
+        virtual std::shared_ptr<Canvas> getCanvas() = 0;
 
-        const Vector2ui32 & getSize() const;
+        virtual void setRenderer(const std::shared_ptr<Renderer> & renderer) = 0;
 
-        void setSize(const Vector2ui32 & size);
+        virtual void update() = 0;
 
-    private:
+        virtual void render() = 0;
 
-        Canvas(const Vector2ui32 & size);
+        virtual Vector2ui32 getSize() = 0;
 
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        virtual HDC getWindowContext() const = 0;
+    #endif
+        //virtual Context & getContext() = 0;
+
+        /**
+        * Modal function for processing event.  
+        */
+        //static void processEvents();
+
+        /**
+        * Terminates processEvents().
+        */
+       // static void terminateEventProcessing(const std::thread::native_handle_type & threadHandle);
+
+    protected:
+
+        //friend class Context;
+
+       // virtual void load() = 0;
 
     };
 

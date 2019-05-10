@@ -28,14 +28,48 @@
 namespace Guise
 {
 
-    Canvas::Canvas()
+    std::shared_ptr<Canvas> Canvas::create(const Vector2ui32 & size)
     {
-
+        return std::shared_ptr<Canvas>(new Canvas(size));
     }
 
     Canvas::~Canvas()
-    {
+    { }
 
+    bool Canvas::add(const std::shared_ptr<Control> & control, const size_t)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        m_controls.push_back(control);
+
+        return true;
     }
+
+    void Canvas::render(RendererInterface & renderInterface)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        for (auto it = m_controls.begin(); it != m_controls.end(); it++)
+        {
+            Vector2f test = m_size;
+            (*(*it)).render(renderInterface, { 0.0f, 0.0f }, m_size);
+        }
+    }
+
+    const Vector2ui32 & Canvas::getSize() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_size;
+    }
+
+    void Canvas::setSize(const Vector2ui32 & size)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_size = size;
+    }
+    
+    Canvas::Canvas(const Vector2ui32 & size) :
+        m_size(size)
+    { }
 
 }

@@ -27,9 +27,13 @@
 #define GUISE_CONTROL_CONTROL_HPP
 
 #include "guise/build.hpp"
+#include "guise/style.hpp"
+#include "guise/renderer.hpp"
 #include <memory>
 #include <vector>
 #include <list>
+#include <limits>
+#include <mutex>
 
 namespace Guise
 {
@@ -38,6 +42,17 @@ namespace Guise
     class Control;
     class ControlContainer;
     class ControlContainerList;
+
+    /**
+    * Enumerator describing the type of control.
+    *
+    *
+    */
+    enum class ControlType
+    {
+        Custom,
+        Button
+    };
 
     /**
     * Control base class.
@@ -51,17 +66,20 @@ namespace Guise
 
         virtual ~Control();
 
+        virtual ControlType getType() const = 0;
+
+        virtual void render(RendererInterface & rendererInterface, const Vector2f & canvasPosition, const Vector2f & canvasSize) = 0;
+
         virtual std::weak_ptr<Control> getParent();
         virtual std::weak_ptr<const Control> getParent() const;
         virtual std::vector<std::shared_ptr<Control> > getChilds();
         virtual std::vector<std::shared_ptr<const Control> > getChilds() const;
 
-        virtual bool add(std::shared_ptr<Control> control, const size_t index);
+        virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
         virtual bool remove(Control & control);
-        virtual bool remove(std::shared_ptr<Control> control);
+        virtual bool remove(const std::shared_ptr<Control> & control);
         virtual bool remove(const size_t index);
         virtual size_t removeAll();
-
         virtual void release();
 
     private:
@@ -69,6 +87,7 @@ namespace Guise
         friend class ControlContainer;
 
         std::weak_ptr<Control> m_parent;
+        mutable std::mutex     m_mutex;
 
     };
 
@@ -79,19 +98,33 @@ namespace Guise
 
         virtual ~ControlContainer();
 
-        virtual std::vector<std::shared_ptr<Control> > getChilds() = 0;
-        virtual std::vector<std::shared_ptr<const Control> > getChilds() const = 0;
-
-        virtual bool add(std::shared_ptr<Control> control, const size_t index) = 0;
-        virtual bool remove(Control & control) = 0;
-        virtual bool remove(std::shared_ptr<Control> control) = 0;
-        virtual bool remove(const size_t index) = 0;
-        virtual size_t removeAll() = 0;
-
     protected:
 
         void adoptControl(Control & control);
         void releaseControl(Control & control);
+
+    };
+
+    class GUISE_API ControlContainerSingle : public ControlContainer
+    {
+
+    public:
+
+        virtual ~ControlContainerSingle();
+
+        std::vector<std::shared_ptr<Control> > getChilds();
+        std::vector<std::shared_ptr<const Control> > getChilds() const;
+
+        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        bool remove(Control & control);
+        bool remove(const std::shared_ptr<Control> & control);
+        bool remove(const size_t index);
+        size_t removeAll();
+
+    private:
+
+        std::shared_ptr<Control>  m_child;
+        mutable std::mutex        m_mutex;
 
     };
 
@@ -105,15 +138,16 @@ namespace Guise
         std::vector<std::shared_ptr<Control> > getChilds();
         std::vector<std::shared_ptr<const Control> > getChilds() const;
 
-        bool add(std::shared_ptr<Control> control, const size_t index = 0);
+        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
         bool remove(Control & control);
-        bool remove(std::shared_ptr<Control> control);
+        bool remove(const std::shared_ptr<Control> & control);
         bool remove(const size_t index);
         size_t removeAll();
 
     private:
 
         std::vector<std::shared_ptr<Control> > m_childs;
+        mutable std::mutex                     m_mutex;
 
     };
 

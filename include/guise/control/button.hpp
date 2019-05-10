@@ -31,12 +31,16 @@
 namespace Guise
 {
 
-    class GUISE_API Button : public ControlContainerList
+    class GUISE_API Button : public Style, public ControlContainerSingle
     {
 
     public:
 
         static std::shared_ptr<Button> create();
+
+        ControlType getType() const;
+
+        void render(RendererInterface & rendererInterface, const Vector2f & canvasPosition, const Vector2f & canvasSize);
 
     private:
 

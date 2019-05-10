@@ -23,52 +23,45 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
+#ifndef GUISE_SEMAPHORE_HPP
+#define GUISE_SEMAPHORE_HPP
 
 #include "guise/build.hpp"
-#include "guise/control.hpp"
-#include "guise/renderer.hpp"
-#include <memory>
 #include <mutex>
-#include <vector>
-
+#include <condition_variable>
 
 namespace Guise
 {
 
     /**
-    * Canvas class.
-    *
+    * Semaphore class.
     *
     */
-    class GUISE_API Canvas
+    class Semaphore
     {
 
     public:
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
+        Semaphore();
+        ~Semaphore();
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        void wait();
+        bool tryWait();
+        //void notifyAll();
+        void notifyOne();
 
-        void render(RendererInterface & renderInterface);
-
-        const Vector2ui32 & getSize() const;
-
-        void setSize(const Vector2ui32 & size);
+        void reset();
 
     private:
 
-        Canvas(const Vector2ui32 & size);
-
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
+        int                     m_value;
+        std::mutex              m_mutex;
+        std::condition_variable m_condition;
 
     };
 
 }
+
+#include "guise/utility/semaphore.inl"
 
 #endif

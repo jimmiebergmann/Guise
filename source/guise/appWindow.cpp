@@ -23,52 +23,39 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
+#include "guise/appWindow.hpp"
 
-#include "guise/build.hpp"
-#include "guise/control.hpp"
-#include "guise/renderer.hpp"
-#include <memory>
-#include <mutex>
-#include <vector>
-
+#if defined(GUISE_PLATFORM_WINDOWS)
+#include "guise/appWindow/win32/win32AppWindow.hpp"
+#endif
 
 namespace Guise
 {
 
-    /**
-    * Canvas class.
-    *
-    *
-    */
-    class GUISE_API Canvas
+    std::shared_ptr<AppWindow> AppWindow::create(const std::wstring & title, const Vector2ui32 & size)
     {
+        #if defined(GUISE_PLATFORM_WINDOWS)
+            return Win32AppWindow::create(title, size);
+        #endif
+    }
 
-    public:
+    AppWindow::~AppWindow()
+    {
+    }
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
+   /*oid AppWindow::processEvents()
+    {
+        #if defined(GUISE_PLATFORM_WINDOWS)
+            Win32AppWindow::processEvents();
+        #endif
+    }
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+    void AppWindow::terminateEventProcessing(const std::thread::native_handle_type & threadHandle)
+    {
+        #if defined(GUISE_PLATFORM_WINDOWS)
+            Win32AppWindow::terminateEventProcessing(threadHandle);
+        #endif
+    }*/
 
-        void render(RendererInterface & renderInterface);
-
-        const Vector2ui32 & getSize() const;
-
-        void setSize(const Vector2ui32 & size);
-
-    private:
-
-        Canvas(const Vector2ui32 & size);
-
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
-
-    };
-
+    
 }
-
-#endif

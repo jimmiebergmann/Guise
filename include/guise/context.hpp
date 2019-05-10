@@ -23,52 +23,70 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
+#ifndef GUISE_CONTEXT_HPP
+#define GUISE_CONTEXT_HPP
 
 #include "guise/build.hpp"
-#include "guise/control.hpp"
 #include "guise/renderer.hpp"
+#include "guise/appWindow.hpp"
+#include "guise/utility/semaphore.hpp"
 #include <memory>
-#include <mutex>
-#include <vector>
-
+#include <thread>
+#include <atomic>
+#include <set>
+#include <chrono>
 
 namespace Guise
 {
 
     /**
-    * Canvas class.
+    * Context class.
     *
     *
     */
-    class GUISE_API Canvas
+
+
+    //template<typename RType #if defined(GUISE_USE_DEFAULT_RENDERER) = GUISE_DEFAULT_RENDERER #endif>
+#if defined(GUISE_USE_DEFAULT_RENDERER)
+    template<typename RType = GUISE_DEFAULT_RENDERER>
+#else
+    template<typename RType>
+#endif
+    class Context
     {
 
     public:
-
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
         
-        ~Canvas();
+        ~Context();
+              
+        static std::shared_ptr<Context<RType> > create();
+        
+        std::shared_ptr<AppWindow> addAppWindow(const std::wstring & title = L"", const Vector2ui32 & size = { 0, 0 });
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        void setMaxFrameTime(const std::chrono::duration<double> & frameTime);
 
-        void render(RendererInterface & renderInterface);
-
-        const Vector2ui32 & getSize() const;
-
-        void setSize(const Vector2ui32 & size);
+        std::chrono::duration<double> getMaxFrameTime() const;
 
     private:
 
-        Canvas(const Vector2ui32 & size);
+        Context();
 
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
+        Context(const Context &) = delete;
 
+        struct AppWindowData
+        {
+            std::thread m_thread;
+            std::shared_ptr<AppWindow> appWindow;
+        };
+
+        std::set<std::shared_ptr<AppWindowData> >   m_appWindows;
+        std::shared_ptr<Renderer>                   m_renderer;
+        std::atomic<std::chrono::duration<double>>  m_maxFrameTime;
     };
 
 }
+
+// Include inline implementations.
+#include "guise/context.inl"
 
 #endif

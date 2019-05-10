@@ -22,53 +22,28 @@
 * SOFTWARE.
 *
 */
-
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
-
-#include "guise/build.hpp"
-#include "guise/control.hpp"
-#include "guise/renderer.hpp"
-#include <memory>
-#include <mutex>
-#include <vector>
-
-
-namespace Guise
+/*
+template<typename T, typename E>
+ControlType Dockable<T, E>::getType() const
 {
+    return ControlType::Custom;
+}
 
-    /**
-    * Canvas class.
-    *
-    *
-    */
-    class GUISE_API Canvas
-    {
+//static std::shared_ptr<Dockable<T> > create();
 
-    public:
+template<typename T, typename>
+ControlType Dockable<T>::getType() const
+{
+    return ControlType::Custom;
+}
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
-
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
-
-        void render(RendererInterface & renderInterface);
-
-        const Vector2ui32 & getSize() const;
-
-        void setSize(const Vector2ui32 & size);
-
-    private:
-
-        Canvas(const Vector2ui32 & size);
-
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
-
-    };
+template<typename T, typename>
+inline void Dockable<T>::render(RendererInterface & rendererInterface)
+{
 
 }
 
-#endif
+template<typename T, typename>
+Dockable<T>::Dockable()
+{ }
+*/

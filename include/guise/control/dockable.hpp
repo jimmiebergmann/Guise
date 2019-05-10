@@ -22,53 +22,47 @@
 * SOFTWARE.
 *
 */
+/*
+#ifndef GUISE_CONTROL_DOCKABLE_HPP
+#define GUISE_CONTROL_DOCKABLE_HPP
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
-
-#include "guise/build.hpp"
 #include "guise/control.hpp"
-#include "guise/renderer.hpp"
-#include <memory>
-#include <mutex>
-#include <vector>
-
+#include <type_traits>
 
 namespace Guise
 {
 
-    /**
-    * Canvas class.
-    *
-    *
-    */
-    class GUISE_API Canvas
+    template<typename T, typename E = std::enable_if<std::is_base_of<Control, T>::value>>
+    class Dockable
     {
 
     public:
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
+        static std::shared_ptr<Dockable<T> > create()
+        {
+            return std::shared_ptr<Dockable<T> >(new Dockable<T>());
+        }
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        ControlType getType() const;
 
-        void render(RendererInterface & renderInterface);
+        void render(RendererInterface & rendererInterface)
+        {}
 
-        const Vector2ui32 & getSize() const;
-
-        void setSize(const Vector2ui32 & size);
+        void foo()
+        {}
 
     private:
 
-        Canvas(const Vector2ui32 & size);
+        Dockable()
+        {}
 
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
+        Dockable(const Dockable &) = delete;
 
     };
 
+    // Include inline implementations.
+    #include "guise/control/dockable.inl"
+
 }
 
-#endif
+#endif*/

@@ -23,49 +23,48 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
+#ifndef GUISE_RENDERER_HPP
+#define GUISE_RENDERER_HPP
 
 #include "guise/build.hpp"
-#include "guise/control.hpp"
-#include "guise/renderer.hpp"
 #include <memory>
-#include <mutex>
-#include <vector>
-
 
 namespace Guise
 {
 
     /**
-    * Canvas class.
+    * Renderer interface class.
     *
     *
     */
-    class GUISE_API Canvas
+    class GUISE_API RendererInterface
     {
 
     public:
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
+        virtual void setCulling(const Vector2f & position, const Vector2f & size) = 0;
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        virtual void drawQuad(const Vector2f & position, const Vector2f & size) = 0;
+    };
 
-        void render(RendererInterface & renderInterface);
+    /**
+    * Renderer base class.
+    *
+    *
+    */
+    class GUISE_API Renderer : public RendererInterface
+    {
 
-        const Vector2ui32 & getSize() const;
+    public:
 
-        void setSize(const Vector2ui32 & size);
+        virtual ~Renderer()
+        { }
 
-    private:
+        virtual void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size) = 0;
 
-        Canvas(const Vector2ui32 & size);
+        virtual void clearColor() = 0;
 
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
+        virtual void present() = 0;
 
     };
 

@@ -23,52 +23,22 @@
 *
 */
 
-#ifndef GUISE_CANVAS_HPP
-#define GUISE_CANVAS_HPP
+#ifndef GUISE_PLATFORM_WIN32_HEADERS_HPP
+#define GUISE_PLATFORM_WIN32_HEADERS_HPP
 
 #include "guise/build.hpp"
-#include "guise/control.hpp"
-#include "guise/renderer.hpp"
-#include <memory>
-#include <mutex>
-#include <vector>
 
+#if defined(GUISE_PLATFORM_WINDOWS)
 
-namespace Guise
-{
+#include <Windows.h>
+//#include <gdiplus.h>
+//#include <atlstr.h> 
+//#include <ShellScalingAPI.h>
 
-    /**
-    * Canvas class.
-    *
-    *
-    */
-    class GUISE_API Canvas
-    {
+#undef min
+#undef max
+//#undef interface
 
-    public:
-
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
-        
-        ~Canvas();
-
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
-
-        void render(RendererInterface & renderInterface);
-
-        const Vector2ui32 & getSize() const;
-
-        void setSize(const Vector2ui32 & size);
-
-    private:
-
-        Canvas(const Vector2ui32 & size);
-
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Vector2ui32                             m_size;
-        mutable std::mutex                      m_mutex;
-
-    };
-
-}
+#endif
 
 #endif
