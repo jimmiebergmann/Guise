@@ -48,13 +48,13 @@ namespace Guise
 
         enum class Property
         {
-            Position,
-            Size,
-            Padding,
             BackgroundColor,
             Border,
             BorderWidth,
-            BorderColor
+            BorderColor,
+            Padding,
+            Position,
+            Size
         };
 
         enum class BorderStyle
@@ -79,20 +79,21 @@ namespace Guise
 
             union
             {
+                BorderStyle borderStyle;
                 float       f;
                 Vector2f    vec2;
                 Vector3f    vec3;
-                Vector4f    vec4;
-                BorderStyle borderStyle;
+                Vector4f    vec4;            
             };
 
             enum class ValueType
             {
+                BorderStyle,
                 Float,
                 Vector2f,
                 Vector3f,
-                Vector4f,
-                BorderStyle
+                Vector4f
+                
             } valueType;
         };
 
@@ -154,8 +155,9 @@ namespace Guise
 
         enum class Entry
         {
-            Canvas,
-            Button
+            Button,
+            Canvas,       
+            Window
         };
 
         struct GUISE_API EntryPair
@@ -182,8 +184,9 @@ namespace Guise
         StyleSheet(const std::initializer_list<EntryPair> & entries = {});
 
         // Styles for default controls.
-        std::shared_ptr<Style> m_canvasStyle;
         std::shared_ptr<Style> m_buttonStyle;
+        std::shared_ptr<Style> m_canvasStyle;
+        std::shared_ptr<Style> m_windowStyle;
 
         // Custom styles.
         std::map<std::string, std::shared_ptr<Style> > m_styleMap;

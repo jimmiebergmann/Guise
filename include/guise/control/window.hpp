@@ -23,45 +23,32 @@
 *
 */
 
-#ifndef GUISE_DEFUALT_STYLES_HPP
-#define GUISE_DEFUALT_STYLES_HPP
+#ifndef GUISE_CONTROL_WINDOW_HPP
+#define GUISE_CONTROL_WINDOW_HPP
 
-#include "guise/style.hpp"
+#include "guise/control.hpp"
 
 namespace Guise
 {
 
-    namespace DefaultStyles
-    {     
+    class GUISE_API Window : public Style, public ControlContainerSingle
+    {
 
-        static const Style button = Style(
-            {
-                { Style::Property::Padding,         1.0f },
-                { Style::Property::BackgroundColor, { 0.25f, 0.25f, 0.25f, 1.0f } },
-                { Style::Property::Border,          Style::BorderStyle::Solid },
-                { Style::Property::BorderWidth,     1.0f },
-                { Style::Property::BorderColor,     { 0.05f, 0.05f, 0.05f, 1.0f } }
-            }
-        );
+    public:
 
-        static const Style canvas = Style(
-            {
-                { Style::Property::Padding,         5.0f },
-                { Style::Property::BackgroundColor,{ 0.9f, 0.9f, 0.9f, 1.0f } },
-            }
-        );
+        static std::shared_ptr<Window> create(Canvas & canvas);
 
-        static const Style window = Style(
-            {
-                { Style::Property::Padding,         5.0f },
-                { Style::Property::BackgroundColor,{ 0.7f, 0.7f, 0.7f, 1.0f } },
-            }
-        );
+        ControlType getType() const;
 
+        void render(RendererInterface & rendererInterface, const StyleSheet & styleSheet, const Vector2f & canvasPosition, const Vector2f & canvasSize);
 
-    }
+    private:
+
+        Window(Canvas & canvas);
+        Window(const Window &) = delete;
+
+    };
 
 }
-
 
 #endif

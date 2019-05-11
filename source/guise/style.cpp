@@ -289,8 +289,9 @@ namespace Guise
     {
         return std::shared_ptr<StyleSheet>(new StyleSheet(
             {
+                { StyleSheet::Entry::Button, DefaultStyles::button },
                 { StyleSheet::Entry::Canvas, DefaultStyles::canvas },
-                { StyleSheet::Entry::Button, DefaultStyles::button }
+                { StyleSheet::Entry::Window, DefaultStyles::window }
             }
         ));
     }
@@ -301,6 +302,7 @@ namespace Guise
         {
             case Entry::Canvas: return *m_canvasStyle;
             case Entry::Button: return *m_buttonStyle;
+            case Entry::Window: return *m_windowStyle;
             default: break;
         }
 
@@ -312,8 +314,9 @@ namespace Guise
     {
         switch (entry)
         {
-            case Entry::Canvas: return *m_canvasStyle;
             case Entry::Button: return *m_buttonStyle;
+            case Entry::Canvas: return *m_canvasStyle;
+            case Entry::Window: return *m_windowStyle;
             default: break;
         }
 
@@ -348,8 +351,9 @@ namespace Guise
 
 
     StyleSheet::StyleSheet(const std::initializer_list<EntryPair> & entries) :
-        m_canvasStyle(std::make_shared<Style>()),
         m_buttonStyle(std::make_shared<Style>()),
+        m_canvasStyle(std::make_shared<Style>()),
+        m_windowStyle(std::make_shared<Style>()),
         m_styleMap{ { "canvas", m_canvasStyle },
                     { "button", m_buttonStyle } }
     {
@@ -366,6 +370,10 @@ namespace Guise
                 else if (it->name == "button")
                 {
                     *m_buttonStyle = it->style;
+                    continue;
+                }else if (it->name == "window")
+                {
+                    *m_windowStyle = it->style;
                     continue;
                 }
 
@@ -385,8 +393,9 @@ namespace Guise
             // Add entry, based on type.
             switch (it->entry)
             {
-                case StyleSheet::Entry::Canvas: *m_canvasStyle = it->style; break;
                 case StyleSheet::Entry::Button: *m_buttonStyle = it->style; break;
+                case StyleSheet::Entry::Canvas: *m_canvasStyle = it->style; break;
+                case StyleSheet::Entry::Window: *m_windowStyle = it->style; break;
                 default: break;
             }
         }

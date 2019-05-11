@@ -30,6 +30,7 @@
 #include "guise/control.hpp"
 #include "guise/renderer.hpp"
 #include "guise/style.hpp"
+#include "guise/input.hpp"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -54,7 +55,12 @@ namespace Guise
 
         bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
 
+        void update();
+
         void render(RendererInterface & renderInterface);
+
+        const Input & getInput() const;
+        Input & getInput();
 
         std::shared_ptr<StyleSheet> getStyleSheet() const;
 
@@ -67,6 +73,7 @@ namespace Guise
         Canvas(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet);
 
         std::vector<std::shared_ptr<Control> >  m_controls;
+        Input                                   m_input;
         Vector2ui32                             m_size;
         std::shared_ptr<StyleSheet>             m_styleSheet;
         mutable std::mutex                      m_mutex;

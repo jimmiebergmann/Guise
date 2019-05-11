@@ -52,7 +52,8 @@ namespace Guise
     enum class ControlType
     {
         Custom,
-        Button
+        Button,
+        Window
     };
 
     /**

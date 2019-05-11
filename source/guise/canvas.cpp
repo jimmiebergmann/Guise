@@ -24,6 +24,7 @@
 */
 
 #include "guise/canvas.hpp"
+#include <iostream>
 
 namespace Guise
 {
@@ -45,6 +46,31 @@ namespace Guise
         return true;
     }
 
+    void Canvas::update()
+    {
+        m_input.update();
+
+        /*Input::Event e;
+        while (m_input.pollEvent(e))
+        {
+            switch (e.type)
+            {
+            case Input::EventType::MouseJustPressed:    std::cout << "MouseJustPressed:"    << (int)e.button << std::endl; break;
+            case Input::EventType::MouseDoubleClick:    std::cout << "MouseDoubleClick:"    << (int)e.button << std::endl; break;
+            case Input::EventType::MouseMove:           std::cout << "MouseMove:"           << e.position.x << ", " << e.position.y << std::endl; break;
+            case Input::EventType::MousePress:          std::cout << "MousePress:"          << (int)e.button << std::endl; break;
+            case Input::EventType::MouseRelease:        std::cout << "MouseRelease:"        << (int)e.button << std::endl; break;
+            case Input::EventType::MouseScroll:         std::cout << "MouseScroll:"         << e.distance << std::endl; break;
+            case Input::EventType::KeyboardJustPressed: std::cout << "KeyboardJustPressed:" << (int)e.key << std::endl; break;
+            case Input::EventType::KeyboardPress:       std::cout << "KeyboardPress:"       << (int)e.key << std::endl; break;
+            case Input::EventType::KeyboardRelease:     std::cout << "KeyboardRelease:"     << (int)e.key << std::endl; break;
+            //case Input::EventType::Texting:             std::cout << "Texting:"             << (int)e.character << std::endl; break;
+            default: break;//                                    std::cout << "None event" << std::endl; break;
+            }
+        }*/
+
+    }
+
     void Canvas::render(RendererInterface & renderInterface)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -54,6 +80,15 @@ namespace Guise
             Vector2f test = m_size;
             (*(*it)).render(renderInterface, *m_styleSheet,{ 0.0f, 0.0f }, m_size);
         }
+    }
+
+    const Input & Canvas::getInput() const
+    {
+        return m_input;
+    }
+    Input & Canvas::getInput()
+    {
+        return m_input;
     }
 
     std::shared_ptr<StyleSheet> Canvas::getStyleSheet() const

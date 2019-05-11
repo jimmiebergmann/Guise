@@ -23,45 +23,28 @@
 *
 */
 
-#ifndef GUISE_DEFUALT_STYLES_HPP
-#define GUISE_DEFUALT_STYLES_HPP
-
-#include "guise/style.hpp"
+#include "guise/control/window.hpp"
+#include "guise/canvas.hpp"
 
 namespace Guise
 {
-
-    namespace DefaultStyles
-    {     
-
-        static const Style button = Style(
-            {
-                { Style::Property::Padding,         1.0f },
-                { Style::Property::BackgroundColor, { 0.25f, 0.25f, 0.25f, 1.0f } },
-                { Style::Property::Border,          Style::BorderStyle::Solid },
-                { Style::Property::BorderWidth,     1.0f },
-                { Style::Property::BorderColor,     { 0.05f, 0.05f, 0.05f, 1.0f } }
-            }
-        );
-
-        static const Style canvas = Style(
-            {
-                { Style::Property::Padding,         5.0f },
-                { Style::Property::BackgroundColor,{ 0.9f, 0.9f, 0.9f, 1.0f } },
-            }
-        );
-
-        static const Style window = Style(
-            {
-                { Style::Property::Padding,         5.0f },
-                { Style::Property::BackgroundColor,{ 0.7f, 0.7f, 0.7f, 1.0f } },
-            }
-        );
-
-
+    std::shared_ptr<Window> Window::create(Canvas & canvas)
+    {
+        return std::shared_ptr<Window>(new Window(canvas));
     }
 
+    ControlType Window::getType() const
+    {
+        return ControlType::Window;
+    }
+
+    void Window::render(RendererInterface & /*renderer*/, const StyleSheet & /*styleSheet*/, const Vector2f & /*canvasPosition*/, const Vector2f & /*canvasSize*/)
+    {
+    }
+
+    Window::Window(Canvas & canvas) :
+        ControlContainerSingle(canvas),
+        Style(canvas.getStyleSheet()->getStyle(StyleSheet::Entry::Window))
+    { }
+
 }
-
-
-#endif

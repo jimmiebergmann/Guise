@@ -28,7 +28,7 @@
 #if defined(GUISE_PLATFORM_WINDOWS)
 
 #include <algorithm>
-
+#include <iostream>
 namespace Guise
 {
 
@@ -70,6 +70,8 @@ namespace Guise
             ::TranslateMessage(&message);
             ::DispatchMessage(&message);
         }
+
+        m_canvas->update();
     }
 
     void Win32AppWindow::render()
@@ -109,6 +111,7 @@ namespace Guise
 
     Win32AppWindow::Win32AppWindow(const std::wstring & title, const Vector2ui32 & size) :
         m_canvas(Canvas::create(size)),
+        m_input(m_canvas->getInput()),
         m_title(title),
         m_size(size),
         m_windowHandle(NULL),
@@ -128,7 +131,7 @@ namespace Guise
         // Create a window class(WNDCLASS - win32)
         WNDCLASS winClass;
         HINSTANCE winInstance = GetModuleHandle(NULL); // Grab any old handle
-        winClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+        winClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_DBLCLKS;
         winClass.lpfnWndProc = (WNDPROC)Win32AppWindow::windowProcStatic;
         winClass.cbClsExtra = 0;
         winClass.cbWndExtra = 0;
@@ -267,6 +270,7 @@ namespace Guise
         switch (message)
         {
 
+        // Windows events.
         case WM_CREATE:
         {
             //SetProcessDpiAwareness(PROCESS_DPI_AWARENESS::PROCESS_PER_MONITOR_DPI_AWARE);
@@ -291,10 +295,67 @@ namespace Guise
             render();
         }
         break;
+
+        // Keyboard events
+        case WM_KEYDOWN:
+            m_input.pushEvent({ Input::EventType::KeyboardPress, Input::transalteWin32Key(LOWORD(wParam)) });
+            break;
+        case WM_KEYUP:
+            m_input.pushEvent({ Input::EventType::KeyboardRelease, Input::transalteWin32Key(LOWORD(wParam)) });
+            break;
+        case WM_CHAR:
+            m_input.pushEvent({Input::EventType::Texting, static_cast<wchar_t>(wParam)});
+            break;
+        
+        // Mouse events.
+        case WM_MOUSEMOVE:
+            m_input.pushEvent({ Input::EventType::MouseMove, { static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
+            break;
+        case WM_LBUTTONDOWN:
+            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(0) });
+            break;
+        case WM_MBUTTONDOWN:
+            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(1) });
+            break;
+        case WM_RBUTTONDOWN:
+            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(2) });
+            break;
+        case WM_LBUTTONUP:
+            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(0) });
+            break;
+        case WM_MBUTTONUP:
+            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(1) });
+            break;
+        case WM_RBUTTONUP:
+            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(2) });
+            break;
+        case WM_LBUTTONDBLCLK:
+            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(0) });
+            break;
+        case WM_MBUTTONDBLCLK:
+            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(1) });
+            break;
+        case WM_RBUTTONDBLCLK:
+            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(2) });
+            break;
+        case WM_MOUSEWHEEL:
+        {
+            auto zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+            if (zDelta == 0)
+            {
+                break;
+            }
+
+            float delta = static_cast<float>(zDelta) / static_cast<float>(WHEEL_DELTA);
+            m_input.pushEvent({ Input::EventType::MouseScroll, delta });
+        } 
+        break;
         default:
             break;
 
         }
+
+       
 
         return DefWindowProc(hWND, message, wParam, lParam);
     }

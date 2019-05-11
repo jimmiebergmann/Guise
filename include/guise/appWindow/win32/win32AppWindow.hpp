@@ -74,15 +74,16 @@ namespace Guise
         static LRESULT windowProcStatic(HWND p_HWND, UINT p_Message, WPARAM p_WParam, LPARAM p_LParam);
         LRESULT windowProc(HWND p_HWND, UINT p_Message, WPARAM p_WParam, LPARAM p_LParam);
 
-        std::shared_ptr<Renderer>  m_renderer;
-        std::shared_ptr<Canvas> m_canvas;
-        std::wstring            m_title; 
-        Vector2ui32             m_size;
-        HWND		            m_windowHandle;
-        HDC			            m_deviceContextHandle;
-        DWORD                   m_win32Style;           ///< Win32 style of window.
-        DWORD                   m_win32ExtendedStyle;   ///< Win32 extended style of window.
-        std::string             m_windowClassName;
+        std::shared_ptr<Renderer>   m_renderer;
+        std::shared_ptr<Canvas>     m_canvas;
+        Input &                     m_input;
+        std::wstring                m_title; 
+        Vector2ui32                 m_size;
+        HWND		                m_windowHandle;
+        HDC			                m_deviceContextHandle;
+        DWORD                       m_win32Style;           ///< Win32 style of window.
+        DWORD                       m_win32ExtendedStyle;   ///< Win32 extended style of window.
+        std::string                 m_windowClassName;
 
     };
 
