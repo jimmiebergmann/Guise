@@ -23,57 +23,38 @@
 *
 */
 
-#ifndef GUISE_RENDERER_HPP
-#define GUISE_RENDERER_HPP
+#ifndef GUISE_DEFUALT_STYLES_HPP
+#define GUISE_DEFUALT_STYLES_HPP
 
-#include "guise/build.hpp"
-#include <memory>
+#include "guise/style.hpp"
 
 namespace Guise
 {
 
-    /**
-    * Renderer interface class.
-    *
-    *
-    */
-    class GUISE_API RendererInterface
+    namespace DefaultStyles
     {
 
-    public:
+        static const Style canvas = Style(
+            {
+                { Style::Property::Padding,         5.0f },
+                { Style::Property::BackgroundColor,{ 0.9f, 0.9f, 0.9f, 1.0f } },
+            }
+        );
 
-        virtual void setCulling(const Vector2f & position, const Vector2f & size) = 0;
+        static const Style button = Style(
+            {
+                { Style::Property::Padding,         1.0f },
+                { Style::Property::BackgroundColor, { 0.25f, 0.25f, 0.25f, 1.0f } },
+                { Style::Property::Border,          Style::BorderStyle::Solid },
+                { Style::Property::BorderWidth,     1.0f },
+                { Style::Property::BorderColor,     { 0.05f, 0.05f, 0.05f, 1.0f } }
+            }
+        );
 
-        virtual void drawQuad(const Vector2f & position, const Vector2f & size, const Vector4f & color) = 0;
 
-        //virtual void drawQuadRounded(const Vector2f & position, const Vector2f & size) = 0;
-    };
-
-    /**
-    * Renderer base class.
-    *
-    *
-    */
-    class GUISE_API Renderer : public RendererInterface
-    {
-
-    public:
-
-        virtual ~Renderer()
-        { }
-
-        virtual const Vector4f & getClearColor() = 0;
-
-        virtual void setClearColor(const Vector4f & color) = 0;
-
-        virtual void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size) = 0;
-
-        virtual void clearColor() = 0;
-
-        virtual void present() = 0;
-
-    };
+    }
 
 }
+
 
 #endif

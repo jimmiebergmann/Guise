@@ -58,34 +58,8 @@ namespace Guise
         bool operator == (const Vector<D, T> & vector) const;
 
         bool operator != (const Vector<D, T> & vector) const;
-        /*
-        Vector<D, T> & operator += (const Vector<D, T> & vector) { return *this; }
-
-        Vector<D, T> & operator -= (const Vector<D, T> & vector) { return *this; }
-
-        Vector<D, T> & operator *= (const Vector<D, T> & vector) { return *this; }
-        Vector<D, T> & operator *= (const T value) { return *this; }
-
-        Vector<D, T> & operator /= (const Vector<D, T> & vector) { return *this; }
-        Vector<D, T> & operator /= (const T value) { return *this; }
-
-        Vector<D, T> operator + (const Vector<D, T> & vector) const { return Vector<D, T>(); }
-
-        Vector<D, T> operator - () const { return Vector<D, T>(); }
-        Vector<D, T> operator - (const Vector<D, T> & vector) const { return Vector<D, T>(); }
-
-        Vector<D, T> operator * (const Vector<D, T> & vector) const { return Vector<D, T>(); }
-        Vector<D, T> operator * (const T value) const { return Vector<D, T>(); }
-
-        Vector<D, T> operator / (const Vector<D, T> & vector) const { return Vector<D, T>(); }
-        Vector<D, T> operator / (const T value) const { return Vector<D, T>(); }
-
-        Vector<D, T> absolute() const { return Vector<D, T>(); }
-
-        T operator[] (const size_t index)
-        {
-            return static_cast<T>(0);
-        }*/
+        
+        T operator[] (const size_t index);
 
         T c[D];
         
@@ -154,6 +128,72 @@ namespace Guise
     };
 
     /**
+    * Vector3 class.
+    *
+    * @tparam T Data type of components.
+    *
+    */
+    template <typename T>
+    class Vector<3, T>
+    {
+
+    public:
+
+        Vector();
+
+        Vector(const T x, const T y, const T z);
+
+        template <typename U>
+        Vector(const U x, const U y, const U z);
+
+        Vector(const Vector<3, T> & vector);
+        Vector(const Vector<2, T> & vector, const T z);
+        Vector(const T x, const Vector<2, T> & vector);
+
+        template <typename U>
+        Vector(const Vector<3, U> & vector);
+
+        template <typename U>
+        Vector<3, T> & operator = (const Vector<3, U> & vector);
+
+        bool operator == (const Vector<3, T> & vector) const;
+
+        bool operator != (const Vector<3, T> & vector) const;
+
+        Vector<3, T> & operator += (const Vector<3, T> & vector);
+
+        Vector<3, T> & operator -= (const Vector<3, T> & vector);
+
+        Vector<3, T> & operator *= (const Vector<3, T> & vector);
+        Vector<3, T> & operator *= (const T value);
+
+        Vector<3, T> & operator /= (const Vector<3, T> & vector);
+        Vector<3, T> & operator /= (const T value);
+
+        Vector<3, T> operator + (const Vector<3, T> & vector) const;
+
+        Vector<3, T> operator - () const;
+        Vector<3, T> operator - (const Vector<3, T> & vector) const;
+
+        Vector<3, T> operator * (const Vector<3, T> & vector) const;
+        Vector<3, T> operator * (const T value) const;
+
+        Vector<3, T> operator / (const Vector<3, T> & vector) const;
+        Vector<3, T> operator / (const T value) const;
+
+        Vector<3, T> absolute() const;
+
+        T operator[] (const size_t index);
+
+        union {
+
+            T c[3];
+            struct { T x, y, z; };
+        };
+
+    };
+
+    /**
     * Vector4 class.
     *
     * @tparam T Data type of components.
@@ -171,6 +211,12 @@ namespace Guise
 
         template <typename U>
         Vector(const U x, const U y, const U z, const U w);
+
+        Vector(const Vector<4, T> & vector);
+        Vector(const Vector<3, T> & vector, const T w);
+        Vector(const Vector<2, T> & vector, const T z, const T w);
+        Vector(const T x, const Vector<3, T> & vector);
+        Vector(const T x, const T y, const Vector<2, T> & vector);
 
         template <typename U>
         Vector(const Vector<4, U> & vector);

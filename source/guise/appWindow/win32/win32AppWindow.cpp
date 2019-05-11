@@ -24,9 +24,10 @@
 */
 
 #include "guise/appWindow/win32/win32AppWindow.hpp"
-#include <iostream>
 
 #if defined(GUISE_PLATFORM_WINDOWS)
+
+#include <algorithm>
 
 namespace Guise
 {
@@ -73,6 +74,8 @@ namespace Guise
 
     void Win32AppWindow::render()
     {
+        auto backgroundColor = m_canvas->getBackgroundColor();
+        m_renderer->setClearColor(backgroundColor);
         m_renderer->clearColor();
         m_canvas->render(*m_renderer.get());
         m_renderer->present();
@@ -88,57 +91,20 @@ namespace Guise
         return m_deviceContextHandle;
     }
 
-
-   /* std::weak_ptr<Context> Win32AppWindow::getContext()
-    {
-        return m_context;
-    }*/
-
-    /*void Win32AppWindow::processEvents()
-    {
-        MSG message;
-        BOOL result = 0;
-        while ((result = ::GetMessage(&message, NULL, 0, 0)) != 0)
-        {
-            if (result == -1)
-            {
-                throw std::runtime_error("GetMessage returned -1.");
-            }
-            else
-            {
-                // A modal function is being called when you press the alt key,
-                // fix this by ignoring the alt(menu) key event.
-                if (message.message == WM_SYSCOMMAND &&
-                    message.wParam == SC_KEYMENU)
-                {
-                    break;
-                }
-
-                // Translate the dispatch the message
-                // This will call the WindowProcStatic function
-                ::TranslateMessage(&message);
-                ::DispatchMessage(&message);
-            }
-        }
-        return;
-        /*MSG message;
-        while (PeekMessage(&message, NULL, NULL, NULL, PM_REMOVE))
-        {
-            TranslateMessage(&message);
-            DispatchMessage(&message);
-        }*/
-    /*}
-
-    void Win32AppWindow::terminateEventProcessing(const std::thread::native_handle_type & threadHandle)
-    {
-        ::PostThreadMessage(::GetThreadId(threadHandle), WM_QUIT, 0, 0);
-    }*/
-
     std::string Win32AppWindow::createClassName()
     {
         static int classCount = 0;
         classCount++;
         return "guise_win32_class_" + std::to_string(classCount);
+
+        // Generate class name.
+        /*GUID guid = { 0 };
+        const size_t guidArraySize = 64;
+        wchar_t guidArray[guidArraySize] = { 0 };
+        CoCreateGuid(&guid);
+        StringFromGUID2(guid, guidArray, guidArraySize);
+        std::wstring className = L"guier_" + std::wstring(guidArray);
+        */
     }
 
     Win32AppWindow::Win32AppWindow(const std::wstring & title, const Vector2ui32 & size) :
@@ -159,14 +125,6 @@ namespace Guise
         m_win32Style |= WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SIZEBOX;
         m_win32ExtendedStyle |= WS_EX_APPWINDOW;
 
-        // Generate class name.
-        /*GUID guid = { 0 };
-        const size_t guidArraySize = 64;
-        wchar_t guidArray[guidArraySize] = { 0 };
-        CoCreateGuid(&guid);
-        StringFromGUID2(guid, guidArray, guidArraySize);
-        std::wstring className = L"guier_" + std::wstring(guidArray);
-        */
         // Create a window class(WNDCLASS - win32)
         WNDCLASS winClass;
         HINSTANCE winInstance = GetModuleHandle(NULL); // Grab any old handle
@@ -177,7 +135,13 @@ namespace Guise
         winClass.hInstance = winInstance;
         winClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
         winClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-        winClass.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
+        auto canvasBGColor = m_canvas->getBackgroundColor();
+        Vector3i32 bgColorInt(canvasBGColor.x * 255.0f, canvasBGColor.y * 255.0f, canvasBGColor.z * 255.0f);
+        Vector3<BYTE> bgColor(  std::min(std::max(bgColorInt.x, 0), 255),
+                                std::min(std::max(bgColorInt.y, 0), 255),
+                                std::min(std::max(bgColorInt.z, 0), 255));
+
+        winClass.hbrBackground = CreateSolidBrush(RGB(bgColor.x, bgColor.y, bgColor.z));
         #ifdef UNICODE
             std::wstring tempClassName(m_windowClassName.length(), L' ');
             std::copy(m_windowClassName.begin(), m_windowClassName.end(), tempClassName.begin());
@@ -243,12 +207,6 @@ namespace Guise
         // Get the device context
         m_deviceContextHandle = GetDC(m_windowHandle);
         //m_DPI = GetDpiForWindow(m_WindowHandle);
-        //m_pRenderer = new GdipRenderer(m_WindowHandle, m_pSkin);
-        //m_pRenderer->Dpi(m_DPI);
-
-        // Create plane control
-        //m_pPlane = new Plane(m_pWindow);
-        //m_pSkin->load();
 
         ShowWindow(m_windowHandle, SW_RESTORE);
         SetForegroundWindow(m_windowHandle);
@@ -318,13 +276,7 @@ namespace Guise
             break;
         case WM_PAINT:
         {
-            /*m_pRenderer->beginRendering();
-
-            m_pRenderer->renderRectangle(Vector2i(0, 0), m_Size, Color::White);
-
-
-            m_pRenderer->renderControl(m_pPlane, Vector2i(0, 0), m_Size);
-            m_pRenderer->endRendering();*/
+            
         }
         break;
         case WM_SIZE:
@@ -335,6 +287,8 @@ namespace Guise
             }
             Vector2ui32 size(static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)));
             m_renderer->setViewportSize({0, 0}, size);
+            m_canvas->setSize(size);
+            render();
         }
         break;
         default:

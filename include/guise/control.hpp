@@ -39,6 +39,7 @@ namespace Guise
 {
 
     // Forward declarations
+    class Canvas;
     class Control;
     class ControlContainer;
     class ControlContainerList;
@@ -64,11 +65,16 @@ namespace Guise
 
     public:
 
+        Control(Canvas & canvas);
+
+        Canvas & getCanvas();
+        const Canvas & getCanvas() const;
+
         virtual ~Control();
 
         virtual ControlType getType() const = 0;
 
-        virtual void render(RendererInterface & rendererInterface, const Vector2f & canvasPosition, const Vector2f & canvasSize) = 0;
+        virtual void render(RendererInterface & rendererInterface, const StyleSheet & styleSheet, const Vector2f & canvasPosition, const Vector2f & canvasSize) = 0;
 
         virtual std::weak_ptr<Control> getParent();
         virtual std::weak_ptr<const Control> getParent() const;
@@ -86,6 +92,7 @@ namespace Guise
 
         friend class ControlContainer;
 
+        Canvas & m_canvas;
         std::weak_ptr<Control> m_parent;
         mutable std::mutex     m_mutex;
 
@@ -96,6 +103,8 @@ namespace Guise
 
     public:
 
+        ControlContainer(Canvas & canvas);
+        
         virtual ~ControlContainer();
 
     protected:
@@ -109,6 +118,8 @@ namespace Guise
     {
 
     public:
+
+        ControlContainerSingle(Canvas & canvas);
 
         virtual ~ControlContainerSingle();
 
@@ -132,6 +143,8 @@ namespace Guise
     {
 
     public:
+
+        ControlContainerList(Canvas & canvas);
 
         virtual ~ControlContainerList();
 

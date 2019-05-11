@@ -36,15 +36,15 @@ namespace Guise
 
     public:
 
-        static std::shared_ptr<Button> create();
+        static std::shared_ptr<Button> create(Canvas & canvas);
 
         ControlType getType() const;
 
-        void render(RendererInterface & rendererInterface, const Vector2f & canvasPosition, const Vector2f & canvasSize);
+        void render(RendererInterface & rendererInterface, const StyleSheet & styleSheet, const Vector2f & canvasPosition, const Vector2f & canvasSize);
 
     private:
 
-        Button();
+        Button(Canvas & canvas);
         Button(const Button &) = delete;
 
     };

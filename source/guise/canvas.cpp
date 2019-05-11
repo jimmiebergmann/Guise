@@ -28,9 +28,9 @@
 namespace Guise
 {
 
-    std::shared_ptr<Canvas> Canvas::create(const Vector2ui32 & size)
+    std::shared_ptr<Canvas> Canvas::create(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet)
     {
-        return std::shared_ptr<Canvas>(new Canvas(size));
+        return std::shared_ptr<Canvas>(new Canvas(size, styleSheet));
     }
 
     Canvas::~Canvas()
@@ -52,8 +52,14 @@ namespace Guise
         for (auto it = m_controls.begin(); it != m_controls.end(); it++)
         {
             Vector2f test = m_size;
-            (*(*it)).render(renderInterface, { 0.0f, 0.0f }, m_size);
+            (*(*it)).render(renderInterface, *m_styleSheet,{ 0.0f, 0.0f }, m_size);
         }
+    }
+
+    std::shared_ptr<StyleSheet> Canvas::getStyleSheet() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_styleSheet;
     }
 
     const Vector2ui32 & Canvas::getSize() const
@@ -68,8 +74,19 @@ namespace Guise
         m_size = size;
     }
     
-    Canvas::Canvas(const Vector2ui32 & size) :
+    Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet) :
         m_size(size)
-    { }
+    {
+        if (styleSheet != nullptr)
+        {
+            m_styleSheet = *styleSheet;
+        }
+        if(!m_styleSheet)
+        {
+            m_styleSheet = StyleSheet::createDefault();
+        }
+
+        setStyle(m_styleSheet->getStyle(StyleSheet::Entry::Canvas));
+    }
 
 }

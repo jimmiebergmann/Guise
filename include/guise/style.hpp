@@ -27,7 +27,11 @@
 #define GUISE_STYLE_HPP
 
 #include "guise/build.hpp"
-
+#include <initializer_list>
+#include <mutex>
+#include <map>
+#include <string>
+#include <memory>
 
 namespace Guise
 {
@@ -42,31 +46,148 @@ namespace Guise
 
     public:
 
+        enum class Property
+        {
+            Position,
+            Size,
+            Padding,
+            BackgroundColor,
+            Border,
+            BorderWidth,
+            BorderColor
+        };
+
+        enum class BorderStyle
+        {
+            None,
+            Solid
+        };
+
+        struct GUISE_API PropertyPair
+        {
+            PropertyPair(const Property property, const float value);
+
+            PropertyPair(const Property property, const Vector2f & value);
+
+            PropertyPair(const Property property, const Vector4f & value);
+
+            PropertyPair(const Property property, const Vector3f & value);
+
+            PropertyPair(const Property property, const BorderStyle value);
+
+            Property property;
+
+            union
+            {
+                float       f;
+                Vector2f    vec2;
+                Vector3f    vec3;
+                Vector4f    vec4;
+                BorderStyle borderStyle;
+            };
+
+            enum class ValueType
+            {
+                Float,
+                Vector2f,
+                Vector3f,
+                Vector4f,
+                BorderStyle
+            } valueType;
+        };
+
         Style();
+        Style(const std::initializer_list<PropertyPair> & properties);
+        Style(const Style & style);
+
+        Style & operator =(const Style & style);
+
+        void setStyle(const Style & style);
+
+        void setStyleProperties(const std::initializer_list<PropertyPair> & properties);
 
         const Vector2f & getPosition() const;
-
         void setPosition(const Vector2f & position);
 
         const Vector2f & getSize() const;
-
         void setSize(const Vector2f & size);
 
         const Vector4f & getPadding() const;
         Vector2f getPaddingLow() const;
         Vector2f getPaddingHigh() const;
-
         void setPadding(const float padding);
         void setPadding(const Vector2f & padding);
         void setPadding(const Vector4f & padding);
         void setPaddingLow(const Vector2f & low);
         void setPaddingHigh(const Vector2f & high);
+
+        Vector4f getBackgroundColor() const;
+        void setBackgroundColor(const Vector4f & color);
+
+        BorderStyle getBorder() const;
+        void setBorder(const BorderStyle style);
+
+        float getBorderWidth() const;
+        void setBorderWidth(const float width);
+
+        Vector4f getBorderColor() const;
+        void setBorderColor(const Vector4f color);
       
     private:
 
-        Vector2f   m_position;
-        Vector2f   m_size;
-        Vector4f   m_padding;
+        Vector2f            m_position;
+        Vector2f            m_size;
+        Vector4f            m_padding;
+        Vector4f            m_backgroundColor;
+        BorderStyle         m_borderStyle;
+        float               m_borderWidth;
+        Vector4f            m_borderColor;
+        mutable std::mutex  m_mutex;
+
+    };
+
+
+    class GUISE_API StyleSheet
+    {
+
+    public:
+
+        enum class Entry
+        {
+            Canvas,
+            Button
+        };
+
+        struct GUISE_API EntryPair
+        {
+            EntryPair(const Entry entry, const Style & style);
+            EntryPair(const std::string & name, const Style & style);
+
+            Entry entry;
+            std::string name;
+            const Style & style;
+        };
+
+        static std::shared_ptr<StyleSheet> create(const std::initializer_list<EntryPair> & entries = {});
+        static std::shared_ptr<StyleSheet> createDefault();
+
+        const Style & getStyle(const Entry entry) const;
+        Style & getStyle(const Entry entry);
+
+        const Style * getStyle(const std::string & name) const;
+        Style * getStyle(const std::string & name);
+
+    private:
+
+        StyleSheet(const std::initializer_list<EntryPair> & entries = {});
+
+        // Styles for default controls.
+        std::shared_ptr<Style> m_canvasStyle;
+        std::shared_ptr<Style> m_buttonStyle;
+
+        // Custom styles.
+        std::map<std::string, std::shared_ptr<Style> > m_styleMap;
+        mutable std::mutex  m_mutex;
 
     };
 

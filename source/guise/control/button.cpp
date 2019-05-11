@@ -24,12 +24,13 @@
 */
 
 #include "guise/control/button.hpp"
+#include "guise/canvas.hpp"
 
 namespace Guise
 {
-    std::shared_ptr<Button> Button::create()
+    std::shared_ptr<Button> Button::create(Canvas & canvas)
     {
-        return std::shared_ptr<Button>(new Button());
+        return std::shared_ptr<Button>(new Button(canvas));
     }
 
     ControlType Button::getType() const
@@ -37,71 +38,53 @@ namespace Guise
         return ControlType::Button;
     }
 
-    void Button::render(RendererInterface & renderer, const Vector2f & canvasPosition, const Vector2f & canvasSize)
+    void Button::render(RendererInterface & renderer, const StyleSheet & styleSheet, const Vector2f & canvasPosition, const Vector2f & canvasSize)
     {
         Vector2f position = getPosition();
         position.x = position.x > 0.0f ? position.x : 0.0f;
         position.y = position.y > 0.0f ? position.y : 0.0f;
 
         Vector2f size = getSize();
-        
-        if (size.x > 0.0f)
-        {
-            if (size.x + position.x > canvasSize.x)
-            {
-                size.x = canvasSize.x - position.x;
-            }
-            else
-            {
-                size.x = size.x;
-            }
-        }
-        else
-        {
-            size.x = canvasSize.x - position.x;
-        }
-
-        if (size.y > 0.0f)
-        {
-            if (size.y + position.y > canvasSize.y)
-            {
-                size.y = canvasSize.y - position.y;
-            }
-            else
-            {
-                size.y = size.y;
-            }
-        }
-        else
-        {
-            size.y = canvasSize.y - position.y;
-        }
-
+        size.x = size.x > 0.0f ? (size.x + position.x > canvasSize.x ? canvasSize.x - position.x : size.x) : canvasSize.x - position.x;
+        size.y = size.y > 0.0f ? (size.y + position.y > canvasSize.y ? canvasSize.y - position.y : size.y) : canvasSize.y - position.y;
 
         position += canvasPosition;
 
-        //size.x = size.x > 0.0f ? (size.x < canvasSize.x ? size.x : canvasSize.x - position.x) : 0.0f;
-        //size.y = size.y > 0.0f ? (size.y < canvasSize.y ? size.y : canvasSize.y - position.y) : 0.0f;
 
-       if (size.x > 0.0f && size.y > 0.0f)
-       {
-           renderer.drawQuad(position, size);
+        if (size.x > 0.0f && size.y > 0.0f)
+        {
+            Vector2f backgroundSize = size;
+            Vector2f backgroundOffset(0.0f, 0.0f);
+            float borderWith = getBorderWidth();
+            if (borderWith > 0.0f && getBorder() != Style::BorderStyle::None)
+            {
+                renderer.drawQuad(position, size, getBorderColor());
+                backgroundSize -= {2.0f * borderWith, 2.0f * borderWith};
+                backgroundOffset += {borderWith, borderWith};
+            }
+            if (backgroundSize.x > 0.0f && backgroundSize.y > 0.0f)
+            {
+                renderer.drawQuad(position + backgroundOffset, backgroundSize, getBackgroundColor());
+            }
+            
+            auto child = getChilds()[0];
+            if (child)
+            {
+                Vector2f childPos = position + getPaddingLow();
+                Vector2f childSize = size - getPaddingLow() - getPaddingHigh();
 
-           auto child = getChilds()[0];
-           if (child)
-           {
-               Vector2f childPos = position + getPaddingLow();
-               Vector2f childSize = size - getPaddingLow() - getPaddingHigh();
-
-               if (childSize.x > 0.0f && childSize.y > 0.0f)
-               {
-                   child->render(renderer, childPos, childSize);
-               }
-           }
-       }
+                if (childSize.x > 0.0f && childSize.y > 0.0f)
+                {
+                    child->render(renderer, styleSheet, childPos, childSize);
+                }
+            }
+        }
+     
     }
 
-    Button::Button()
+    Button::Button(Canvas & canvas) :
+        ControlContainerSingle(canvas),
+        Style(canvas.getStyleSheet()->getStyle(StyleSheet::Entry::Button))
     { }
 
 }

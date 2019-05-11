@@ -36,6 +36,20 @@ namespace Guise
 {
 
     // Control implementations.
+    Control::Control(Canvas & canvas) :
+        m_canvas(canvas)
+    {}
+
+    Canvas & Control::getCanvas()
+    {
+        return m_canvas;
+    }
+
+    const Canvas & Control::getCanvas() const
+    {
+        return m_canvas;
+    }
+
     Control::~Control()
     {
     }
@@ -97,6 +111,10 @@ namespace Guise
 
 
     // ControlContainer implementations.
+    ControlContainer::ControlContainer(Canvas & canvas) :
+        Control(canvas)
+    { }
+
     ControlContainer::~ControlContainer()
     { }
 
@@ -116,6 +134,10 @@ namespace Guise
 
 
     // ControlContainerSingle implementations.
+    ControlContainerSingle::ControlContainerSingle(Canvas & canvas) :
+        ControlContainer(canvas)
+    { }
+
     ControlContainerSingle::~ControlContainerSingle()
     {
         removeAll();
@@ -210,6 +232,10 @@ namespace Guise
 
     
     // ControlContainerList implementations.
+    ControlContainerList::ControlContainerList(Canvas & canvas) :
+        ControlContainer(canvas)
+    { }
+
     ControlContainerList::~ControlContainerList()
     {
         removeAll();

@@ -44,9 +44,6 @@ namespace Guise
     *
     *
     */
-
-
-    //template<typename RType #if defined(GUISE_USE_DEFAULT_RENDERER) = GUISE_DEFAULT_RENDERER #endif>
 #if defined(GUISE_USE_DEFAULT_RENDERER)
     template<typename RType = GUISE_DEFAULT_RENDERER>
 #else

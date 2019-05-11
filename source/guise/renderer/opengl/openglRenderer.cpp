@@ -37,20 +37,14 @@ namespace Guise
 
     }
 
-    void OpenGLRenderer::drawQuad(const Vector2f & position, const Vector2f & size)
+    void OpenGLRenderer::drawQuad(const Vector2f & position, const Vector2f & size, const Vector4f & color)
     {
         glBegin(GL_QUADS);
 
-        glColor3f(1.0f, 0.0f, 0.0f);
+        glColor4f(color.x, color.y, color.z, color.w);
         glVertex2f(position.x, position.y);
-
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex2f(position.x + size.x, position.y);
-
-        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex2f(position.x + size.x, position.y); 
         glVertex2f(position.x + size.x, position.y + size.y);
-
-        glColor3f(1.0f, 1.0f, 1.0f);
         glVertex2f(position.x, position.y + size.y);
 
         glEnd();
@@ -71,6 +65,17 @@ namespace Guise
     {
         return std::shared_ptr<Renderer>(new OpenGLRenderer(sibling));
     }*/
+
+    const Vector4f & OpenGLRenderer::getClearColor()
+    {
+        return m_clearColor;
+    }
+
+    void OpenGLRenderer::setClearColor(const Vector4f & color)
+    {
+        m_clearColor = color;
+        glClearColor(color.x, color.y, color.z, color.w);
+    }
 
     void OpenGLRenderer::setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size)
     {
@@ -140,8 +145,6 @@ namespace Guise
 
         wglMakeCurrent(NULL, NULL);
         wglMakeCurrent(deviceContextHandle, m_context);
-
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         glEnable(GL_COLOR_MATERIAL);
     }

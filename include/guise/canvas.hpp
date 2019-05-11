@@ -29,6 +29,7 @@
 #include "guise/build.hpp"
 #include "guise/control.hpp"
 #include "guise/renderer.hpp"
+#include "guise/style.hpp"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -42,12 +43,12 @@ namespace Guise
     *
     *
     */
-    class GUISE_API Canvas
+    class GUISE_API Canvas : public Style
     {
 
     public:
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size);
+        static std::shared_ptr<Canvas> create(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet = nullptr);
         
         ~Canvas();
 
@@ -55,16 +56,19 @@ namespace Guise
 
         void render(RendererInterface & renderInterface);
 
+        std::shared_ptr<StyleSheet> getStyleSheet() const;
+
         const Vector2ui32 & getSize() const;
 
         void setSize(const Vector2ui32 & size);
 
     private:
 
-        Canvas(const Vector2ui32 & size);
+        Canvas(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet);
 
         std::vector<std::shared_ptr<Control> >  m_controls;
         Vector2ui32                             m_size;
+        std::shared_ptr<StyleSheet>             m_styleSheet;
         mutable std::mutex                      m_mutex;
 
     };

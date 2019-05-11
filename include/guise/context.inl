@@ -57,8 +57,6 @@ namespace Guise
             renderer->setViewportSize({0, 0}, appWindow->getSize());
             windowIsCreated.notifyOne();
 
-            
-
             while (1)
             {
                 auto timerStart = std::chrono::system_clock::now();
@@ -99,54 +97,4 @@ namespace Guise
 
     }
 
-    /*template<typename RendererType>
-    static std::shared_ptr<Context> Context::create()
-    {
-        static_assert(std::is_base_of<Renderer, RendererType>(), "Context<RType>::create() requires Renderer to be base of RType.");
-        return std::shared_ptr<Context>(new Context(RendererType::create()));
-    }
-    */
 }
-
-    /*
-    
-
-    template<typename RType>
-    Context<RType>::~Context()
-    { }
-
-    template<typename RType>
-    inline std::shared_ptr<Context<RType> > Context<RType>::create()
-    {
-        return std::shared_ptr<Context<RType> >(new Context<RType>());
-    }
-
-    template<typename RType>
-    inline std::shared_ptr<AppWindow> Context<RType>::addAppWindow(const std::wstring & title, const Vector2ui & size)
-    {
-        auto appWindowData = std::make_shared<AppWindowData>();
-
-        Semaphore windowIsCreated;
-
-        appWindowData->m_thread = std::thread([&windowIsCreated, appWindowData, &title, &size]()
-        {
-            appWindowData->appWindow = AppWindow::create(title, size);
-            windowIsCreated.notifyOne();
-
-            auto appWindow = appWindowData->appWindow;
-
-            while (1)
-            {
-                appWindow->update();
-            }
-        });
-
-        windowIsCreated.wait();
-        return appWindowData->appWindow;
-    }
-
-    template<typename RType>
-    Context<RType>::Context()
-    { }
-
-}*/

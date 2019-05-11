@@ -56,13 +56,16 @@ namespace Guise
 
         void setCulling(const Vector2f & position, const Vector2f & size);
 
-        void drawQuad(const Vector2f & position, const Vector2f & size);
+        void drawQuad(const Vector2f & position, const Vector2f & size, const Vector4f & color);
   
         static std::shared_ptr<Renderer> create(const std::shared_ptr<AppWindow> & appWindow);
     #if defined(GUISE_PLATFORM_WINDOWS)
         static std::shared_ptr<Renderer> create(HDC deviceContextHandle);
     #endif
 
+        const Vector4f & getClearColor();
+
+        void setClearColor(const Vector4f & color);
 
         void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size);
 
@@ -82,6 +85,8 @@ namespace Guise
         HDC m_deviceContextHandle;  ///< Device context handle from the render output.
         HGLRC m_context;            ///< The OpenGL context.      
     #endif
+
+        Vector4f m_clearColor;
 
     };
 

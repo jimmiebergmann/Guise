@@ -9,26 +9,62 @@ using namespace Guise;
 int main()
 {
     auto context = Context<>::create();
-    context->setMaxFrameTime(std::chrono::duration<double>(0.01f));
-    auto appWindow1 = context->addAppWindow(L"Example 1", { 800, 600 });
+    context->setMaxFrameTime(std::chrono::duration<double>(0.009f));
+    auto appWindow1 = context->addAppWindow(L"Example 1", { 400, 400 });
     auto canvas1 = appWindow1->getCanvas();
 
-    auto button1 = Button::create();
-    button1->setPosition({ 100, 200 });
-    button1->setSize({ 300, 200 });
-    button1->setPadding(50.0f);
-    auto button2 = Button::create();
-    //button2->setPosition({ 30, -60 });
-    //button2->setSize({ 300, 100 });
+    auto button1 = Button::create(*canvas1);
+    button1->setPosition({ 100.0f, 100.0f });
+    button1->setSize({ 100.0f, 100.f });
 
-    button1->add(button2);
+    /*button1->setStyleProperties(
+        {   
+            { Style::Property::Position,        { 100, 200 } },
+            { Style::Property::Size,            { 300, 200 } },
+            { Style::Property::Padding,         10.0f/*{ 2.0f, 5.0f, 10.0f, 15.0f }*//* } ,
+            { Style::Property::BackgroundColor, { 0.0, 1.0f, 0.0, 1.0f } } ,
+            { Style::Property::Border,          Style::BorderStyle::Solid } ,
+            { Style::Property::BorderWidth,     10.0f } ,
+            { Style::Property::BorderColor,     { 1.0f, 0.0, 0.0, 1.0f } }
+        }
+    );*/
 
+    /*auto button2 = Button::create();  
+    button2->setStyleProperties(
+        { 
+            { Style::Property::Size,            { 300, 200 } },
+            { Style::Property::Padding,         50.0f },
+            { Style::Property::BackgroundColor, { 0.22352f, 0.23529f, 0.25490f, 1.0f } } ,
+            { Style::Property::Border,          Style::BorderStyle::None } ,
+            { Style::Property::BorderWidth,     10.0f } ,
+            { Style::Property::BorderColor,     { 0.0, 1.0f, 1.0, 1.0f } }
+        }
+    );
+
+
+
+    button1->add(button2);*/
 
     canvas1->add(button1);
 
     /*std::this_thread::sleep_for(std::chrono::duration<double>(1.0f));
     auto appWindow2 = context->addAppWindow(L"Example 2", { 400, 200 });
-    */
+    auto canvas2 = appWindow2->getCanvas();
+
+    auto button3 = Button::create();
+    button3->setStyleProperties(
+        {
+            { Style::Property::Size,            { 300, 100 } },
+            { Style::Property::Padding,         50.0f },
+            { Style::Property::BackgroundColor, { 0.22352f, 0.23529f, 0.25490f, 1.0f } } ,
+            { Style::Property::Border,          Style::BorderStyle::None } ,
+            { Style::Property::BorderWidth,     10.0f } ,
+            { Style::Property::BorderColor,     { 0.0, 1.0f, 1.0, 1.0f } }
+        }
+    );
+
+    canvas2->add(button3);*/
+    
     std::this_thread::sleep_for(std::chrono::duration<double>(1000.0f));
     return 0;
 }

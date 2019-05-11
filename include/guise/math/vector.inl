@@ -48,6 +48,11 @@ namespace Guise
         return ::memcmp(c, vector.c, D * sizeof(T)) != 0;
     }
 
+    template <size_t D, typename T>
+    inline T Vector<D, T>::operator[] (const size_t index)
+    {
+        return c[index];
+    }
 
 
     // Vector 2 implementations.
@@ -199,6 +204,184 @@ namespace Guise
     }
 
 
+    // Vector 3 implementations.
+    template <typename T>
+    inline Vector<3, T>::Vector()
+    {}
+
+    template <typename T>
+    inline Vector<3, T>::Vector(const T x, const T y, const T z) :
+        x(x),
+        y(y),
+        z(z)
+    {}
+
+    template <typename T>
+    template <typename U>
+    inline Vector<3, T>::Vector(const U x, const U y, const U z) :
+        x(static_cast<T>(x)),
+        y(static_cast<T>(y)),
+        z(static_cast<T>(z))
+    {}
+
+    template <typename T>
+    inline Vector<3, T>::Vector(const Vector<3, T> & vector) :
+        x(vector.x),
+        y(vector.y),
+        z(vector.z)
+    {}
+    template <typename T>
+    inline Vector<3, T>::Vector(const Vector<2, T> & vector, const T z) :
+        x(vector.x),
+        y(vector.y),
+        z(z)
+    {}
+    template <typename T>
+    inline Vector<3, T>::Vector(const T x, const Vector<2, T> & vector) :
+        x(x),
+        y(vector.x),
+        z(vector.y)
+    {}
+
+    template <typename T>
+    template <typename U>
+    inline Vector<3, T>::Vector(const Vector<3, U> & vector) :
+        x(static_cast<T>(vector.x)),
+        y(static_cast<T>(vector.y)),
+        z(static_cast<T>(vector.z))
+    {}
+
+    template <typename T>
+    template <typename U>
+    inline Vector<3, T> & Vector<3, T>::operator = (const Vector<3, U> & vector)
+    {
+        x = static_cast<T>(vector.x);
+        y = static_cast<T>(vector.y);
+        z = static_cast<T>(vector.z);
+        return *this;
+    }
+
+    template <typename T>
+    inline bool Vector<3, T>::operator == (const Vector<3, T> & vector) const
+    {
+        return (x == vector.x) && (y == vector.y) && (z == vector.z);
+    }
+
+    template <typename T>
+    inline bool Vector<3, T>::operator != (const Vector<3, T> & vector) const
+    {
+        return (x != vector.x) || (y != vector.y) || (z != vector.z);
+    }
+
+    template <typename T>
+    inline Vector<3, T> & Vector<3, T>::operator += (const Vector<3, T> & vector)
+    {
+        x += vector.x;
+        y += vector.y;
+        z += vector.z;
+        return *this;
+    }
+
+    template <typename T>
+    inline Vector<3, T> & Vector<3, T>::operator -= (const Vector<3, T> & vector)
+    {
+        x -= vector.x;
+        y -= vector.y;
+        z -= vector.z;
+        return *this;
+    }
+
+    template <typename T>
+    inline Vector<3, T> & Vector<3, T>::operator *= (const Vector<3, T> & vector)
+    {
+        x *= vector.x;
+        y *= vector.y;
+        z *= vector.z;
+        return *this;
+    }
+
+    template <typename T>
+    inline Vector<3, T> & Vector<3, T>::operator *= (const T value)
+    {
+        x *= value;
+        y *= value;
+        z *= value;
+        return *this;
+    }
+
+    template <typename T>
+    inline Vector<3, T> & Vector<3, T>::operator /= (const Vector<3, T> & vector)
+    {
+        x /= vector.x;
+        y /= vector.y;
+        z /= vector.z;
+        return *this;
+    }
+
+    template <typename T>
+    inline Vector<3, T> & Vector<3, T>::operator /= (const T value)
+    {
+        x /= value;
+        y /= value;
+        z /= value;
+        return *this;
+    }
+
+    template <typename T>
+    inline Vector<3, T> Vector<3, T>::operator + (const Vector<3, T> & vector) const
+    {
+        return Vector2<T>(x + vector.x, y + vector.y, z + vector.z);
+    }
+
+    template <typename T>
+    inline Vector<3, T> Vector<3, T>::operator - () const
+    {
+        return Vector2<T>(-x, -y, -z);
+    }
+
+    template <typename T>
+    inline Vector<3, T> Vector<3, T>::operator - (const Vector<3, T> & vector) const
+    {
+        return Vector2<T>(x - vector.x, y - vector.y, z - vector.z);
+    }
+
+    template <typename T>
+    inline Vector<3, T> Vector<3, T>::operator * (const Vector<3, T> & vector) const
+    {
+        return Vector2<T>(x * vector.x, y * vector.y, z * vector.z);
+    }
+
+    template <typename T>
+    inline Vector<3, T> Vector<3, T>::operator * (const T value) const
+    {
+        return Vector2<T>(x * value, y * value, z * value);
+    }
+
+    template <typename T>
+    inline Vector<3, T> Vector<3, T>::operator / (const Vector<3, T> & vector) const
+    {
+        return Vector2<T>(x / vector.x, y / vector.y, z / vector.z);
+    }
+
+    template <typename T>
+    inline Vector<3, T> Vector<3, T>::operator / (const T value) const
+    {
+        return Vector2<T>(x / value, y / value, z / value);
+    }
+
+    template <typename T>
+    inline Vector<3, T> Vector<3, T>::absolute() const
+    {
+        return Vector2<T>(std::abs(x), std::abs(y), std::abs(z));
+    }
+
+    template <typename T>
+    inline T Vector<3, T>::operator[] (const size_t index)
+    {
+        return c[index];
+    }
+
+
     // Vector 4 implementations.
     template <typename T>
     inline Vector<4, T>::Vector()
@@ -219,6 +402,42 @@ namespace Guise
         y(static_cast<T>(y)),
         z(static_cast<T>(z)),
         w(static_cast<T>(w))
+    {}
+
+    template <typename T>
+    inline Vector<4, T>::Vector(const Vector<4, T> & vector) :
+        x(vector.x),
+        y(vector.y),
+        z(vector.z),
+        w(vector.w)
+    {}
+    template <typename T>
+    inline Vector<4, T>::Vector(const Vector<3, T> & vector, const T w) :
+        x(vector.x),
+        y(vector.y),
+        z(vector.z),
+        w(w)
+    {}
+    template <typename T>
+    inline Vector<4, T>::Vector(const Vector<2, T> & vector, const T z, const T w) :
+        x(vector.x),
+        y(vector.y),
+        z(z),
+        w(z)
+    {}
+    template <typename T>
+    inline Vector<4, T>::Vector(const T x, const Vector<3, T> & vector) :
+        x(x),
+        y(vector.x),
+        z(vector.y),
+        w(vector.z)
+    {}
+    template <typename T>
+    inline Vector<4, T>::Vector(const T x, const T y, const Vector<2, T> & vector) :
+        x(x),
+        y(y),
+        z(vector.x),
+        w(vector.y)
     {}
 
     template <typename T>
