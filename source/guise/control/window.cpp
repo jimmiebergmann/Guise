@@ -38,8 +38,23 @@ namespace Guise
         return ControlType::Window;
     }
 
-    void Window::render(RendererInterface & /*renderer*/, const StyleSheet & /*styleSheet*/, const Vector2f & /*canvasPosition*/, const Vector2f & /*canvasSize*/)
+    bool Window::handleInputEvent(const Input::Event &/* event*/)
     {
+        return true;
+    }
+
+    void Window::update(const Vector2f &/* availablePosition*/, const Vector2f & /*availableSize*/)
+    {
+
+    }
+
+    void Window::render(RendererInterface & /*renderer*/)
+    {
+    }
+
+    Vector4f Window::getSelectBounds() const
+    {
+        return { 0.0f, 0.0f, 0.0f, 0.0f };
     }
 
     Window::Window(Canvas & canvas) :

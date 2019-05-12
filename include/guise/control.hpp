@@ -29,6 +29,7 @@
 #include "guise/build.hpp"
 #include "guise/style.hpp"
 #include "guise/renderer.hpp"
+#include "guise/input.hpp"
 #include <memory>
 #include <vector>
 #include <list>
@@ -53,6 +54,7 @@ namespace Guise
     {
         Custom,
         Button,
+        Plane,
         Window
     };
 
@@ -68,14 +70,24 @@ namespace Guise
 
         Control(Canvas & canvas);
 
+        virtual ~Control();
+
         Canvas & getCanvas();
         const Canvas & getCanvas() const;
 
-        virtual ~Control();
-
         virtual ControlType getType() const = 0;
 
-        virtual void render(RendererInterface & rendererInterface, const StyleSheet & styleSheet, const Vector2f & canvasPosition, const Vector2f & canvasSize) = 0;
+        virtual bool handleInputEvent(const Input::Event & event);
+
+        virtual void update(const Vector2f & availablePosition, const Vector2f & availableSize);
+
+        virtual void render(RendererInterface & rendererInterface);
+
+        virtual Vector4f getSelectBounds() const;
+
+        virtual size_t getLevel() const;
+
+        virtual void setLevel(const size_t level);
 
         virtual std::weak_ptr<Control> getParent();
         virtual std::weak_ptr<const Control> getParent() const;
@@ -93,7 +105,8 @@ namespace Guise
 
         friend class ControlContainer;
 
-        Canvas & m_canvas;
+        Canvas &               m_canvas;
+        size_t                 m_level;
         std::weak_ptr<Control> m_parent;
         mutable std::mutex     m_mutex;
 
@@ -124,6 +137,8 @@ namespace Guise
 
         virtual ~ControlContainerSingle();
 
+        void setLevel(const size_t level);
+
         std::vector<std::shared_ptr<Control> > getChilds();
         std::vector<std::shared_ptr<const Control> > getChilds() const;
 
@@ -148,6 +163,8 @@ namespace Guise
         ControlContainerList(Canvas & canvas);
 
         virtual ~ControlContainerList();
+
+        void setLevel(const size_t level);
 
         std::vector<std::shared_ptr<Control> > getChilds();
         std::vector<std::shared_ptr<const Control> > getChilds() const;

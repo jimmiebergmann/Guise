@@ -43,19 +43,4 @@ namespace Guise
     {
     }
 
-   /*oid AppWindow::processEvents()
-    {
-        #if defined(GUISE_PLATFORM_WINDOWS)
-            Win32AppWindow::processEvents();
-        #endif
-    }
-
-    void AppWindow::terminateEventProcessing(const std::thread::native_handle_type & threadHandle)
-    {
-        #if defined(GUISE_PLATFORM_WINDOWS)
-            Win32AppWindow::terminateEventProcessing(threadHandle);
-        #endif
-    }*/
-
-    
 }

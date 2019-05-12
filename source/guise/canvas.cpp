@@ -37,20 +37,56 @@ namespace Guise
     Canvas::~Canvas()
     { }
 
-    bool Canvas::add(const std::shared_ptr<Control> & control, const size_t)
+    bool Canvas::add(const std::shared_ptr<Control> & control, const size_t index)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
-        m_controls.push_back(control);
+        m_plane->add(control, index);
 
         return true;
     }
 
     void Canvas::update()
     {
+        m_plane->update({ 0.0f, 0.0f }, m_size);
+         
         m_input.update();
+        
+        const ControlGrid::Node * gridControls = nullptr;
+        bool queried = false;
 
-        /*Input::Event e;
+        Input::Event e;
+        while (m_input.pollEvent(e))
+        {
+            switch (e.type)
+            {
+                case Input::EventType::MousePress:
+                {
+                    if (!queried)
+                    {
+                        gridControls = m_controlGrid.query(e.position);
+                        queried = true;
+                    }
+                    
+                    if (gridControls)
+                    {
+                        for (auto it = gridControls->controls.rbegin(); it != gridControls->controls.rend(); it++)
+                        {
+                            if (it->second->intersects(e.position) && it->second->control->handleInputEvent(e))
+                            {
+                                break;
+                            }
+                        }
+                    }
+    
+                }
+                break;
+                default: break;
+            }
+        }
+
+        /*
+        Input::Event e;
         while (m_input.pollEvent(e))
         {
             switch (e.type)
@@ -75,11 +111,7 @@ namespace Guise
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
-        for (auto it = m_controls.begin(); it != m_controls.end(); it++)
-        {
-            Vector2f test = m_size;
-            (*(*it)).render(renderInterface, *m_styleSheet,{ 0.0f, 0.0f }, m_size);
-        }
+        m_plane->render(renderInterface);
     }
 
     const Input & Canvas::getInput() const
@@ -103,15 +135,33 @@ namespace Guise
         return m_size;
     }
 
-    void Canvas::setSize(const Vector2ui32 & size)
+    void Canvas::resize(const Vector2ui32 & size)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_size = size;
     }
-    
+
+    void Canvas::registerControlBoundsChange(Control & control, const Vector4f & bounds)
+    {
+        m_controlGrid.set(control, bounds);
+    }
+
+    void Canvas::registerControlLevelChange(Control & control, const size_t level)
+    {
+        m_controlGrid.updateLevel(control, level);
+    }
+
+    void Canvas::unregisterControl(Control & control)
+    {
+        m_controlGrid.unset(control);
+    }
+
     Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet) :
+        m_controlGrid(size, 128.0f),
+        m_plane(nullptr),
         m_size(size)
     {
+        
         if (styleSheet != nullptr)
         {
             m_styleSheet = *styleSheet;
@@ -122,6 +172,8 @@ namespace Guise
         }
 
         setStyle(m_styleSheet->getStyle(StyleSheet::Entry::Canvas));
+
+        m_plane = Plane::create(*this);
     }
 
 }

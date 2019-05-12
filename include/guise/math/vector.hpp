@@ -215,6 +215,7 @@ namespace Guise
         Vector(const Vector<4, T> & vector);
         Vector(const Vector<3, T> & vector, const T w);
         Vector(const Vector<2, T> & vector, const T z, const T w);
+        Vector(const Vector<2, T> & vector1, const Vector<2, T> & vector2);
         Vector(const T x, const Vector<3, T> & vector);
         Vector(const T x, const T y, const Vector<2, T> & vector);
 

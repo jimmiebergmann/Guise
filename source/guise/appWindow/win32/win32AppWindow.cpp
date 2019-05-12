@@ -291,7 +291,7 @@ namespace Guise
             }
             Vector2ui32 size(static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)));
             m_renderer->setViewportSize({0, 0}, size);
-            m_canvas->setSize(size);
+            m_canvas->resize(size);
             render();
         }
         break;
@@ -312,31 +312,31 @@ namespace Guise
             m_input.pushEvent({ Input::EventType::MouseMove, { static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_LBUTTONDOWN:
-            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(0) });
+            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(0), { static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_MBUTTONDOWN:
-            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(1) });
+            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(1),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_RBUTTONDOWN:
-            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(2) });
+            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(2),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_LBUTTONUP:
-            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(0) });
+            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(0),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_MBUTTONUP:
-            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(1) });
+            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(1),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_RBUTTONUP:
-            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(2) });
+            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(2),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_LBUTTONDBLCLK:
-            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(0) });
+            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(0),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_MBUTTONDBLCLK:
-            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(1) });
+            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(1),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_RBUTTONDBLCLK:
-            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(2) });
+            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(2),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
             break;
         case WM_MOUSEWHEEL:
         {

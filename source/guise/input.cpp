@@ -32,9 +32,10 @@ namespace Guise
         type(EventType::None)
     { }
 
-    Input::Event::Event(const EventType type, const uint8_t value) :
+    Input::Event::Event(const EventType type, const uint8_t value1, const Vector2f &value2) :
         type(type),
-        button(value)
+        button(value1),
+        position(value2)
     { }
 
     Input::Event::Event(const EventType type, const wchar_t value) :
@@ -52,7 +53,7 @@ namespace Guise
         key(value)
     { }
 
-    Input::Event::Event(const EventType type, const Vector2f value) :
+    Input::Event::Event(const EventType type, const Vector2f & value) :
         type(type),
         position(value)
     { }
@@ -85,9 +86,9 @@ namespace Guise
         // Mouse is pressed, but has not been queued.
         for (auto it = m_mousePressed.begin(); it != m_mousePressed.end(); it++)
         {
-            if (m_eventMousePressed.find(*it) == m_eventMousePressed.end())
+            if (m_eventMousePressed.find(it->first) == m_eventMousePressed.end())
             {
-                m_eventQueue.push({ EventType::MousePress, *it });
+                m_eventQueue.push({ EventType::MousePress, it->first, m_mousePosition });
             }
         }
         m_eventMousePressed.clear();
@@ -95,8 +96,8 @@ namespace Guise
         // Mouse just pressed events.
         for (auto it = m_mouseReleased.begin(); it != m_mouseReleased.end(); it++)
         {
-            m_eventQueue.push({ EventType::MouseRelease, *it });
-            m_mousePressed.erase(*it);
+            m_eventQueue.push({ EventType::MouseRelease, it->first, it->second });
+            m_mousePressed.erase(it->first);
         }
         m_mouseReleased.clear();
 
@@ -147,15 +148,19 @@ namespace Guise
                 m_eventKeyPressed.insert(e.key);
                 break;
             case Input::EventType::MouseRelease:
-                m_mouseReleased.insert(e.button);
+                m_mouseReleased.insert({ e.button, e.position });
                 return;
             case Input::EventType::MousePress:
                 if (m_mousePressed.find(e.button) == m_mousePressed.end())
                 {
-                    m_eventQueue.push({ EventType::MouseJustPressed, e.button });
+                    m_mousePosition = e.position;
+                    m_eventQueue.push({ EventType::MouseJustPressed, e.button, e.position });
                 }
-                m_mousePressed.insert(e.button);
-                m_eventMousePressed.insert(e.button);
+                m_mousePressed.insert({ e.button, e.position });
+                m_eventMousePressed.insert({ e.button, e.position });
+                break;
+            case Input::EventType::MouseMove:
+                m_mousePosition = e.position;
                 break;
             default: break;
         }

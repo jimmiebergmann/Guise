@@ -25,6 +25,7 @@
 
 #include "guise/control/button.hpp"
 #include "guise/canvas.hpp"
+#include <iostream>
 
 namespace Guise
 {
@@ -38,53 +39,86 @@ namespace Guise
         return ControlType::Button;
     }
 
-    void Button::render(RendererInterface & renderer, const StyleSheet & styleSheet, const Vector2f & canvasPosition, const Vector2f & canvasSize)
+    bool Button::handleInputEvent(const Input::Event & e)
     {
-        Vector2f position = getPosition();
-        position.x = position.x > 0.0f ? position.x : 0.0f;
-        position.y = position.y > 0.0f ? position.y : 0.0f;
+        std::cout << "Pressed me! " << (int)e.button << ": " <<  e.position.x << " " << e.position.y  << std::endl;
+        return true;
+    }
 
-        Vector2f size = getSize();
-        size.x = size.x > 0.0f ? (size.x + position.x > canvasSize.x ? canvasSize.x - position.x : size.x) : canvasSize.x - position.x;
-        size.y = size.y > 0.0f ? (size.y + position.y > canvasSize.y ? canvasSize.y - position.y : size.y) : canvasSize.y - position.y;
+    void Button::update(const Vector2f & availablePosition, const Vector2f & availableSize)
+    {
+        m_renderPosition = getPosition();
+        m_renderPosition.x = m_renderPosition.x > 0.0f ? m_renderPosition.x : 0.0f;
+        m_renderPosition.y = m_renderPosition.y > 0.0f ? m_renderPosition.y : 0.0f;
 
-        position += canvasPosition;
+        m_renderSize = getSize();
+        m_renderSize.x = m_renderSize.x > 0.0f ? (m_renderSize.x + m_renderPosition.x > availableSize.x ? availableSize.x - m_renderPosition.x : m_renderSize.x) : availableSize.x - m_renderPosition.x;
+        m_renderSize.y = m_renderSize.y > 0.0f ? (m_renderSize.y + m_renderPosition.y > availableSize.y ? availableSize.y - m_renderPosition.y : m_renderSize.y) : availableSize.y - m_renderPosition.y;
 
+        m_renderPosition += availablePosition;
 
-        if (size.x > 0.0f && size.y > 0.0f)
+        Vector4f bounds = { m_renderPosition, m_renderPosition };
+        bounds.z += m_renderSize.x;
+        bounds.w += m_renderSize.y;
+
+        if (bounds != m_bounds)
         {
-            Vector2f backgroundSize = size;
+            m_bounds = bounds;
+            getCanvas().registerControlBoundsChange(*this, m_bounds);
+        }
+
+        auto child = getChilds()[0];
+        if (child)
+        {
+
+            m_childAvailablePosition = m_renderPosition + getPaddingLow();
+            m_childAvailableSize = m_renderSize - getPaddingLow() - getPaddingHigh();
+            
+            if (m_childAvailableSize.x > 0.0f && m_childAvailableSize.y > 0.0f)
+            {
+                child->update(m_childAvailablePosition, m_childAvailableSize);
+            }
+        }
+    }
+
+    void Button::render(RendererInterface & renderer)
+    {
+        if (m_renderSize.x > 0.0f && m_renderSize.y > 0.0f)
+        {
+            Vector2f backgroundSize = m_renderSize;
             Vector2f backgroundOffset(0.0f, 0.0f);
             float borderWith = getBorderWidth();
             if (borderWith > 0.0f && getBorder() != Style::BorderStyle::None)
             {
-                renderer.drawQuad(position, size, getBorderColor());
+                renderer.drawQuad(m_renderPosition, m_renderSize, getBorderColor());
                 backgroundSize -= {2.0f * borderWith, 2.0f * borderWith};
                 backgroundOffset += {borderWith, borderWith};
             }
             if (backgroundSize.x > 0.0f && backgroundSize.y > 0.0f)
             {
-                renderer.drawQuad(position + backgroundOffset, backgroundSize, getBackgroundColor());
+                renderer.drawQuad(m_renderPosition + backgroundOffset, backgroundSize, getBackgroundColor());
             }
             
             auto child = getChilds()[0];
             if (child)
             {
-                Vector2f childPos = position + getPaddingLow();
-                Vector2f childSize = size - getPaddingLow() - getPaddingHigh();
-
-                if (childSize.x > 0.0f && childSize.y > 0.0f)
-                {
-                    child->render(renderer, styleSheet, childPos, childSize);
-                }
+                child->render(renderer);
             }
         }
      
     }
 
+    Vector4f Button::getSelectBounds() const
+    {
+        return m_bounds;
+    }
+
     Button::Button(Canvas & canvas) :
         ControlContainerSingle(canvas),
-        Style(canvas.getStyleSheet()->getStyle(StyleSheet::Entry::Button))
+        Style(canvas.getStyleSheet()->getStyle(StyleSheet::Entry::Button)),
+        m_bounds(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()),
+        m_renderPosition(0.0f, 0.0f),
+        m_renderSize(0.0f, 0.0f)
     { }
 
 }

@@ -40,7 +40,13 @@ namespace Guise
 
         ControlType getType() const;
 
-        void render(RendererInterface & rendererInterface, const StyleSheet & styleSheet, const Vector2f & canvasPosition, const Vector2f & canvasSize);
+        bool handleInputEvent(const Input::Event & event);
+
+        void update(const Vector2f & availablePosition, const Vector2f & availableSize);
+
+        void render(RendererInterface & rendererInterface);
+
+        Vector4f getSelectBounds() const;
 
     private:
 

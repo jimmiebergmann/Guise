@@ -29,6 +29,7 @@
 #include "guise/build.hpp"
 #include <queue>
 #include <set>
+#include <map>
 
 namespace Guise
 {
@@ -167,20 +168,20 @@ namespace Guise
         struct Event
         {
             Event();
-            Event(const EventType type, const uint8_t value);
+            Event(const EventType type, const uint8_t value1, const Vector2f & value2);
             Event(const EventType type, const wchar_t value);
             Event(const EventType type, const float value);
             Event(const EventType type, const Key value);
-            Event(const EventType type, const Vector2f value);
+            Event(const EventType type, const Vector2f & value);
 
             union
             {
                 uint8_t     button;
                 wchar_t     character;
                 float       distance;
-                Key         key;
-                Vector2f    position;
+                Key         key;    
             };
+            Vector2f    position;
 
             EventType type;
         };
@@ -205,13 +206,14 @@ namespace Guise
         
         Input(const Input &) = delete;
 
-        std::queue<Event>   m_eventQueue; 
-        std::set<Key>       m_eventKeyPressed;
-        std::set<Key>       m_keysPressed;
-        std::set<Key>       m_keysReleased;
-        std::set<uint8_t>   m_eventMousePressed;
-        std::set<uint8_t>   m_mousePressed;
-        std::set<uint8_t>   m_mouseReleased;
+        std::queue<Event>           m_eventQueue; 
+        std::set<Key>               m_eventKeyPressed;
+        std::set<Key>               m_keysPressed;
+        std::set<Key>               m_keysReleased;
+        std::map<uint8_t, Vector2f> m_eventMousePressed;
+        std::map<uint8_t, Vector2f> m_mousePressed;
+        std::map<uint8_t, Vector2f> m_mouseReleased;
+        Vector2f                    m_mousePosition;
 
     };
 

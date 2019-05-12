@@ -423,7 +423,14 @@ namespace Guise
         x(vector.x),
         y(vector.y),
         z(z),
-        w(z)
+        w(w)
+    {}
+    template <typename T>
+    inline Vector<4, T>::Vector(const Vector<2, T> & vector1, const Vector<2, T> & vector2) :
+        x(vector1.x),
+        y(vector1.y),
+        z(vector2.y),
+        w(vector2.y)
     {}
     template <typename T>
     inline Vector<4, T>::Vector(const T x, const Vector<3, T> & vector) :

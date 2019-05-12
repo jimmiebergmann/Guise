@@ -23,20 +23,20 @@
 *
 */
 
-#ifndef GUISE_CONTROL_BUTTON_HPP
-#define GUISE_CONTROL_BUTTON_HPP
+#ifndef GUISE_CONTROL_PLANE_HPP
+#define GUISE_CONTROL_PLANE_HPP
 
 #include "guise/control.hpp"
 
 namespace Guise
 {
 
-    class GUISE_API Button : public Style, public ControlContainerSingle
+    class GUISE_API Plane : public Style, public ControlContainerList
     {
 
     public:
 
-        static std::shared_ptr<Button> create(Canvas & canvas);
+        static std::shared_ptr<Plane> create(Canvas & canvas);
 
         ControlType getType() const;
 
@@ -50,16 +50,10 @@ namespace Guise
 
     private:
 
-        Button(Canvas & canvas);
-        Button(const Button &) = delete;
+        Plane(Canvas & canvas);
+        Plane(const Plane &) = delete;
 
         Vector4f m_bounds;
-        Vector2f m_childAvailablePosition;
-        Vector2f m_childAvailableSize;
-        Vector2f m_renderPosition;
-        Vector2f m_renderSize;
-
-        
 
     };
 

@@ -24,6 +24,7 @@
 */
 
 #include "guise/control.hpp"
+#include "guise/canvas.hpp"
 
 template <typename T, typename U>
 static bool ptrEquals(const std::weak_ptr<T>& t, const std::shared_ptr<U>& u)
@@ -37,8 +38,14 @@ namespace Guise
 
     // Control implementations.
     Control::Control(Canvas & canvas) :
-        m_canvas(canvas)
-    {}
+        m_canvas(canvas),
+        m_level(0)
+    { }
+
+    Control::~Control()
+    {
+        m_canvas.unregisterControl(*this);
+    }
 
     Canvas & Control::getCanvas()
     {
@@ -50,9 +57,38 @@ namespace Guise
         return m_canvas;
     }
 
-    Control::~Control()
+    bool Control::handleInputEvent(const Input::Event &)
+    {
+        return false;
+    }
+
+    void Control::update(const Vector2f &, const Vector2f &)
     {
     }
+
+    void Control::render(RendererInterface &)
+    {
+    }
+
+    Vector4f Control::getSelectBounds() const
+    {
+        return { 0.0f, 0.0f, 0.0f, 0.0f};
+    }
+
+    size_t Control::getLevel() const
+    {
+        return m_level;
+    }
+
+    void Control::setLevel(const size_t level)
+    {
+        if (level != m_level)
+        {
+            m_level = level;
+            m_canvas.registerControlLevelChange(*this, m_level);
+        }
+    }
+
     std::weak_ptr<Control> Control::getParent()
     {
         return m_parent;
@@ -141,6 +177,23 @@ namespace Guise
     ControlContainerSingle::~ControlContainerSingle()
     {
         removeAll();
+    }
+
+    void ControlContainerSingle::setLevel(const size_t level)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if (level == getLevel())
+        {
+            return;
+        }
+
+        Control::setLevel(level);
+
+        if (m_child)
+        {
+            m_child->setLevel(level + 1);
+        }
     }
 
     std::vector<std::shared_ptr<Control> > ControlContainerSingle::getChilds()
@@ -241,6 +294,24 @@ namespace Guise
         removeAll();
     }
 
+    void ControlContainerList::setLevel(const size_t level)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if (level == getLevel())
+        {
+            return;
+        }
+
+        Control::setLevel(level);
+
+        const size_t nextLevel = level + 1;
+        for (auto & child : m_childs)
+        {
+            child->setLevel(nextLevel);
+        }
+    }
+
     std::vector<std::shared_ptr<Control> > ControlContainerList::getChilds()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -337,7 +408,6 @@ namespace Guise
         for (auto & child : m_childs)
         {
             releaseControl(*child.get());
-            
         }
 
         size_t count = m_childs.size();

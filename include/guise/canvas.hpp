@@ -31,9 +31,12 @@
 #include "guise/renderer.hpp"
 #include "guise/style.hpp"
 #include "guise/input.hpp"
+#include "guise/control/plane.hpp"
+#include "guise/utility/controlGrid.hpp"
 #include <memory>
 #include <mutex>
 #include <vector>
+#include <set>
 
 
 namespace Guise
@@ -66,17 +69,36 @@ namespace Guise
 
         const Vector2ui32 & getSize() const;
 
-        void setSize(const Vector2ui32 & size);
+        void resize(const Vector2ui32 & size);
+
+        //void registerControl(Control & control);
+
+        //void unregisterControl(Control & control);
+
+        void registerControlBoundsChange(Control & control, const Vector4f & bounds);
+
+        void registerControlLevelChange(Control & control, const size_t level);
+
+        void unregisterControl(Control & control);
 
     private:
 
         Canvas(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet);
 
-        std::vector<std::shared_ptr<Control> >  m_controls;
-        Input                                   m_input;
-        Vector2ui32                             m_size;
-        std::shared_ptr<StyleSheet>             m_styleSheet;
-        mutable std::mutex                      m_mutex;
+        //std::set<Control *>                     m_allControlsSet;
+        //std::vector<Control *>                  m_allControls;
+        //std::vector<std::shared_ptr<Control> >  m_controls;
+
+        ControlGrid                 m_controlGrid;
+        Input                       m_input;
+        std::shared_ptr<Plane>      m_plane;
+        Vector2ui32                 m_size;
+        std::shared_ptr<StyleSheet> m_styleSheet;
+        mutable std::mutex          m_mutex;
+
+
+
+        
 
     };
 
