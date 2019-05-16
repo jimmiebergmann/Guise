@@ -25,6 +25,8 @@
 
 #include "guise/style.hpp"
 #include "guise/defaultStyles.hpp"
+#include <algorithm>
+#include <iostream>
 
 namespace Guise
 {
@@ -35,6 +37,12 @@ namespace Guise
         property(property),
         f(value),
         valueType(ValueType::Float)
+    {}
+
+    Style::PropertyPair::PropertyPair(const Property property, const bool value) :
+        property(property),
+        b(value),
+        valueType(ValueType::Boolean)
     {}
 
     Style::PropertyPair::PropertyPair(const Property property, const Vector2f & value) :
@@ -64,6 +72,7 @@ namespace Guise
 
     // Style implementations.
     Style::Style() :
+        m_clamp(true),
         m_position(0.0f, 0.0f),
         m_size(0.0f, 0.0f),
         m_padding(0.0f, 0.0f, 0.0f, 0.0f),
@@ -80,6 +89,7 @@ namespace Guise
     }
 
     Style::Style(const Style & style) :
+        m_clamp(style.getClamp()),
         m_position(style.getPosition()),
         m_size(style.getSize()),
         m_padding(style.getPadding()),
@@ -91,6 +101,7 @@ namespace Guise
 
     Style & Style::operator =(const Style & style)
     {
+        m_clamp = style.getClamp();
         m_position = style.getPosition();
         m_size = style.getSize();
         m_padding = style.getPadding();
@@ -108,14 +119,22 @@ namespace Guise
 
     void Style::setStyleProperties(const std::initializer_list<PropertyPair> & properties)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-
         for (auto it = properties.begin(); it != properties.end(); it++)
         {
             switch (it->property)
             {
-                case Property::Position: m_position = it->vec2; break;
-                case Property::Size: m_size = it->vec2; break;
+                case Property::BackgroundColor: m_backgroundColor = it->vec4; break;
+                case Property::Border: m_borderStyle = it->borderStyle; break;
+                case Property::BorderColor:
+                    switch (it->valueType)
+                    {
+                        case PropertyPair::ValueType::Vector3f: m_borderColor = { it->vec3, 1.0f }; break;
+                        case PropertyPair::ValueType::Vector4f: m_borderColor = it->vec4; break;
+                        default: break;
+                    }
+                    break;
+                case Property::BorderWidth: m_borderWidth = it->f; break;
+                case Property::Clamp: m_clamp = it->b; break;
                 case Property::Padding:
                     switch (it->valueType)
                     {
@@ -125,17 +144,8 @@ namespace Guise
                         default: break;
                     }
                     break;
-                case Property::BackgroundColor: m_backgroundColor = it->vec4; break;
-                case Property::Border: m_borderStyle = it->borderStyle; break;
-                case Property::BorderWidth: m_borderWidth = it->f; break;
-                case Property::BorderColor:
-                    switch (it->valueType)
-                    {
-                        case PropertyPair::ValueType::Vector3f: m_borderColor = { it->vec3, 1.0f }; break;
-                        case PropertyPair::ValueType::Vector4f: m_borderColor = it->vec4; break;
-                        default: break;
-                    }
-                    break;
+                case Property::Position: m_position = it->vec2; break;
+                case Property::Size: m_size = it->vec2; break;
                     
                     
                 default: break;
@@ -143,127 +153,146 @@ namespace Guise
         }
     }
 
+    bool Style::getClamp() const
+    {
+        return m_clamp;
+    }
+
+    void Style::setClamp(bool clamp)
+    {
+        m_clamp = clamp;
+    }
+
     const Vector2f & Style::getPosition() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return m_position;
     }
 
     void Style::setPosition(const Vector2f & position)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_position = position;
     }
 
     const Vector2f & Style::getSize() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return m_size;
     }
 
     void Style::setSize(const Vector2f & size)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_size = size;
     }
 
     const Vector4f & Style::getPadding() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return m_padding;
     }
 
     Vector2f Style::getPaddingLow() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return { m_padding.x, m_padding.y };
     }
 
     Vector2f Style::getPaddingHigh() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return { m_padding.z, m_padding.w };
     }
 
     void Style::setPadding(const float padding)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_padding = { padding, padding, padding, padding };
     }
 
     void Style::setPadding(const Vector2f & padding)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_padding = { padding.x, padding.y, padding.x, padding.y };
     }
 
     void Style::setPadding(const Vector4f & padding)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_padding = padding;
     }
 
     void Style::setPaddingLow(const Vector2f & low)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_padding.x = low.x;
         m_padding.y = low.y;
     }
 
     void Style::setPaddingHigh(const Vector2f & high)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_padding.z = high.x;
         m_padding.w = high.y;
     }
 
     Vector4f Style::getBackgroundColor() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return m_backgroundColor;
     }
 
     void Style::setBackgroundColor(const Vector4f & color)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_backgroundColor = color;
     }
 
     Style::BorderStyle Style::getBorder() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return m_borderStyle;
     }
 
     void Style::setBorder(const BorderStyle style)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_borderStyle = style;
     }
 
     float Style::getBorderWidth() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return m_borderWidth;
     }
 
     void Style::setBorderWidth(const float width)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_borderWidth = width;
     }
 
     Vector4f Style::getBorderColor() const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return m_borderColor;
     }
 
     void Style::setBorderColor(const Vector4f color)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_borderColor = color;
     }
+
+    Bounds2f Style::calcRenderBounds(const Bounds2f & canvasBound)
+    {
+        Bounds2f bounds = { canvasBound.position + m_position, m_size};
+        
+        if (m_clamp)
+        {
+            bounds.position = Vector2f::clamp(bounds.position, canvasBound.position, Vector2f::max(canvasBound.position, canvasBound.position + canvasBound.size));
+        }
+
+        Vector2f lower = bounds.position;
+        Vector2f higherCanvas = canvasBound.position + canvasBound.size;
+        Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, m_size);
+
+        if ((m_clamp && higherThis.x > higherCanvas.x) || m_size.x <= 0.0f)
+        {
+            bounds.size.x = higherCanvas.x - lower.x;
+        }
+        if ((m_clamp && higherThis.y > higherCanvas.y) || m_size.y <= 0.0f)
+        {
+            bounds.size.y = higherCanvas.y - lower.y;
+        }
+        
+        bounds.size.x = std::max(0.0f, bounds.size.x);
+        bounds.size.y = std::max(0.0f, bounds.size.y);
+
+        return bounds;
+    }
+
   
     // StyleSheet EntryPair implementations.
     StyleSheet::EntryPair::EntryPair(const Entry entry, const Style & style) :
@@ -291,6 +320,7 @@ namespace Guise
             {
                 { StyleSheet::Entry::Button, DefaultStyles::button },
                 { StyleSheet::Entry::Canvas, DefaultStyles::canvas },
+                { StyleSheet::Entry::Plane,  DefaultStyles::plane },
                 { StyleSheet::Entry::Window, DefaultStyles::window }
             }
         ));
@@ -302,6 +332,7 @@ namespace Guise
         {
             case Entry::Canvas: return *m_canvasStyle;
             case Entry::Button: return *m_buttonStyle;
+            case Entry::Plane:  return *m_planeStyle;
             case Entry::Window: return *m_windowStyle;
             default: break;
         }
@@ -316,6 +347,7 @@ namespace Guise
         {
             case Entry::Button: return *m_buttonStyle;
             case Entry::Canvas: return *m_canvasStyle;
+            case Entry::Plane:  return *m_planeStyle;
             case Entry::Window: return *m_windowStyle;
             default: break;
         }
@@ -326,8 +358,6 @@ namespace Guise
 
     const Style * StyleSheet::getStyle(const std::string & name) const
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-
         auto it = m_styleMap.find(name);
         if (it != m_styleMap.end())
         {
@@ -338,8 +368,6 @@ namespace Guise
     }
     Style * StyleSheet::getStyle(const std::string & name)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-
         auto it = m_styleMap.find(name);
         if (it != m_styleMap.end())
         {
@@ -353,9 +381,13 @@ namespace Guise
     StyleSheet::StyleSheet(const std::initializer_list<EntryPair> & entries) :
         m_buttonStyle(std::make_shared<Style>()),
         m_canvasStyle(std::make_shared<Style>()),
+        m_planeStyle(std::make_shared<Style>()),
         m_windowStyle(std::make_shared<Style>()),
-        m_styleMap{ { "canvas", m_canvasStyle },
-                    { "button", m_buttonStyle } }
+        m_styleMap{
+            { "canvas", m_canvasStyle },
+            { "button", m_buttonStyle },
+            { "plane",  m_planeStyle } ,
+            { "window", m_windowStyle } }
     {
         for (auto it = entries.begin(); it != entries.end(); it++)
         {
@@ -371,7 +403,13 @@ namespace Guise
                 {
                     *m_buttonStyle = it->style;
                     continue;
-                }else if (it->name == "window")
+                }
+                else if (it->name == "plane")
+                {
+                    *m_planeStyle = it->style;
+                    continue;
+                }
+                else if (it->name == "window")
                 {
                     *m_windowStyle = it->style;
                     continue;
@@ -395,6 +433,7 @@ namespace Guise
             {
                 case StyleSheet::Entry::Button: *m_buttonStyle = it->style; break;
                 case StyleSheet::Entry::Canvas: *m_canvasStyle = it->style; break;
+                case StyleSheet::Entry::Plane:  *m_planeStyle = it->style; break;
                 case StyleSheet::Entry::Window: *m_windowStyle = it->style; break;
                 default: break;
             }

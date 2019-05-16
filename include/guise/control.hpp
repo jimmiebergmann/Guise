@@ -30,6 +30,7 @@
 #include "guise/style.hpp"
 #include "guise/renderer.hpp"
 #include "guise/input.hpp"
+#include "guise/math/bounds.hpp"
 #include <memory>
 #include <vector>
 #include <list>
@@ -79,11 +80,11 @@ namespace Guise
 
         virtual bool handleInputEvent(const Input::Event & event);
 
-        virtual void update(const Vector2f & availablePosition, const Vector2f & availableSize);
+        virtual void update(const Bounds2f & canvasBounds);
 
         virtual void render(RendererInterface & rendererInterface);
 
-        virtual Vector4f getSelectBounds() const;
+        virtual Bounds2f getSelectBounds() const;
 
         virtual size_t getLevel() const;
 

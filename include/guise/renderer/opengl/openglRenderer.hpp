@@ -56,7 +56,9 @@ namespace Guise
 
         void setCulling(const Vector2f & position, const Vector2f & size);
 
-        void drawQuad(const Vector2f & position, const Vector2f & size, const Vector4f & color);
+        void drawQuad(const Bounds2f & bounds, const Vector4f & color);
+
+        void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color);
   
         static std::shared_ptr<Renderer> create(const std::shared_ptr<AppWindow> & appWindow);
     #if defined(GUISE_PLATFORM_WINDOWS)

@@ -203,6 +203,25 @@ namespace Guise
         return c[index];
     }
 
+    template <typename T>
+    Vector<2, T> Vector<2, T>::clamp(const Vector<2, T> & vector, const Vector<2, T> & low, const Vector<2, T> & high)
+    {
+        return { std::clamp<T>(vector.x, low.x, high.x) , std::clamp<T>(vector.y, low.y, high.y) };
+    }
+
+    template <typename T>
+    Vector<2, T> Vector<2, T>::min(const Vector<2, T> & low, const Vector<2, T> & high)
+    {
+        return { std::min<T>(low.x, high.x) , std::min<T>(low.y, high.y) };
+
+    }
+
+    template <typename T>
+    Vector<2, T> Vector<2, T>::max(const Vector<2, T> & low, const Vector<2, T> & high)
+    {
+        return { std::max<T>(low.x, high.x) , std::max<T>(low.y, high.y) };
+    }
+
 
     // Vector 3 implementations.
     template <typename T>

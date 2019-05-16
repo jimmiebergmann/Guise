@@ -37,16 +37,24 @@ namespace Guise
 
     }
 
-    void OpenGLRenderer::drawQuad(const Vector2f & position, const Vector2f & size, const Vector4f & color)
+    void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const Vector4f & color)
     {
         glBegin(GL_QUADS);
-
         glColor4f(color.x, color.y, color.z, color.w);
-        glVertex2f(position.x, position.y);
-        glVertex2f(position.x + size.x, position.y); 
-        glVertex2f(position.x + size.x, position.y + size.y);
-        glVertex2f(position.x, position.y + size.y);
+        glVertex2f(bounds.position.x, bounds.position.y);
+        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
+        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
+        glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+        glEnd();
+    }
 
+    void OpenGLRenderer::drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color)
+    {
+        glLineWidth(width);
+        glBegin(GL_LINES);
+        glColor4f(color.x, color.y, color.z, color.w);
+        glVertex2f(point1.x, point1.y);
+        glVertex2f(point2.x, point2.y);
         glEnd();
     }
 

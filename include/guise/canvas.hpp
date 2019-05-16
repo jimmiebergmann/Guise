@@ -75,7 +75,7 @@ namespace Guise
 
         //void unregisterControl(Control & control);
 
-        void registerControlBoundsChange(Control & control, const Vector4f & bounds);
+        void registerControlBoundsChange(Control & control, const Bounds2f & bounds);
 
         void registerControlLevelChange(Control & control, const size_t level);
 

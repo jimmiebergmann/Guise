@@ -43,7 +43,7 @@ namespace Guise
         return true;
     }
 
-    void Window::update(const Vector2f &/* availablePosition*/, const Vector2f & /*availableSize*/)
+    void Window::update(const Bounds2f & /*canvasBound*/)
     {
 
     }
@@ -52,9 +52,9 @@ namespace Guise
     {
     }
 
-    Vector4f Window::getSelectBounds() const
+    Bounds2f Window::getSelectBounds() const
     {
-        return { 0.0f, 0.0f, 0.0f, 0.0f };
+        return { {0.0f, 0.0f}, {0.0f, 0.0f} };
     }
 
     Window::Window(Canvas & canvas) :

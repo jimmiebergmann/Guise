@@ -27,6 +27,7 @@
 #define GUISE_RENDERER_HPP
 
 #include "guise/build.hpp"
+#include "guise/math/bounds.hpp"
 #include <memory>
 
 namespace Guise
@@ -44,7 +45,9 @@ namespace Guise
 
         virtual void setCulling(const Vector2f & position, const Vector2f & size) = 0;
 
-        virtual void drawQuad(const Vector2f & position, const Vector2f & size, const Vector4f & color) = 0;
+        virtual void drawQuad(const Bounds2f & bounds, const Vector4f & color) = 0;
+
+        virtual void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color) = 0;
 
         //virtual void drawQuadRounded(const Vector2f & position, const Vector2f & size) = 0;
     };

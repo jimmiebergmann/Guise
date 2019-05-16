@@ -43,42 +43,31 @@ namespace Guise
         return true;
     }
 
-    void Plane::update(const Vector2f & availablePosition, const Vector2f & availableSize)
+    void Plane::update(const Bounds2f & canvasBound)
     {
-        Vector4f bounds = { availablePosition, availablePosition };
-        bounds.z += availableSize.x;
-        bounds.w += availableSize.y;
-
-        if (bounds != m_bounds)
+        if (canvasBound != m_bounds)
         {
-            m_bounds = bounds;
+            m_bounds = canvasBound;
             getCanvas().registerControlBoundsChange(*this, m_bounds);
-        }
 
-        auto childs = getChilds();
-        for (auto it = childs.begin(); it != childs.end(); it++)
-        {
-            (*it)->update(availablePosition, availableSize);
-        }
+            Bounds2f childBounds(m_bounds.position + getPaddingLow(), m_bounds.size - getPaddingLow() - getPaddingHigh());
+
+            auto childs = getChilds();
+            for (auto it = childs.begin(); it != childs.end(); it++)
+            {
+                (*it)->update(childBounds);
+            }
+        }  
     }
 
-    void Plane::render(RendererInterface & renderer)
-    {
-        auto childs = getChilds();
-        for (auto it = childs.begin(); it != childs.end(); it++)
-        {
-            (*it)->render(renderer);
-        }
-    }
-
-    Vector4f Plane::getSelectBounds() const
+    Bounds2f Plane::getSelectBounds() const
     {
         return m_bounds;
     }
 
     Plane::Plane(Canvas & canvas) :
         ControlContainerList(canvas),
-        Style(canvas.getStyleSheet()->getStyle(StyleSheet::Entry::Window)),
+        Style(canvas.getStyleSheet()->getStyle(StyleSheet::Entry::Plane)),
         m_bounds(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min())
     { }
 

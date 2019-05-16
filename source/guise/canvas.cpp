@@ -24,7 +24,6 @@
 */
 
 #include "guise/canvas.hpp"
-#include <iostream>
 
 namespace Guise
 {
@@ -48,7 +47,7 @@ namespace Guise
 
     void Canvas::update()
     {
-        m_plane->update({ 0.0f, 0.0f }, m_size);
+        m_plane->update({ { 0.0f, 0.0f }, m_size });
          
         m_input.update();
         
@@ -111,7 +110,8 @@ namespace Guise
     {
         std::lock_guard<std::mutex> lock(m_mutex);
 
-        m_plane->render(renderInterface);
+        m_controlGrid.render(renderInterface, m_size);
+        m_controlGrid.renderGrid(renderInterface, m_size);
     }
 
     const Input & Canvas::getInput() const
@@ -138,22 +138,27 @@ namespace Guise
     void Canvas::resize(const Vector2ui32 & size)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_size = size;
+
+        if (size != m_size)
+        {
+            m_size = size;
+            m_controlGrid.resize(m_size);
+        }       
     }
 
-    void Canvas::registerControlBoundsChange(Control & control, const Vector4f & bounds)
+    void Canvas::registerControlBoundsChange(Control & control, const Bounds2f & bounds)
     {
-        m_controlGrid.set(control, bounds);
+        m_controlGrid.setControlBounds(control, bounds);
     }
 
     void Canvas::registerControlLevelChange(Control & control, const size_t level)
     {
-        m_controlGrid.updateLevel(control, level);
+        m_controlGrid.setControlLevel(control, level);
     }
 
     void Canvas::unregisterControl(Control & control)
     {
-        m_controlGrid.unset(control);
+        m_controlGrid.removeControl(control);
     }
 
     Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet) :
@@ -174,6 +179,7 @@ namespace Guise
         setStyle(m_styleSheet->getStyle(StyleSheet::Entry::Canvas));
 
         m_plane = Plane::create(*this);
+        m_plane->setLevel(1);
     }
 
 }

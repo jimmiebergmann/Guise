@@ -15,7 +15,21 @@ int main()
 
     auto button1 = Button::create(*canvas1);
     button1->setPosition({ 100.0f, 100.0f });
-    button1->setSize({ 100.0f, 100.f });
+    button1->setSize({ 600.0f, 600.0f });
+    //button1->setSize({ 130.0f, 130.0f });
+
+    auto current = button1;
+
+    for (size_t i = 0; i < 10; i++)
+    {
+        auto newButton = Button::create(*canvas1);
+        current->add(newButton);
+        current = newButton;
+    }
+
+    
+
+    
 
     /*button1->setStyleProperties(
         {   

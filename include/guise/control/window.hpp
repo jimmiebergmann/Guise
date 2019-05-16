@@ -42,11 +42,11 @@ namespace Guise
 
         bool handleInputEvent(const Input::Event & event);
 
-        void update(const Vector2f & availablePosition, const Vector2f & availableSize);
+        void update(const Bounds2f & canvasBound);
 
         void render(RendererInterface & rendererInterface);
 
-        Vector4f getSelectBounds() const;
+        Bounds2f getSelectBounds() const;
 
     private:
 

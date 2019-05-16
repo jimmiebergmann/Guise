@@ -52,6 +52,7 @@ namespace Guise
             Border,
             BorderWidth,
             BorderColor,
+            Clamp,
             Padding,
             Position,
             Size
@@ -67,6 +68,8 @@ namespace Guise
         {
             PropertyPair(const Property property, const float value);
 
+            PropertyPair(const Property property, const bool value);
+
             PropertyPair(const Property property, const Vector2f & value);
 
             PropertyPair(const Property property, const Vector4f & value);
@@ -79,6 +82,7 @@ namespace Guise
 
             union
             {
+                bool        b;
                 BorderStyle borderStyle;
                 float       f;
                 Vector2f    vec2;
@@ -88,6 +92,7 @@ namespace Guise
 
             enum class ValueType
             {
+                Boolean,
                 BorderStyle,
                 Float,
                 Vector2f,
@@ -106,6 +111,9 @@ namespace Guise
         void setStyle(const Style & style);
 
         void setStyleProperties(const std::initializer_list<PropertyPair> & properties);
+
+        bool getClamp() const;
+        void setClamp(bool clamp);
 
         const Vector2f & getPosition() const;
         void setPosition(const Vector2f & position);
@@ -133,9 +141,14 @@ namespace Guise
 
         Vector4f getBorderColor() const;
         void setBorderColor(const Vector4f color);
-      
+     
+    protected:
+
+        Bounds2f calcRenderBounds(const Bounds2f & canvasBound);
+
     private:
 
+        bool                m_clamp;
         Vector2f            m_position;
         Vector2f            m_size;
         Vector4f            m_padding;
@@ -143,7 +156,6 @@ namespace Guise
         BorderStyle         m_borderStyle;
         float               m_borderWidth;
         Vector4f            m_borderColor;
-        mutable std::mutex  m_mutex;
 
     };
 
@@ -156,7 +168,8 @@ namespace Guise
         enum class Entry
         {
             Button,
-            Canvas,       
+            Canvas,
+            Plane,
             Window
         };
 
@@ -186,11 +199,11 @@ namespace Guise
         // Styles for default controls.
         std::shared_ptr<Style> m_buttonStyle;
         std::shared_ptr<Style> m_canvasStyle;
+        std::shared_ptr<Style> m_planeStyle;
         std::shared_ptr<Style> m_windowStyle;
 
         // Custom styles.
         std::map<std::string, std::shared_ptr<Style> > m_styleMap;
-        mutable std::mutex  m_mutex;
 
     };
 

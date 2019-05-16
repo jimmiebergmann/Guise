@@ -62,7 +62,7 @@ namespace Guise
         return false;
     }
 
-    void Control::update(const Vector2f &, const Vector2f &)
+    void Control::update(const Bounds2f &)
     {
     }
 
@@ -70,9 +70,9 @@ namespace Guise
     {
     }
 
-    Vector4f Control::getSelectBounds() const
+    Bounds2f Control::getSelectBounds() const
     {
-        return { 0.0f, 0.0f, 0.0f, 0.0f};
+        return { {0.0f, 0.0f}, {0.0f, 0.0f} };
     }
 
     size_t Control::getLevel() const
@@ -144,7 +144,7 @@ namespace Guise
         m_parent.reset();
         parent->remove(*this);
     }
-
+ 
 
     // ControlContainer implementations.
     ControlContainer::ControlContainer(Canvas & canvas) :
@@ -220,6 +220,12 @@ namespace Guise
         adoptControl(*control.get());
         m_child = control;
 
+        size_t level = getLevel();
+        if (level != 0)
+        {
+            m_child->setLevel(level + 1);
+        }    
+
         return true;
     }
 
@@ -233,6 +239,7 @@ namespace Guise
         }
  
         releaseControl(control);
+        m_child->setLevel(0);
         m_child.reset();
 
         return true;
@@ -347,6 +354,12 @@ namespace Guise
         {
             m_childs.insert(m_childs.begin() + index, control);
         }
+
+        size_t level = getLevel();
+        if (level != 0)
+        {
+            control->setLevel(level + 1);
+        }
         
         return true;
     }
@@ -360,6 +373,7 @@ namespace Guise
             if (it->get() == &control)
             {
                 releaseControl(*it->get());
+                (*it)->setLevel(0);
                 m_childs.erase(it);
                 return true;
             }

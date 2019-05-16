@@ -119,6 +119,10 @@ namespace Guise
 
         T operator[] (const size_t index);
 
+        static Vector<2, T> clamp(const Vector<2, T> & vector, const Vector<2, T> & low, const Vector<2, T> & high);
+        static Vector<2, T> min(const Vector<2, T> & low, const Vector<2, T> & high);
+        static Vector<2, T> max(const Vector<2, T> & low, const Vector<2, T> & high);
+
         union {
            
             T c[2];

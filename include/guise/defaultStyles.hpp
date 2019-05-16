@@ -36,10 +36,10 @@ namespace Guise
 
         static const Style button = Style(
             {
-                { Style::Property::Padding,         1.0f },
+                { Style::Property::Padding,         15.0f },
                 { Style::Property::BackgroundColor, { 0.25f, 0.25f, 0.25f, 1.0f } },
                 { Style::Property::Border,          Style::BorderStyle::Solid },
-                { Style::Property::BorderWidth,     1.0f },
+                { Style::Property::BorderWidth,     10.0f },
                 { Style::Property::BorderColor,     { 0.05f, 0.05f, 0.05f, 1.0f } }
             }
         );
@@ -47,14 +47,20 @@ namespace Guise
         static const Style canvas = Style(
             {
                 { Style::Property::Padding,         5.0f },
-                { Style::Property::BackgroundColor,{ 0.9f, 0.9f, 0.9f, 1.0f } },
+                { Style::Property::BackgroundColor,{ 0.9f, 0.9f, 0.9f, 1.0f } }
             }
         );
 
         static const Style window = Style(
             {
                 { Style::Property::Padding,         5.0f },
-                { Style::Property::BackgroundColor,{ 0.7f, 0.7f, 0.7f, 1.0f } },
+                { Style::Property::BackgroundColor,{ 0.7f, 0.7f, 0.7f, 1.0f } }
+            }
+        );
+
+        static const Style plane = Style(
+            {
+                { Style::Property::Padding,         5.0f }
             }
         );
 

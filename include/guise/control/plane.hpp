@@ -42,18 +42,16 @@ namespace Guise
 
         bool handleInputEvent(const Input::Event & event);
 
-        void update(const Vector2f & availablePosition, const Vector2f & availableSize);
+        void update(const Bounds2f & canvasBound);
 
-        void render(RendererInterface & rendererInterface);
-
-        Vector4f getSelectBounds() const;
+        Bounds2f getSelectBounds() const;
 
     private:
 
         Plane(Canvas & canvas);
         Plane(const Plane &) = delete;
 
-        Vector4f m_bounds;
+        Bounds2f m_bounds;
 
     };
 

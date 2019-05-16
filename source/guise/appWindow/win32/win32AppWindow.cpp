@@ -76,6 +76,11 @@ namespace Guise
 
     void Win32AppWindow::render()
     {
+        if (!m_renderer)
+        {
+            return;
+        }
+
         auto backgroundColor = m_canvas->getBackgroundColor();
         m_renderer->setClearColor(backgroundColor);
         m_renderer->clearColor();
@@ -144,7 +149,8 @@ namespace Guise
                                 std::min(std::max(bgColorInt.y, 0), 255),
                                 std::min(std::max(bgColorInt.z, 0), 255));
 
-        winClass.hbrBackground = CreateSolidBrush(RGB(bgColor.x, bgColor.y, bgColor.z));
+        winClass.hbrBackground = NULL;
+        //winClass.hbrBackground = CreateSolidBrush(RGB(bgColor.x, bgColor.y, bgColor.z));
         #ifdef UNICODE
             std::wstring tempClassName(m_windowClassName.length(), L' ');
             std::copy(m_windowClassName.begin(), m_windowClassName.end(), tempClassName.begin());
@@ -289,12 +295,15 @@ namespace Guise
             {
                 break;
             }
+
             Vector2ui32 size(static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)));
             m_renderer->setViewportSize({0, 0}, size);
             m_canvas->resize(size);
+            update();
             render();
         }
         break;
+        //case WM_SIZING
 
         // Keyboard events
         case WM_KEYDOWN:
