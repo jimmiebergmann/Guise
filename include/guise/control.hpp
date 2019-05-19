@@ -102,6 +102,10 @@ namespace Guise
         virtual size_t removeAll();
         virtual void release();
 
+    protected:
+
+        Bounds2f calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const;
+
     private:
 
         friend class ControlContainer;

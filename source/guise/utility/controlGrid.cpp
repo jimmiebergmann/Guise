@@ -73,6 +73,11 @@ namespace Guise
         }
     }
 
+    bool ControlGrid::isControlSet(Control & control)
+    {
+        return m_controlMap.find(&control) != m_controlMap.end();
+    }
+
     void ControlGrid::setControlBounds(Control & control, const Bounds2f & bounds)
     {
         Bounds2<size_t> presence;
@@ -131,10 +136,10 @@ namespace Guise
         }
     }
 
-    void ControlGrid::setControlLevel(Control &/* control*/, const size_t/* level*/)
-    {
+    //void ControlGrid::setControlLevel(Control &/* control*/, const size_t/* level*/)
+    //{
         
-    }
+    //}
 
     void ControlGrid::resize(const Vector2f & gridSize)
     {

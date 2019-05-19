@@ -2,6 +2,7 @@
 #include "guise/context.hpp"
 #include "guise/appWindow.hpp"
 #include "guise/control/button.hpp"
+#include "guise/control/movable.hpp"
 #include <thread>
 
 using namespace Guise;
@@ -26,6 +27,8 @@ int main()
         current->add(newButton);
         current = newButton;
     }
+
+    auto movableButton = Movable<Button>::create(*canvas1);
 
     
 

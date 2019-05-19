@@ -31,39 +31,44 @@
 namespace Guise
 {
 
-    namespace DefaultStyles
-    {     
+    namespace Style
+    {
 
-        static const Style button = Style(
-            {
-                { Style::Property::Padding,         15.0f },
-                { Style::Property::BackgroundColor, { 0.25f, 0.25f, 0.25f, 1.0f } },
-                { Style::Property::Border,          Style::BorderStyle::Solid },
-                { Style::Property::BorderWidth,     10.0f },
-                { Style::Property::BorderColor,     { 0.05f, 0.05f, 0.05f, 1.0f } }
-            }
-        );
+        namespace DefaultStyles
+        {
 
-        static const Style canvas = Style(
-            {
-                { Style::Property::Padding,         5.0f },
-                { Style::Property::BackgroundColor,{ 0.9f, 0.9f, 0.9f, 1.0f } }
-            }
-        );
+            static const Selector button = Selector(
+                {
+                    { "padding",                { 15.0f } },
+                    { "background-color",   {   { 0.25f, 0.25f, 0.25f, 1.0 } } },
+                    { "padding",                { 15.0f } },
+                    { "border-style",           { Property::BorderStyle::Solid } },
+                    { "border-width",           { 10.0f } },
+                    { "border-color",       {   { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                }
+            );
 
-        static const Style window = Style(
-            {
-                { Style::Property::Padding,         5.0f },
-                { Style::Property::BackgroundColor,{ 0.7f, 0.7f, 0.7f, 1.0f } }
-            }
-        );
+            static const Selector canvas = Selector(
+                {
+                    { "padding",                { 5.0f }  },
+                    { "background-color",   {   { 0.9f, 0.9f, 0.9f, 1.0f } } }
+                }
+            );
 
-        static const Style plane = Style(
-            {
-                { Style::Property::Padding,         5.0f }
-            }
-        );
+            static const Selector window = Selector(
+                {
+                    { "padding",                { 5.0f } },
+                    { "background-color",   {   { 0.7f, 0.7f, 0.7f, 1.0f } } }
+                }
+            );
 
+            static const Selector plane = Selector(
+                {
+                    { "padding",                { 5.0f }  }
+                }
+            );
+
+        }
 
     }
 

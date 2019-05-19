@@ -14,6 +14,7 @@ addons:
     packages:
       - valgrind
       - lcov
+      - mesa-common-dev
 
 before_install:
   # C++14, even C++17

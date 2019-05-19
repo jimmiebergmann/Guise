@@ -58,8 +58,8 @@ namespace Guise
     }
 
     Window::Window(Canvas & canvas) :
-        ControlContainerSingle(canvas),
-        Style(canvas.getStyleSheet()->getStyle(StyleSheet::Entry::Window))
+        ControlContainerSingle(canvas)//,
+        //Style::Selector(canvas.getStyleSheet()->getSelector(Style::Selector::Type::Window))
     { }
 
 }

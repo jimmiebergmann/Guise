@@ -28,6 +28,107 @@
 
 namespace Guise
 {
+    // Plane style implementations.
+    PlaneStyle::PlaneStyle() :
+        m_position(0.0f, 0.0f),
+        m_size(0.0f, 0.0f),
+        m_padding(0.0f, 0.0f, 0.0f, 0.0f),
+        m_overflow(Style::Property::Overflow::hidden)
+    { }
+
+    PlaneStyle::PlaneStyle(const std::shared_ptr<Style::Selector> & selector) :
+        PlaneStyle()
+    {
+        if (!selector)
+        {
+            return;
+        }
+
+        auto & properties = selector->getProperties();
+        for (auto it = properties.begin(); it != properties.end(); it++)
+        {
+            if (it->first == "position")
+            {
+                m_position = it->second->getVector2f();
+            }
+            else if (it->first == "size")
+            {
+                m_size = it->second->getVector2f();
+            }
+            else if (it->first == "padding")
+            {
+                switch (it->second->getDataType())
+                {
+                    case Style::Property::DataType::Float:
+                    {
+                        m_padding.x = m_padding.y = m_padding.w = m_padding.z = it->second->getFloat();
+                    }
+                    break;
+                    case Style::Property::DataType::Vector2f:
+                    {
+                        m_padding = { it->second->getVector2f(), 0.0f, 0.0f };
+                    }
+                    break;
+                    case Style::Property::DataType::Vector4f:
+                    {
+                        m_padding = it->second->getVector4f();
+                    }
+                    break;
+                    default: break;
+                }
+            }
+            else if (it->first == "overflow")
+            {
+                m_overflow = it->second->getOverflow();
+            }          
+        }
+    }
+
+    
+    const Vector2f & PlaneStyle::getPosition() const
+    {
+        return m_position;
+    }
+    const Vector2f & PlaneStyle::getSize() const
+    {
+        return m_size;
+    }
+    const Vector4f & PlaneStyle::getPadding() const
+    {
+        return m_padding;
+    }
+    const Vector2f PlaneStyle::getPaddingLow() const
+    {
+        return { m_padding.x, m_padding.y };
+    }
+    const Vector2f PlaneStyle::getPaddingHigh() const
+    {
+        return { m_padding.z, m_padding.w };
+    }
+    Style::Property::Overflow PlaneStyle::getOverflow() const
+    {
+        return m_overflow;
+    }
+
+    void PlaneStyle::setPosition(const Vector2f & position)
+    {
+        m_position = position;
+    }
+    void PlaneStyle::setSize(const Vector2f & size)
+    {
+        m_size = size;
+    }
+    void PlaneStyle::setPadding(const Vector4f & padding)
+    {
+        m_padding = padding;
+    }
+    void PlaneStyle::setOverflow(const Style::Property::Overflow overflow)
+    {
+        m_overflow = overflow;
+    }
+
+
+    // Plane implementations.
     std::shared_ptr<Plane> Plane::create(Canvas & canvas)
     {
         return std::shared_ptr<Plane>(new Plane(canvas));
@@ -45,30 +146,35 @@ namespace Guise
 
     void Plane::update(const Bounds2f & canvasBound)
     {
-        if (canvasBound != m_bounds)
+        if (canvasBound != m_renderBounds)
         {
-            m_bounds = canvasBound;
-            getCanvas().registerControlBoundsChange(*this, m_bounds);
-
-            Bounds2f childBounds(m_bounds.position + getPaddingLow(), m_bounds.size - getPaddingLow() - getPaddingHigh());
-
-            auto childs = getChilds();
-            for (auto it = childs.begin(); it != childs.end(); it++)
+            Bounds2f renderBounds = calcRenderBounds(canvasBound, m_position, m_size, m_overflow);
+            if (renderBounds != m_renderBounds)
             {
-                (*it)->update(childBounds);
+                m_renderBounds = canvasBound;
+
+                getCanvas().registerControlBoundsChange(*this, m_renderBounds);
+
+                Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
+
+                auto childs = getChilds();
+                for (auto it = childs.begin(); it != childs.end(); it++)
+                {
+                    (*it)->update(childBounds);
+                }
             }
-        }  
+        } 
     }
 
     Bounds2f Plane::getSelectBounds() const
     {
-        return m_bounds;
+        return m_renderBounds;
     }
 
     Plane::Plane(Canvas & canvas) :
         ControlContainerList(canvas),
-        Style(canvas.getStyleSheet()->getStyle(StyleSheet::Entry::Plane)),
-        m_bounds(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min())
+        PlaneStyle(canvas.getStyleSheet()->getSelector("plane")),
+        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f)
     { }
 
 }

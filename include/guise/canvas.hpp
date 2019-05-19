@@ -42,17 +42,36 @@
 namespace Guise
 {
 
+
+    class GUISE_API CanvasStyle
+    {
+
+    public:
+
+        CanvasStyle();
+        CanvasStyle(const Style::Selector & selector);
+
+        const Vector4f & getBackgroundColor() const;
+
+        void setBackgroundColor(const Vector4f & color);
+
+    private:
+
+        Vector4f m_backgroundColor;
+
+    };
+
     /**
     * Canvas class.
     *
     *
     */
-    class GUISE_API Canvas : public Style
+    class GUISE_API Canvas : public CanvasStyle
     {
 
     public:
 
-        static std::shared_ptr<Canvas> create(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet = nullptr);
+        static std::shared_ptr<Canvas> create(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet = nullptr);
         
         ~Canvas();
 
@@ -65,7 +84,7 @@ namespace Guise
         const Input & getInput() const;
         Input & getInput();
 
-        std::shared_ptr<StyleSheet> getStyleSheet() const;
+        std::shared_ptr<Style::Sheet> getStyleSheet() const;
 
         const Vector2ui32 & getSize() const;
 
@@ -77,28 +96,20 @@ namespace Guise
 
         void registerControlBoundsChange(Control & control, const Bounds2f & bounds);
 
-        void registerControlLevelChange(Control & control, const size_t level);
+        //void registerControlLevelChange(Control & control, const size_t level);
 
         void unregisterControl(Control & control);
 
     private:
 
-        Canvas(const Vector2ui32 & size, std::shared_ptr<StyleSheet> * styleSheet);
+        Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet);
 
-        //std::set<Control *>                     m_allControlsSet;
-        //std::vector<Control *>                  m_allControls;
-        //std::vector<std::shared_ptr<Control> >  m_controls;
-
-        ControlGrid                 m_controlGrid;
-        Input                       m_input;
-        std::shared_ptr<Plane>      m_plane;
-        Vector2ui32                 m_size;
-        std::shared_ptr<StyleSheet> m_styleSheet;
-        mutable std::mutex          m_mutex;
-
-
-
-        
+        ControlGrid                     m_controlGrid;
+        Input                           m_input;
+        std::shared_ptr<Plane>          m_plane;
+        Control *                       m_selectedControl;
+        Vector2ui32                     m_size;
+        std::shared_ptr<Style::Sheet>   m_styleSheet;
 
     };
 

@@ -36,176 +36,194 @@
 namespace Guise
 {
 
-    /**
-    * Style class.
-    *
-    *
-    */
-    class GUISE_API Style
+    namespace Style
     {
 
-    public:
+        class Selector;
+        class Property;
 
-        enum class Property
+        using Properties = std::map<std::string, std::shared_ptr<Property> >;
+        using Selectors = std::map<std::string, std::shared_ptr<Selector> >;
+
+        class GUISE_API Property
         {
-            BackgroundColor,
-            Border,
-            BorderWidth,
-            BorderColor,
-            Clamp,
-            Padding,
-            Position,
-            Size
-        };
 
-        enum class BorderStyle
-        {
-            None,
-            Solid
-        };
+        public:
 
-        struct GUISE_API PropertyPair
-        {
-            PropertyPair(const Property property, const float value);
-
-            PropertyPair(const Property property, const bool value);
-
-            PropertyPair(const Property property, const Vector2f & value);
-
-            PropertyPair(const Property property, const Vector4f & value);
-
-            PropertyPair(const Property property, const Vector3f & value);
-
-            PropertyPair(const Property property, const BorderStyle value);
-
-            Property property;
-
-            union
+            /*enum class Type
             {
-                bool        b;
-                BorderStyle borderStyle;
-                float       f;
-                Vector2f    vec2;
-                Vector3f    vec3;
-                Vector4f    vec4;            
-            };
+                Unkown,
 
-            enum class ValueType
+                BackgroundColor,
+                BackgroundImage,
+                BorderColor,
+                BorderStyle,
+                BorderWidth,
+                Overflow,
+                Padding,
+                Position,
+                Size
+            };*/
+
+            enum class DataType : uint32_t
             {
                 Boolean,
                 BorderStyle,
                 Float,
+                Overflow,
                 Vector2f,
                 Vector3f,
                 Vector4f
-                
-            } valueType;
+
+            };
+
+            enum class BorderStyle : uint32_t
+            {
+                None,
+                Solid
+            };
+
+            enum class Overflow : uint32_t
+            {
+                hidden,
+                visible
+            };
+
+            
+            Property(const Property & property);
+            Property(const std::shared_ptr<Property> & property);
+
+            Property(const bool value);
+            Property(const BorderStyle value);
+            Property(const float value);
+            Property(const Overflow value);
+            Property(const Vector2f & value);
+            Property(const Vector3f & value);
+            Property(const Vector4f & value);
+
+
+            DataType getDataType() const;
+
+            bool getBool() const;
+            BorderStyle getBorderStyle() const;
+            float getFloat() const;
+            Overflow getOverflow() const;
+            const Vector2f & getVector2f() const;
+            const Vector3f & getVector3f() const;
+            const Vector4f & getVector4f() const;
+
+            void setBool(const bool value);
+            void setBorderStyle(const BorderStyle value);
+            void setFloat(const float value);
+            void setOverflow(const Overflow value);
+            void setVector2f(const Vector2f & value);
+            void setVector3f(const Vector3f & value);
+            void setVector4f(const Vector4f & value);
+
+            Property & operator = (const bool value);
+            Property & operator = (const BorderStyle value);
+            Property & operator = (const float value);
+            Property & operator = (const Overflow value);
+            Property & operator = (const Vector2f & value);
+            Property & operator = (const Vector3f & value);
+            Property & operator = (const Vector4f & value);
+
+        private:
+
+            union
+            {
+                bool        m_valueBoolean;
+                BorderStyle m_valueBorderStyle;
+                float       m_valueFloat;
+                Overflow    m_valueOverflow;
+                Vector2f    m_valueVector2f;
+                Vector3f    m_valueVector3f;
+                Vector4f    m_valueVector4f;
+            };
+
+            DataType    m_dataType;
+
         };
 
-        Style();
-        Style(const std::initializer_list<PropertyPair> & properties);
-        Style(const Style & style);
 
-        Style & operator =(const Style & style);
-
-        void setStyle(const Style & style);
-
-        void setStyleProperties(const std::initializer_list<PropertyPair> & properties);
-
-        bool getClamp() const;
-        void setClamp(bool clamp);
-
-        const Vector2f & getPosition() const;
-        void setPosition(const Vector2f & position);
-
-        const Vector2f & getSize() const;
-        void setSize(const Vector2f & size);
-
-        const Vector4f & getPadding() const;
-        Vector2f getPaddingLow() const;
-        Vector2f getPaddingHigh() const;
-        void setPadding(const float padding);
-        void setPadding(const Vector2f & padding);
-        void setPadding(const Vector4f & padding);
-        void setPaddingLow(const Vector2f & low);
-        void setPaddingHigh(const Vector2f & high);
-
-        Vector4f getBackgroundColor() const;
-        void setBackgroundColor(const Vector4f & color);
-
-        BorderStyle getBorder() const;
-        void setBorder(const BorderStyle style);
-
-        float getBorderWidth() const;
-        void setBorderWidth(const float width);
-
-        Vector4f getBorderColor() const;
-        void setBorderColor(const Vector4f color);
-     
-    protected:
-
-        Bounds2f calcRenderBounds(const Bounds2f & canvasBound);
-
-    private:
-
-        bool                m_clamp;
-        Vector2f            m_position;
-        Vector2f            m_size;
-        Vector4f            m_padding;
-        Vector4f            m_backgroundColor;
-        BorderStyle         m_borderStyle;
-        float               m_borderWidth;
-        Vector4f            m_borderColor;
-
-    };
-
-
-    class GUISE_API StyleSheet
-    {
-
-    public:
-
-        enum class Entry
+        class GUISE_API Selector
         {
-            Button,
-            Canvas,
-            Plane,
-            Window
+
+        public:
+
+            /*enum class Type
+            {
+                Custom,
+
+                Button,
+                Canvas,
+                Plane,
+                Window
+            };*/
+
+            struct GUISE_API PropertyNameValue
+            {
+                PropertyNameValue(const std::string & name, const Property & property);
+
+                const std::string & name;
+                const Property & property;
+
+            };
+
+            Selector();
+            Selector(const Selector & selector);
+            Selector(const std::shared_ptr<Selector> & selector);
+            Selector(const std::initializer_list<PropertyNameValue> & properties);
+
+            std::shared_ptr<Property> getProperty(const std::string & name);
+
+            Properties & getProperties();
+            const Properties & getProperties() const;
+
+        private:
+
+            Properties  m_properties;
+
         };
 
-        struct GUISE_API EntryPair
+
+        class GUISE_API Sheet
         {
-            EntryPair(const Entry entry, const Style & style);
-            EntryPair(const std::string & name, const Style & style);
 
-            Entry entry;
-            std::string name;
-            const Style & style;
+        public:
+
+            /*enum class Entry
+            {
+                Button,
+                Canvas,
+                Plane,
+                Window
+            };*/
+
+            struct GUISE_API SelectorNameValue
+            {
+                SelectorNameValue(const std::string & name, const Selector & selector);
+
+                const std::string & name;
+                const Selector & selector;
+
+            };
+
+            static std::shared_ptr<Sheet> create(const std::initializer_list<SelectorNameValue> & selectors = {});
+            static std::shared_ptr<Sheet> createDefault();
+
+            std::shared_ptr<Selector> getSelector(const std::string & name) const;
+
+
+        private:
+
+            Sheet(const std::initializer_list<SelectorNameValue> & selectors = {});
+
+            Selectors      m_selectors;
+
         };
-
-        static std::shared_ptr<StyleSheet> create(const std::initializer_list<EntryPair> & entries = {});
-        static std::shared_ptr<StyleSheet> createDefault();
-
-        const Style & getStyle(const Entry entry) const;
-        Style & getStyle(const Entry entry);
-
-        const Style * getStyle(const std::string & name) const;
-        Style * getStyle(const std::string & name);
-
-    private:
-
-        StyleSheet(const std::initializer_list<EntryPair> & entries = {});
-
-        // Styles for default controls.
-        std::shared_ptr<Style> m_buttonStyle;
-        std::shared_ptr<Style> m_canvasStyle;
-        std::shared_ptr<Style> m_planeStyle;
-        std::shared_ptr<Style> m_windowStyle;
-
-        // Custom styles.
-        std::map<std::string, std::shared_ptr<Style> > m_styleMap;
-
-    };
+        
+    }
 
 }
 

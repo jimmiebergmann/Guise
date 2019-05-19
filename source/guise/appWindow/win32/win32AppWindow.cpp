@@ -81,7 +81,8 @@ namespace Guise
             return;
         }
 
-        auto backgroundColor = m_canvas->getBackgroundColor();
+        ///auto backgroundColor = m_canvas->getBackgroundColor();
+        Vector4f backgroundColor(1.0f, 1.0f, 1.0f, 1.0f);
         m_renderer->setClearColor(backgroundColor);
         m_renderer->clearColor();
         m_canvas->render(*m_renderer.get());
@@ -143,7 +144,10 @@ namespace Guise
         winClass.hInstance = winInstance;
         winClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
         winClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+        
+        
         auto canvasBGColor = m_canvas->getBackgroundColor();
+      
         Vector3i32 bgColorInt(canvasBGColor.x * 255.0f, canvasBGColor.y * 255.0f, canvasBGColor.z * 255.0f);
         Vector3<BYTE> bgColor(  std::min(std::max(bgColorInt.x, 0), 255),
                                 std::min(std::max(bgColorInt.y, 0), 255),

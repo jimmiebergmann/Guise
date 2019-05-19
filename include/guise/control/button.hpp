@@ -31,7 +31,48 @@
 namespace Guise
 {
 
-    class GUISE_API Button : public Style, public ControlContainerSingle
+    class GUISE_API ButtonStyle
+    {
+
+    public:
+
+        ButtonStyle();
+        ButtonStyle(const std::shared_ptr<Style::Selector> & selector);
+
+        const Vector4f & getBackgroundColor() const;
+        const Vector4f & getBorderColor() const;
+        Style::Property::BorderStyle getBorderStyle() const;
+        float getBorderWidth() const;
+        const Vector2f & getPosition() const;
+        const Vector2f & getSize() const;
+        const Vector4f & getPadding() const;
+        const Vector2f getPaddingLow() const;
+        const Vector2f getPaddingHigh() const;
+        Style::Property::Overflow getOverflow() const;
+
+        void setBackgroundColor(const Vector4f & color);
+        void setBorderColor(const Vector4f & color);
+        void setBorderStyle(const Style::Property::BorderStyle borderStyle);
+        void setBorderWidth(const float width);
+        void setPosition(const Vector2f & position);
+        void setSize(const Vector2f & size);
+        void setPadding(const Vector4f & padding);
+        void setOverflow(const Style::Property::Overflow overflow);
+
+    protected:
+
+        Vector4f m_backgroundColor;
+        Vector4f m_borderColor;
+        float m_borderWidth;
+        Style::Property::BorderStyle m_borderStyle;
+        Vector2f m_position;
+        Vector2f m_size;
+        Vector4f m_padding;
+        Style::Property::Overflow m_overflow;
+
+    };
+
+    class GUISE_API Button : public ButtonStyle, public ControlContainerSingle
     {
 
     public:
@@ -40,26 +81,29 @@ namespace Guise
 
         ControlType getType() const;
 
-        bool handleInputEvent(const Input::Event & event);
+        virtual bool handleInputEvent(const Input::Event & event);
 
-        void update(const Bounds2f & canvasBound);
+        virtual void update(const Bounds2f & canvasBound);
 
-        void render(RendererInterface & rendererInterface);
+        virtual void render(RendererInterface & rendererInterface);
 
-        Bounds2f getSelectBounds() const;
+        virtual Bounds2f getSelectBounds() const;
+
+        ButtonStyle & getActiveStyle();
+        ButtonStyle & getDisabledStyle();
+        ButtonStyle & getHoverStyle();
 
     private:
 
         Button(Canvas & canvas);
         Button(const Button &) = delete;
 
-        /*Bounds2f m_bounds;
-        Vector2f m_childAvailablePosition;
-        Vector2f m_childAvailableSize;*/
         Bounds2f m_renderBounds;
         Bounds2f m_childBounds;
 
-        
+        ButtonStyle m_activeStyle;
+        ButtonStyle m_disabledStyle;
+        ButtonStyle m_hoverStyle;  
 
     };
 

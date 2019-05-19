@@ -23,38 +23,41 @@
 *
 */
 
-#ifndef GUISE_CONTROL_WINDOW_HPP
-#define GUISE_CONTROL_WINDOW_HPP
-
-#include "guise/control.hpp"
-
 namespace Guise
 {
 
-    class GUISE_API Window :/* public Style::Selector,*/ public ControlContainerSingle
+    // Movable implementations.
+    template<typename C>
+    inline std::shared_ptr<Movable<C> > Movable<C>::create(Canvas & canvas)
     {
+        return std::shared_ptr<Movable<C> >(new Movable<C>(canvas));
+    }
 
-    public:
+    template<typename C>
+    inline ControlType Movable<C>::getType() const
+    {
+        return m_control->getType();
+    }
 
-        static std::shared_ptr<Window> create(Canvas & canvas);
+    /* bool handleInputEvent(const Input::Event & event);
 
-        ControlType getType() const;
+    void update(const Bounds2f & canvasBound);
 
-        bool handleInputEvent(const Input::Event & event);
+    void render(RendererInterface & rendererInterface);
 
-        void update(const Bounds2f & canvasBound);
+    Bounds2f getSelectBounds() const;
+    */
 
-        void render(RendererInterface & rendererInterface);
+    template<typename C>
+    inline Movable<C>::Movable(Canvas & canvas) :
+        Control(canvas)
+    { }
 
-        Bounds2f getSelectBounds() const;
+    template<typename C>
+    inline std::shared_ptr<C> Movable<C>::getControl() const
+    {
+        return m_control;
+    }
 
-    private:
-
-        Window(Canvas & canvas);
-        Window(const Window &) = delete;
-
-    };
 
 }
-
-#endif

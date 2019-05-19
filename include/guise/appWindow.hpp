@@ -68,23 +68,6 @@ namespace Guise
     #if defined(GUISE_PLATFORM_WINDOWS)
         virtual HDC getWindowContext() const = 0;
     #endif
-        //virtual Context & getContext() = 0;
-
-        /**
-        * Modal function for processing event.  
-        */
-        //static void processEvents();
-
-        /**
-        * Terminates processEvents().
-        */
-       // static void terminateEventProcessing(const std::thread::native_handle_type & threadHandle);
-
-    protected:
-
-        //friend class Context;
-
-       // virtual void load() = 0;
 
     };
 

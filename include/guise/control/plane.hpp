@@ -31,7 +31,36 @@
 namespace Guise
 {
 
-    class GUISE_API Plane : public Style, public ControlContainerList
+    class GUISE_API PlaneStyle
+    {
+
+    public:
+
+        PlaneStyle();
+        PlaneStyle(const std::shared_ptr<Style::Selector> & selector);
+      
+        const Vector2f & getPosition() const;
+        const Vector2f & getSize() const;
+        const Vector4f & getPadding() const;
+        const Vector2f getPaddingLow() const;
+        const Vector2f getPaddingHigh() const;
+        Style::Property::Overflow getOverflow() const;
+     
+        void setPosition(const Vector2f & position);
+        void setSize(const Vector2f & size);
+        void setPadding(const Vector4f & padding);
+        void setOverflow(const Style::Property::Overflow overflow);
+
+    protected:
+    
+        Vector2f m_position;
+        Vector2f m_size;
+        Vector4f m_padding;
+        Style::Property::Overflow m_overflow;
+
+    };
+
+    class GUISE_API Plane : public PlaneStyle, public ControlContainerList
     {
 
     public:
@@ -40,18 +69,18 @@ namespace Guise
 
         ControlType getType() const;
 
-        bool handleInputEvent(const Input::Event & event);
+        virtual bool handleInputEvent(const Input::Event & event);
 
-        void update(const Bounds2f & canvasBound);
+        virtual void update(const Bounds2f & canvasBound);
 
-        Bounds2f getSelectBounds() const;
+        virtual Bounds2f getSelectBounds() const;
 
     private:
 
         Plane(Canvas & canvas);
         Plane(const Plane &) = delete;
 
-        Bounds2f m_bounds;
+        Bounds2f m_renderBounds;
 
     };
 

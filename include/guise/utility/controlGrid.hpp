@@ -68,10 +68,10 @@ namespace Guise
         ControlGrid(const Vector2f & gridSize, const float pieceSize);
         ~ControlGrid();
 
-        //void addControl(Control & control);
+        bool isControlSet(Control & control);
 
         void setControlBounds(Control & control, const Bounds2f & bounds);
-        void setControlLevel(Control & control, const size_t level);
+        //void setControlLevel(Control & control, const size_t level);
 
         void removeControl(Control & control);
 
