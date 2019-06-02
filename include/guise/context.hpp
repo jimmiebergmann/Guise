@@ -44,19 +44,14 @@ namespace Guise
     *
     *
     */
-#if defined(GUISE_USE_DEFAULT_RENDERER)
-    template<typename RType = GUISE_DEFAULT_RENDERER>
-#else
-    template<typename RType>
-#endif
-    class Context
+    class GUISE_API Context
     {
 
     public:
         
         ~Context();
               
-        static std::shared_ptr<Context<RType> > create();
+        static std::shared_ptr<Context> create();
         
         std::shared_ptr<AppWindow> addAppWindow(const std::wstring & title = L"", const Vector2ui32 & size = { 0, 0 });
 
@@ -82,8 +77,5 @@ namespace Guise
     };
 
 }
-
-// Include inline implementations.
-#include "guise/context.inl"
 
 #endif

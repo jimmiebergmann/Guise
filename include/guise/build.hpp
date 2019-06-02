@@ -32,6 +32,7 @@
 #if defined( _WIN32 ) || defined( __WIN32__ ) || defined( _WIN64 ) || defined( __WIN64__ )
     #define GUISE_PLATFORM_WINDOWS
 
+    #include "guise/platform/win32Headers.hpp"
     #if defined (_MSC_VER)
         #pragma comment(lib, "ws2_32.lib")
     #endif
@@ -111,20 +112,10 @@ namespace Guise
 }
 
 // Renderer settings.
-#define GUISE_USE_DEFAULT_RENDERER
+#define GUISE_OPENGL_RENDERER 0
 
-#define GUISE_ENABLE_OPENGL_RENDERER
-
-
-#if defined(GUISE_USE_DEFAULT_RENDERER)
-    #if defined(GUISE_ENABLE_OPENGL_RENDERER)
-        #include "guise/renderer/opengl/openglRenderer.hpp"
-        #define GUISE_DEFAULT_RENDERER OpenGLRenderer
-    #else
-        #undef GUISE_USE_DEFAULT_RENDERER
-    #endif  
-    
+#if !defined(GUISE_DISABLE_OPENGL)
+    #define GUISE_DEFAULT_RENDERER GUISE_OPENGL_RENDERER
 #endif
-
 
 #endif

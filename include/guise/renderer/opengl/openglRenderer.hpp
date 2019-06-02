@@ -28,12 +28,9 @@
 
 #include "guise/build.hpp"
 
-#if defined(GUISE_ENABLE_OPENGL_RENDERER)
+#if !defined(GUISE_DISABLE_OPENGL)
 
-#if defined(GUISE_PLATFORM_WINDOWS)
-    #include "guise/platform/win32Headers.hpp"
-#endif
-#include <gl/GL.h>
+#include "guise/renderer/opengl/opengl.hpp"
 #include "guise/renderer.hpp"
 #include <memory>
 
@@ -54,12 +51,17 @@ namespace Guise
 
     public:
 
+        // Interface functions.
         void setCulling(const Vector2f & position, const Vector2f & size);
 
         void drawQuad(const Bounds2f & bounds, const Vector4f & color);
+        void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color);
 
         void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color);
   
+        std::shared_ptr<Texture> createTexture();
+
+        // Renderer functions.
         static std::shared_ptr<Renderer> create(const std::shared_ptr<AppWindow> & appWindow);
     #if defined(GUISE_PLATFORM_WINDOWS)
         static std::shared_ptr<Renderer> create(HDC deviceContextHandle);

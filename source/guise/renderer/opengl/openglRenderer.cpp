@@ -25,8 +25,9 @@
 
 #include "guise/renderer/opengl/openglRenderer.hpp"
 
-#if defined(GUISE_ENABLE_OPENGL_RENDERER)
+#if !defined(GUISE_DISABLE_OPENGL)
 
+#include "guise/renderer/opengl/openglTexture.hpp"
 #include "guise/appWindow.hpp"
 
 namespace Guise
@@ -39,6 +40,7 @@ namespace Guise
 
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const Vector4f & color)
     {
+        glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
         glColor4f(color.x, color.y, color.z, color.w);
         glVertex2f(bounds.position.x, bounds.position.y);
@@ -48,8 +50,32 @@ namespace Guise
         glEnd();
     }
 
+    void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color)
+    {
+        glEnable(GL_TEXTURE_2D);
+        texture->bind(0);
+
+        glBegin(GL_QUADS);
+        glColor4f(color.x, color.y, color.z, color.w);
+        
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2f(bounds.position.x, bounds.position.y);
+        
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
+        
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
+        
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+        
+        glEnd();
+    }
+
     void OpenGLRenderer::drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color)
     {
+        glDisable(GL_TEXTURE_2D);
         glLineWidth(width);
         glBegin(GL_LINES);
         glColor4f(color.x, color.y, color.z, color.w);
@@ -58,21 +84,20 @@ namespace Guise
         glEnd();
     }
 
+    std::shared_ptr<Texture> OpenGLRenderer::createTexture()
+    {
+        return std::make_shared<OpenGLTexture>();
+    }
+
     std::shared_ptr<Renderer> OpenGLRenderer::create(const std::shared_ptr<AppWindow> & appWindow)
     {
         auto windowContext = appWindow->getWindowContext();
-
         return std::shared_ptr<Renderer>(new OpenGLRenderer(windowContext));
     }
     std::shared_ptr<Renderer> OpenGLRenderer::create(HDC deviceContextHandle)
     {
         return std::shared_ptr<Renderer>(new OpenGLRenderer(deviceContextHandle));
     }
-
-    /*std::shared_ptr<Renderer> OpenGLRenderer::create(const std::shared_ptr<Renderer> & sibling)
-    {
-        return std::shared_ptr<Renderer>(new OpenGLRenderer(sibling));
-    }*/
 
     const Vector4f & OpenGLRenderer::getClearColor()
     {
@@ -154,7 +179,14 @@ namespace Guise
         wglMakeCurrent(NULL, NULL);
         wglMakeCurrent(deviceContextHandle, m_context);
 
+        if (!OpenGL::loadExtensions())
+        {
+            throw std::runtime_error("Missing OpenGL extensions.");
+        }
+
         glEnable(GL_COLOR_MATERIAL);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
 }

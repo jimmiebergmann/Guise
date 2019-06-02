@@ -77,59 +77,50 @@ namespace Guise
          
         m_input.update();
         
-        const ControlGrid::Node * gridControls = nullptr;
-        bool queried = false;
-        //m_selectedControl = nullptr;
+        //const ControlGrid::Node * gridControls = nullptr;
+        bool isHitsQueried = false;
+        Control * controlHit = nullptr;
 
         Input::Event e;
         while (m_input.pollEvent(e))
         {
             switch (e.type)
             {
-                case Input::EventType::MousePress:
+                /*case Input::EventType::MousePress:
                 {
                     
     
                 }
-                break;
+                break;*/
+                case Input::EventType::MousePress:
+                case Input::EventType::MouseRelease:
+                case Input::EventType::MouseMove:
                 case Input::EventType::MouseJustPressed:
                 {
-                    if (!queried)
+                    if (!isHitsQueried)
                     {
-                        gridControls = m_controlGrid.query(e.position);
-                        queried = true;
+                        //gridControls = m_controlGrid.query(e.position);
+                        controlHit = m_plane->queryHit(e.position);
+                        isHitsQueried = true;
                     }
 
-                    if (gridControls)
+                    if (controlHit && controlHit->handleInputEvent(e))
                     {
-                        for (auto it = gridControls->controls.rbegin(); it != gridControls->controls.rend(); it++)
-                        {
-                            if (it->second->intersects(e.position) && it->second->control->handleInputEvent(e))
-                            {
-                                m_selectedControl = it->second->control;
-                                break;
-                            }
-                        }
+                        break;
                     }
+     
                 }
                 break;
-                case Input::EventType::MouseRelease:
+                /*case Input::EventType::MouseRelease:
                 {
-                    if (m_selectedControl && m_controlGrid.isControlSet(*m_selectedControl))
-                    {
-                        m_selectedControl->handleInputEvent(e);
-                    }
-                    m_selectedControl = nullptr;
+                    
                 }
                 break;
                 case Input::EventType::MouseMove:
                 {
-                    if (m_selectedControl && m_controlGrid.isControlSet(*m_selectedControl))
-                    {
-                        m_selectedControl->handleInputEvent(e);
-                    }
+               
                 }
-                break;
+                break;*/
                 default: break;
             }
         }
@@ -158,8 +149,9 @@ namespace Guise
 
     void Canvas::render(RendererInterface & renderInterface)
     {
-        m_controlGrid.render(renderInterface, m_size);
-        m_controlGrid.renderGrid(renderInterface, m_size);
+        m_plane->render(renderInterface);
+        //m_controlGrid.render(renderInterface, m_size);
+        //m_controlGrid.renderGrid(renderInterface, m_size);
     }
 
     const Input & Canvas::getInput() const
@@ -183,33 +175,51 @@ namespace Guise
 
     void Canvas::resize(const Vector2ui32 & size)
     {
-        if (size != m_size)
+        m_size = size;
+
+        /*if (size != m_size)
         {
             m_size = size;
             m_controlGrid.resize(m_size);
-        }       
+        } */ 
     }
 
-    void Canvas::registerControlBoundsChange(Control & control, const Bounds2f & bounds)
+    void Canvas::focusControl(Control * control)
+    {
+        m_focusedControl = control;
+    }
+
+    void Canvas::setDpi(const uint32_t dpi)
+    {
+        m_dpi = dpi;
+    }
+
+    uint32_t Canvas::getDpi() const
+    {
+        return m_dpi;
+    }
+
+    /*void Canvas::registerControlBoundsChange(Control & control, const Bounds2f & bounds)
     {
         m_controlGrid.setControlBounds(control, bounds);
-    }
+    }*/
 
     /*void Canvas::registerControlLevelChange(Control & control, const size_t level)
     {
         m_controlGrid.setControlLevel(control, level);
     }*/
 
-    void Canvas::unregisterControl(Control & control)
+    /*void Canvas::unregisterControl(Control & control)
     {
         m_controlGrid.removeControl(control);
-    }
+    }*/
 
     Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet) :
-        m_controlGrid(size, 128.0f),
+        m_dpi(96),
         m_plane(nullptr),
         m_selectedControl(nullptr),
-        m_size(size)
+        m_size(size),
+        m_focusedControl(nullptr)
     {
         
         if (styleSheet != nullptr)

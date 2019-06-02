@@ -25,6 +25,7 @@
 
 #include "guise/control/plane.hpp"
 #include "guise/canvas.hpp"
+#include <iostream>
 
 namespace Guise
 {
@@ -139,21 +140,35 @@ namespace Guise
         return ControlType::Plane;
     }
 
-    bool Plane::handleInputEvent(const Input::Event &/* event*/)
+    Control * Plane::handleInputEvent(const Input::Event & /*e*/)
     {
-        return true;
+       /* if (getSelectBounds().intersects(point))
+        {
+            auto childs = getChilds();
+            for (auto it = childs.begin(); it != childs.end(); it++)
+            {
+                auto control = (*it)->handleInputEvent(point);
+                if (control)
+                {
+                    return control;
+                }
+            }
+
+            return this;
+        }*/
+
+        return nullptr;
     }
 
     void Plane::update(const Bounds2f & canvasBound)
     {
-        if (canvasBound != m_renderBounds)
+        const bool childsUpdate = pollUpdateForced();
+        if (canvasBound != m_renderBounds || childsUpdate)
         {
             Bounds2f renderBounds = calcRenderBounds(canvasBound, m_position, m_size, m_overflow);
-            if (renderBounds != m_renderBounds)
+            if (renderBounds != m_renderBounds || childsUpdate)
             {
-                m_renderBounds = canvasBound;
-
-                getCanvas().registerControlBoundsChange(*this, m_renderBounds);
+                m_renderBounds = renderBounds;
 
                 Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
 
@@ -162,13 +177,62 @@ namespace Guise
                 {
                     (*it)->update(childBounds);
                 }
+
             }
+            
+            /*Bounds2f renderBounds = calcRenderBounds(canvasBound, m_position, m_size, m_overflow);
+            if (renderBounds != m_renderBounds)
+            {
+                m_renderBounds = canvasBound;
+
+                //getCanvas().registerControlBoundsChange(*this, m_renderBounds);
+
+                Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
+
+                auto childs = getChilds();
+                for (auto it = childs.begin(); it != childs.end(); it++)
+                {
+                    (*it)->update(childBounds);
+                }
+            }*/
         } 
+    }
+
+    void Plane::render(RendererInterface & renderer)
+    {
+        auto childs = getChilds();
+        for (auto it = childs.begin(); it != childs.end(); it++)
+        {
+            (*it)->render(renderer);
+        }
+    }
+
+    Bounds2f Plane::getRenderBounds() const
+    {
+        return m_renderBounds;
     }
 
     Bounds2f Plane::getSelectBounds() const
     {
         return m_renderBounds;
+    }
+
+    Control * Plane::queryHit(const Vector2f & point) const
+    {
+        auto childs = getChilds();
+        for (auto it = childs.rbegin(); it != childs.rend(); it++)
+        {
+            if (auto hit = (*it)->queryHit(point))
+            {
+                return hit;
+            }
+        }
+        if (m_renderBounds.intersects(point))
+        {
+            return const_cast<Plane *>(this);
+        }
+
+        return nullptr;
     }
 
     Plane::Plane(Canvas & canvas) :

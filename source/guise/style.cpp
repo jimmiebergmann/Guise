@@ -324,7 +324,7 @@ namespace Guise
             }
         }
 
-        std::shared_ptr<Property> Selector::getProperty(const std::string & name)
+        std::shared_ptr<Property> Selector::getProperty(const std::string & name) const
         {
             auto it = m_properties.find(name);
             if (it != m_properties.end())
@@ -359,8 +359,11 @@ namespace Guise
             return std::shared_ptr<Sheet>(new Sheet(
                 {
                     { "button", DefaultStyles::button },
+                    { "button:hover", DefaultStyles::buttonHover },
                     { "canvas", DefaultStyles::canvas },
                     { "plane",  DefaultStyles::plane },
+                    { "vertical-grid", DefaultStyles::verticalGrid },
+                    { "vertical-grid-slot", DefaultStyles::verticalGridSlot },
                     { "window", DefaultStyles::window }
                 }
             ));

@@ -27,83 +27,50 @@
 #define GUISE_CONTROL_BUTTON_HPP
 
 #include "guise/control.hpp"
+#include <functional>
 
 namespace Guise
 {
 
-    class GUISE_API ButtonStyle
+    class GUISE_API Button : public Style::BoxStyle, public ControlContainerSingle
     {
 
     public:
 
-        ButtonStyle();
-        ButtonStyle(const std::shared_ptr<Style::Selector> & selector);
+        static std::shared_ptr<Button> create(std::shared_ptr<Canvas> & canvas);
 
-        const Vector4f & getBackgroundColor() const;
-        const Vector4f & getBorderColor() const;
-        Style::Property::BorderStyle getBorderStyle() const;
-        float getBorderWidth() const;
-        const Vector2f & getPosition() const;
-        const Vector2f & getSize() const;
-        const Vector4f & getPadding() const;
-        const Vector2f getPaddingLow() const;
-        const Vector2f getPaddingHigh() const;
-        Style::Property::Overflow getOverflow() const;
+        virtual ControlType getType() const;
 
-        void setBackgroundColor(const Vector4f & color);
-        void setBorderColor(const Vector4f & color);
-        void setBorderStyle(const Style::Property::BorderStyle borderStyle);
-        void setBorderWidth(const float width);
-        void setPosition(const Vector2f & position);
-        void setSize(const Vector2f & size);
-        void setPadding(const Vector4f & padding);
-        void setOverflow(const Style::Property::Overflow overflow);
-
-    protected:
-
-        Vector4f m_backgroundColor;
-        Vector4f m_borderColor;
-        float m_borderWidth;
-        Style::Property::BorderStyle m_borderStyle;
-        Vector2f m_position;
-        Vector2f m_size;
-        Vector4f m_padding;
-        Style::Property::Overflow m_overflow;
-
-    };
-
-    class GUISE_API Button : public ButtonStyle, public ControlContainerSingle
-    {
-
-    public:
-
-        static std::shared_ptr<Button> create(Canvas & canvas);
-
-        ControlType getType() const;
-
-        virtual bool handleInputEvent(const Input::Event & event);
+        virtual Control * handleInputEvent(const Input::Event & event);
 
         virtual void update(const Bounds2f & canvasBound);
 
         virtual void render(RendererInterface & rendererInterface);
 
+        virtual Bounds2f getRenderBounds() const;
+
         virtual Bounds2f getSelectBounds() const;
 
-        ButtonStyle & getActiveStyle();
-        ButtonStyle & getDisabledStyle();
-        ButtonStyle & getHoverStyle();
+        virtual Control * queryHit(const Vector2f & point) const;
+
+        Style::BoxStyle & getActiveStyle();
+        Style::BoxStyle & getDisabledStyle();
+        Style::BoxStyle & getHoverStyle();
+
+        std::function<void()> onPressed;
 
     private:
 
-        Button(Canvas & canvas);
+        Button(std::shared_ptr<Canvas> & canvas);
         Button(const Button &) = delete;
 
         Bounds2f m_renderBounds;
         Bounds2f m_childBounds;
 
-        ButtonStyle m_activeStyle;
-        ButtonStyle m_disabledStyle;
-        ButtonStyle m_hoverStyle;  
+        Style::BoxStyle m_activeStyle;
+        Style::BoxStyle m_disabledStyle;
+        Style::BoxStyle m_hoverStyle;
+        Style::BoxStyle * m_currentStyle;
 
     };
 

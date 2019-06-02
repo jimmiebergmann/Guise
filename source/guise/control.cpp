@@ -44,7 +44,7 @@ namespace Guise
 
     Control::~Control()
     {
-        m_canvas.unregisterControl(*this);
+        //m_canvas.unregisterControl(*this);
     }
 
     Canvas & Control::getCanvas()
@@ -57,9 +57,9 @@ namespace Guise
         return m_canvas;
     }
 
-    bool Control::handleInputEvent(const Input::Event &)
+    Control * Control::handleInputEvent(const Input::Event &)
     {
-        return false;
+        return nullptr;
     }
 
     void Control::update(const Bounds2f &)
@@ -70,9 +70,60 @@ namespace Guise
     {
     }
 
+   /* Control * Control::mousePress(const Vector2f &)
+    {
+        return nullptr;
+    }
+
+    Control * Control::mouseRelease(const Vector2f &)
+    {
+        return nullptr;
+    }
+
+    Control * Control::mouseHover(const Vector2f &)
+    {
+        return nullptr;
+    }*/
+
+    Bounds2f Control::getRenderBounds() const
+    {
+        return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
+    }
+
     Bounds2f Control::getSelectBounds() const
     {
-        return { {0.0f, 0.0f}, {0.0f, 0.0f} };
+        return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
+    }
+
+    void Control::forceUpdate()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_forceUpdate = true;
+
+        if (auto parent = getParent().lock())
+        {
+            parent->forceUpdate();
+        }
+    }
+
+    bool Control::isUpdateForced()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_forceUpdate;
+    }
+
+    bool Control::pollUpdateForced()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        const bool forced = m_forceUpdate;
+        m_forceUpdate = false;
+        return forced;
+    }
+
+    Control * Control::queryHit(const Vector2f &) const
+    {
+        return nullptr;
     }
 
     size_t Control::getLevel() const
@@ -173,7 +224,7 @@ namespace Guise
 
         return bounds;
     }
- 
+
 
     // ControlContainer implementations.
     ControlContainer::ControlContainer(Canvas & canvas) :
@@ -255,6 +306,7 @@ namespace Guise
             m_child->setLevel(level + 1);
         }    
 
+        forceUpdate();
         return true;
     }
 
@@ -270,6 +322,7 @@ namespace Guise
         releaseControl(control);
         m_child->setLevel(0);
         m_child.reset();
+        forceUpdate();
 
         return true;
     }
@@ -285,6 +338,7 @@ namespace Guise
 
         releaseControl(*control.get());
         m_child.reset();
+        forceUpdate();
 
         return true;
     }
@@ -300,6 +354,7 @@ namespace Guise
 
         releaseControl(*m_child.get());
         m_child.reset();
+        forceUpdate();
 
         return true;
     }
@@ -315,11 +370,11 @@ namespace Guise
 
         releaseControl(*m_child.get());
         m_child.reset();
+        forceUpdate();
 
         return 1;
     }
 
-    
     // ControlContainerList implementations.
     ControlContainerList::ControlContainerList(Canvas & canvas) :
         ControlContainer(canvas)
@@ -390,6 +445,7 @@ namespace Guise
             control->setLevel(level + 1);
         }
         
+        forceUpdate();
         return true;
     }
 
@@ -404,6 +460,7 @@ namespace Guise
                 releaseControl(*it->get());
                 (*it)->setLevel(0);
                 m_childs.erase(it);
+                forceUpdate();
                 return true;
             }
         }
@@ -420,6 +477,7 @@ namespace Guise
             {
                 releaseControl(*it->get());
                 m_childs.erase(it);
+                forceUpdate();
                 return true;
             }
         }
@@ -440,6 +498,7 @@ namespace Guise
 
         releaseControl(*child.get());
         m_childs.erase(m_childs.begin() + index);
+        forceUpdate();
 
         return true;
     }
@@ -455,8 +514,13 @@ namespace Guise
 
         size_t count = m_childs.size();
         m_childs.clear();
+
+        if (count)
+        {
+            forceUpdate();
+        }
+
         return count;
     }
-
 
 }

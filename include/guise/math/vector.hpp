@@ -61,6 +61,7 @@ namespace Guise
         
         T operator[] (const size_t index);
 
+        size_t dimensions;
         T c[D];
         
     };

@@ -67,13 +67,19 @@ namespace Guise
 
         static std::shared_ptr<Plane> create(Canvas & canvas);
 
-        ControlType getType() const;
+        virtual ControlType getType() const;
 
-        virtual bool handleInputEvent(const Input::Event & event);
+        virtual Control * handleInputEvent(const Input::Event & event);
 
         virtual void update(const Bounds2f & canvasBound);
 
+        virtual void render(RendererInterface & renderer);
+
+        virtual Bounds2f getRenderBounds() const;
+
         virtual Bounds2f getSelectBounds() const;
+
+        virtual Control * queryHit(const Vector2f & point) const;
 
     private:
 

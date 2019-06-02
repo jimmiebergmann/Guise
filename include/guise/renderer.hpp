@@ -28,10 +28,14 @@
 
 #include "guise/build.hpp"
 #include "guise/math/bounds.hpp"
+#include "guise/renderer/texture.hpp"
 #include <memory>
 
 namespace Guise
 {
+
+    // Forward declarations
+    class AppWindow;
 
     /**
     * Renderer interface class.
@@ -45,9 +49,12 @@ namespace Guise
 
         virtual void setCulling(const Vector2f & position, const Vector2f & size) = 0;
 
-        virtual void drawQuad(const Bounds2f & bounds, const Vector4f & color) = 0;
+        virtual void drawQuad(const Bounds2f & bounds, const Vector4f & color) = 0;      
+        virtual void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color) = 0;
 
         virtual void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color) = 0;
+
+        virtual std::shared_ptr<Texture> createTexture() = 0;
 
         //virtual void drawQuadRounded(const Vector2f & position, const Vector2f & size) = 0;
     };
@@ -62,8 +69,12 @@ namespace Guise
 
     public:
 
-        virtual ~Renderer()
-        { }
+        static std::shared_ptr<Renderer> createDefault(const std::shared_ptr<AppWindow> & appWindow);
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        static std::shared_ptr<Renderer> createDefault(HDC deviceContextHandle);
+    #endif
+
+        virtual ~Renderer();
 
         virtual const Vector4f & getClearColor() = 0;
 

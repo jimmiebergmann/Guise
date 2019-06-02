@@ -26,7 +26,6 @@
 #include "guise/utility/controlGrid.hpp"
 #include "guise/control.hpp"
 #include <stack>
-#include <iostream>
 
 namespace Guise
 {
@@ -314,11 +313,8 @@ namespace Guise
         presence.position.x = std::min<size_t>(std::max(lower.x, 0), static_cast<int32_t>(m_dimensions.x) - 1);
         presence.position.y = std::min<size_t>(std::max(lower.y, 0), static_cast<int32_t>(m_dimensions.y) - 1);
 
-        presence.size.x = std::min<size_t>(std::max(higher.x - lower.x, 0), static_cast<int32_t>(m_dimensions.x) - 1);
-        presence.size.y = std::min<size_t>(std::max(higher.y - lower.y, 0), static_cast<int32_t>(m_dimensions.y) - 1);
-
-        //std::cout
-
+        presence.size.x = std::min<size_t>(std::max(higher.x - lower.x, 0), static_cast<int32_t>(m_dimensions.x - static_cast<size_t>(presence.position.x)) - 1);
+        presence.size.y = std::min<size_t>(std::max(higher.y - lower.y, 0), static_cast<int32_t>(m_dimensions.y - static_cast<size_t>(presence.position.y)) - 1);
 
         return true;
     }

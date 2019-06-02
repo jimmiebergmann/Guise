@@ -27,12 +27,14 @@ namespace Guise
 {
     // Vector implementations
     template <size_t D, typename T>
-    inline Vector<D, T>::Vector()
+    inline Vector<D, T>::Vector() :
+        dimensions(D)
     { }
 
     template <size_t D, typename T>
     template <typename... Targs>
     inline Vector<D, T>::Vector(Targs ... components) :
+        dimensions(D),
         c{ components... }
     { }
 

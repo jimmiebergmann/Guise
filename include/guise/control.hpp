@@ -55,7 +55,9 @@ namespace Guise
     {
         Custom,
         Button,
+        Label,
         Plane,
+        VerticalGrid,
         Window
     };
 
@@ -78,17 +80,25 @@ namespace Guise
 
         virtual ControlType getType() const = 0;
 
-        virtual bool handleInputEvent(const Input::Event & event);
+        virtual Control * handleInputEvent(const Input::Event & event);
 
         virtual void update(const Bounds2f & canvasBounds);
 
         virtual void render(RendererInterface & rendererInterface);
 
-        virtual Bounds2f getSelectBounds() const;
+        virtual Bounds2f getRenderBounds() const;
+        virtual Bounds2f getSelectBounds() const;        
 
+        void forceUpdate();
+        bool isUpdateForced();
+        bool pollUpdateForced();
+
+        virtual Control * queryHit(const Vector2f & point) const;
+
+        // Depreciated...
         virtual size_t getLevel() const;
-
         virtual void setLevel(const size_t level);
+        // ... Depreciated
 
         virtual std::weak_ptr<Control> getParent();
         virtual std::weak_ptr<const Control> getParent() const;
@@ -110,10 +120,11 @@ namespace Guise
 
         friend class ControlContainer;
 
-        Canvas &               m_canvas;
-        size_t                 m_level;
-        std::weak_ptr<Control> m_parent;
-        mutable std::mutex     m_mutex;
+        Canvas &                m_canvas;
+        bool                    m_forceUpdate;
+        size_t                  m_level;
+        std::weak_ptr<Control>  m_parent;
+        mutable std::mutex      m_mutex;
 
     };
 
@@ -155,8 +166,8 @@ namespace Guise
 
     private:
 
-        std::shared_ptr<Control>  m_child;
-        mutable std::mutex        m_mutex;
+        std::shared_ptr<Control>    m_child;
+        mutable std::mutex          m_mutex;
 
     };
 
@@ -182,8 +193,8 @@ namespace Guise
 
     private:
 
-        std::vector<std::shared_ptr<Control> > m_childs;
-        mutable std::mutex                     m_mutex;
+        std::vector<std::shared_ptr<Control> >  m_childs;
+        mutable std::mutex                      m_mutex;
 
     };
 

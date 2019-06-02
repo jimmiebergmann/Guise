@@ -13,7 +13,7 @@ git submodule init
 git submodule update
 mkdir build
 cd build
-cmake .. -DENABLE_OPENGL_RENDERER=ON
+cmake ..
 ```
 ##### Linux
 ```sh

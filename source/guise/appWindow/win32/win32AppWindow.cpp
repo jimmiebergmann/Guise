@@ -27,6 +27,7 @@
 
 #if defined(GUISE_PLATFORM_WINDOWS)
 
+#include <shellscalingapi.h>
 #include <algorithm>
 #include <iostream>
 namespace Guise
@@ -81,8 +82,7 @@ namespace Guise
             return;
         }
 
-        ///auto backgroundColor = m_canvas->getBackgroundColor();
-        Vector4f backgroundColor(1.0f, 1.0f, 1.0f, 1.0f);
+        auto backgroundColor = m_canvas->getBackgroundColor();
         m_renderer->setClearColor(backgroundColor);
         m_renderer->clearColor();
         m_canvas->render(*m_renderer.get());
@@ -284,6 +284,7 @@ namespace Guise
         case WM_CREATE:
         {
             //SetProcessDpiAwareness(PROCESS_DPI_AWARENESS::PROCESS_PER_MONITOR_DPI_AWARE);
+            SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
         }
         case WM_ERASEBKGND:
             return 1;

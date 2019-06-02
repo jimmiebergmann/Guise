@@ -32,7 +32,7 @@
 #include "guise/style.hpp"
 #include "guise/input.hpp"
 #include "guise/control/plane.hpp"
-#include "guise/utility/controlGrid.hpp"
+//#include "guise/utility/controlGrid.hpp"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -90,26 +90,24 @@ namespace Guise
 
         void resize(const Vector2ui32 & size);
 
-        //void registerControl(Control & control);
+        void focusControl(Control * control);
 
-        //void unregisterControl(Control & control);
+        void setDpi(const uint32_t dpi);
 
-        void registerControlBoundsChange(Control & control, const Bounds2f & bounds);
+        uint32_t getDpi() const;
 
-        //void registerControlLevelChange(Control & control, const size_t level);
-
-        void unregisterControl(Control & control);
 
     private:
 
         Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet);
 
-        ControlGrid                     m_controlGrid;
+        uint32_t                        m_dpi;
         Input                           m_input;
         std::shared_ptr<Plane>          m_plane;
         Control *                       m_selectedControl;
         Vector2ui32                     m_size;
         std::shared_ptr<Style::Sheet>   m_styleSheet;
+        Control *                       m_focusedControl;
 
     };
 

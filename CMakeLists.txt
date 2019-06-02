@@ -13,8 +13,8 @@ endfunction(createSourceGroups)
 project (Guise)
 cmake_minimum_required(VERSION 2.8)
 
-option(CODE_COVERAGE "Enable coverage reporting" OFF)
-option(ENABLE_OPENGL_RENDERER "Enable default OpenGL renderer" ON)
+option(CODE_COVERAGE "Enables coverage reporting" OFF)
+option(ENABLE_OPENGL_RENDERER "Enables OpenGL renderer" ON)
 
 # Require C++17.
 set(CMAKE_CXX_STANDARD 17)
@@ -46,22 +46,30 @@ endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
 
 # Find files
-file(GLOB_RECURSE guise_src "${CMAKE_SOURCE_DIR}/source/*.cpp")
-file(GLOB_RECURSE guise_inc "${CMAKE_SOURCE_DIR}/include/*.hpp" "${CMAKE_SOURCE_DIR}/include/*.inl")
-file(GLOB guise_files ${guise_src} ${guise_inc})
+file(GLOB_RECURSE guise_src "${CMAKE_SOURCE_DIR}/source/*.c" "${CMAKE_SOURCE_DIR}/source/*.cpp")
+file(GLOB_RECURSE guise_inc "${CMAKE_SOURCE_DIR}/include/*.h" "${CMAKE_SOURCE_DIR}/include/*.hpp" "${CMAKE_SOURCE_DIR}/include/*.inl")
+file(GLOB_RECURSE vendor_src "${CMAKE_SOURCE_DIR}/vendor/*.c" "${CMAKE_SOURCE_DIR}/vendor/*.cpp")
+file(GLOB_RECURSE vendor_inc "${CMAKE_SOURCE_DIR}/vendor/*.h" "${CMAKE_SOURCE_DIR}/vendor/*.hpp")
+file(GLOB guise_files ${guise_src} ${guise_inc} ${vendor_src} ${vendor_inc})
 file(GLOB_RECURSE test_files "${CMAKE_SOURCE_DIR}/tests/*.cpp" "${CMAKE_SOURCE_DIR}/tests/*.hpp")
 file(GLOB_RECURSE example1_files "${CMAKE_SOURCE_DIR}/examples/example1.cpp")
 
 # Guise dynamic lib
-include_directories ("${CMAKE_SOURCE_DIR}/include") # Include header files
+include_directories ("${CMAKE_SOURCE_DIR}/include", "${CMAKE_SOURCE_DIR}/vendor") # Include header files
 add_library(guise SHARED ${guise_files}) # Create shared library
 
-if(ENABLE_OPENGL_RENDERER AND WIN32)
-	target_link_libraries(guise "opengl32.lib")
-endif(ENABLE_OPENGL_RENDERER AND WIN32)
+if(ENABLE_OPENGL_RENDERER)
+	if(WIN32)
+		target_link_libraries(guise "opengl32.lib")
+	endif(WIN32)
+else()
+	target_compile_definitions(guise PRIVATE GUISE_DISABLE_OPENGL)
+endif(ENABLE_OPENGL_RENDERER)
 
 createSourceGroups("${guise_src}" "${CMAKE_SOURCE_DIR}/source")
 createSourceGroups("${guise_inc}" "${CMAKE_SOURCE_DIR}/include")
+createSourceGroups("${vendor_src}" "${CMAKE_SOURCE_DIR}/vendor")
+createSourceGroups("${vendor_inc}" "${CMAKE_SOURCE_DIR}/vendor")
 
 target_compile_definitions(guise PRIVATE GUISE_EXPORT)
 install(TARGETS guise DESTINATION "${CMAKE_SOURCE_DIR}lib") # Install library
@@ -86,13 +94,17 @@ install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install 
 
 
 # Guise static lib
-include_directories ("${CMAKE_SOURCE_DIR}/include")
+include_directories ("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/vendor")
 add_library(guise_static STATIC ${guise_files}) # Create shared library
 
 createSourceGroups("${guise_src}" "${CMAKE_SOURCE_DIR}/source")
 createSourceGroups("${guise_inc}" "${CMAKE_SOURCE_DIR}/include")
 
 target_compile_definitions(guise_static PRIVATE GUISE_STATIC)
+if(NOT ENABLE_OPENGL_RENDERER)
+	target_compile_definitions(guise_static PRIVATE GUISE_DISABLE_OPENGL)
+endif(NOT ENABLE_OPENGL_RENDERER)
+
 install(TARGETS guise_static DESTINATION "${CMAKE_SOURCE_DIR}lib") # Install library
 set_target_properties( guise_static
   PROPERTIES
@@ -119,6 +131,11 @@ endif()
 include_directories ("${CMAKE_SOURCE_DIR}/include")
 link_directories("${CMAKE_SOURCE_DIR}/lib")
 add_executable(guise_tests ${test_files})
+
+if(NOT ENABLE_OPENGL_RENDERER)
+	target_compile_definitions(guise_tests PRIVATE GUISE_DISABLE_OPENGL)
+endif(NOT ENABLE_OPENGL_RENDERER)
+
 set_target_properties( guise_tests
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"
@@ -136,6 +153,11 @@ target_link_libraries(guise_tests gtest_main guise)
 include_directories ("${CMAKE_SOURCE_DIR}/include")
 link_directories("${CMAKE_SOURCE_DIR}/lib")
 add_executable(example1 ${example1_files})
+
+if(NOT ENABLE_OPENGL_RENDERER)
+	target_compile_definitions(example1 PRIVATE GUISE_DISABLE_OPENGL)
+endif(NOT ENABLE_OPENGL_RENDERER)
+
 set_target_properties( example1
   PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin"

@@ -77,6 +77,8 @@ namespace Guise
         Bounds(const T pX, const T pY, const T sX, const T sY);
         Bounds(const Bounds<2, T> & bounds);
 
+        bool intersects(const Vector<2, T> & point) const;
+
         Bounds<2, T> & operator = (const Bounds<2, T> & bounds);
 
         bool operator == (const Bounds<2, T> & bounds) const;

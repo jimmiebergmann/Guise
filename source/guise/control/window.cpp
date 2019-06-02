@@ -38,9 +38,9 @@ namespace Guise
         return ControlType::Window;
     }
 
-    bool Window::handleInputEvent(const Input::Event &/* event*/)
+    Control * Window::handleInputEvent(const Input::Event &/* event*/)
     {
-        return true;
+        return nullptr;
     }
 
     void Window::update(const Bounds2f & /*canvasBound*/)
@@ -50,6 +50,11 @@ namespace Guise
 
     void Window::render(RendererInterface & /*renderer*/)
     {
+    }
+
+    Bounds2f Window::getRenderBounds() const
+    {
+        return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
     }
 
     Bounds2f Window::getSelectBounds() const

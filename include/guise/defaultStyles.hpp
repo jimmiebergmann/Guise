@@ -48,10 +48,39 @@ namespace Guise
                 }
             );
 
+            static const Selector buttonHover = Selector(
+                {
+                    { "padding",{ 15.0f } },
+                    { "background-color",{ { 1.0f, 0.25f, 0.25f, 1.0 } } },
+                    { "padding",{ 15.0f } },
+                    { "border-style",{ Property::BorderStyle::Solid } },
+                    { "border-width",{ 10.0f } },
+                    { "border-color",{ { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                }
+            );
+
             static const Selector canvas = Selector(
                 {
-                    { "padding",                { 5.0f }  },
+                    { "padding",                { 0.0f }  },
                     { "background-color",   {   { 0.9f, 0.9f, 0.9f, 1.0f } } }
+                }
+            );
+
+            static const Selector plane = Selector(
+                {
+                    { "padding",                { 0.0f } }
+                }
+            );
+
+            static const Selector verticalGrid = Selector(
+                {
+                    { "padding",                { 5.0f } }
+                }
+            );
+
+            static const Selector verticalGridSlot = Selector(
+                {
+                    { "padding",            {   { 5.0f, 1.0f, 3.0f, 1.0f } } }
                 }
             );
 
@@ -62,11 +91,7 @@ namespace Guise
                 }
             );
 
-            static const Selector plane = Selector(
-                {
-                    { "padding",                { 5.0f }  }
-                }
-            );
+            
 
         }
 
