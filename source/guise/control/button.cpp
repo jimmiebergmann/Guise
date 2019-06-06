@@ -43,11 +43,22 @@ namespace Guise
 
     Control * Button::handleInputEvent(const Input::Event & e)
     {
-        std::cout << "button event (" << this << ") - " << (int)e.type << "  " << (int)e.button << ": " <<  e.position.x << " " << e.position.y  << std::endl;
         switch (e.type)
         {
-            case Input::EventType::MouseMove:           m_currentStyle = &m_hoverStyle; break;
-            case Input::EventType::MouseJustPressed:    if (onPressed) { onPressed(); } break;
+            case Input::EventType::MouseMove:          
+            {
+                if (m_renderBounds.intersects(e.position))
+                {
+                    m_currentStyle = &m_hoverStyle;
+                }
+                else
+                {
+                    m_currentStyle = this;
+                }
+            }
+            break;
+            case Input::EventType::MouseJustPressed:    onPressed(e.position); break;
+            case Input::EventType::MouseDoubleClick:    onPressed(e.position); break;
             default: break;
         }
 
@@ -64,7 +75,9 @@ namespace Guise
             {
                 m_renderBounds = renderBounds;
 
-                if (auto child = getChilds()[0])
+                m_childBounds = Bounds2f(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - (getPaddingHigh() * 2.0f));
+
+                /*if (auto child = getChilds()[0])
                 {
                     const Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - (getPaddingHigh() * 2.0f));
 
@@ -73,15 +86,22 @@ namespace Guise
                         m_childBounds = childBounds;
                         child->update(m_childBounds);
                     }
-                }
+                }*/
             }
+        }
+
+        getCanvas().queueControlRendering(this);
+
+        if (auto child = getChilds()[0])
+        {
+            child->update(m_childBounds);
         }
     }
 
     void Button::render(RendererInterface & renderer)
     {
         const bool drawBorder = m_currentStyle->getBorderStyle() != Style::Property::BorderStyle::None && m_currentStyle->getBorderWidth() > 0.0f;
-        Vector4f firstColor = drawBorder ? getBorderColor() : getBackgroundColor();
+        Vector4f firstColor = drawBorder ? m_currentStyle->getBorderColor() : m_currentStyle->getBackgroundColor();
         renderer.drawQuad(m_renderBounds, firstColor);
 
         if (drawBorder)
@@ -93,17 +113,15 @@ namespace Guise
 
             if (innerBounds.size.x > 0.0f && innerBounds.size.y > 0.0f)
             {
-                renderer.drawQuad(innerBounds, getBackgroundColor());
+                renderer.drawQuad(innerBounds, m_currentStyle->getBackgroundColor());
             } 
         }
 
-        auto childs = getChilds();
+        /*auto childs = getChilds();
         if (childs.size() && childs[0])
         {
             childs[0]->render(renderer);
-        }
-
-        m_currentStyle = this;
+        }*/
     }
 
     Bounds2f Button::getRenderBounds() const
@@ -116,23 +134,15 @@ namespace Guise
         return m_renderBounds;
     }
 
-    Control * Button::queryHit(const Vector2f & point) const
+    bool Button::add(const std::shared_ptr<Control> & control, const size_t)
     {
-        if (m_renderBounds.intersects(point))
+        if (ControlContainerSingle::add(control))
         {
-            return const_cast<Button *>(this);
+            control->disableInput();
+            return true;
         }
 
-        auto childs = getChilds();
-        if (childs.size() && childs[0])
-        {
-            if (auto hit = childs[0]->queryHit(point))
-            {
-                return hit;
-            }
-        }
-
-        return nullptr;
+        return false;
     }
 
     Style::BoxStyle & Button::getActiveStyle()

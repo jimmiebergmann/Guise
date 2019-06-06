@@ -31,12 +31,11 @@
 
 namespace Guise
 {
-
     std::shared_ptr<AppWindow> AppWindow::create(const std::wstring & title, const Vector2ui32 & size)
     {
-        #if defined(GUISE_PLATFORM_WINDOWS)
-            return Win32AppWindow::create(title, size);
-        #endif
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        return Win32AppWindow::create(title, size);
+    #endif
     }
 
     AppWindow::~AppWindow()

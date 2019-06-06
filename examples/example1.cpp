@@ -13,6 +13,8 @@ using namespace Guise;
 
 int main()
 {
+    Context::setDpiAware();
+
     auto context = Context::create();
     context->setMaxFrameTime(std::chrono::duration<double>(0.009f));
     auto appWindow1 = context->addAppWindow(L"Example 1", { 400, 400 });
@@ -26,6 +28,7 @@ int main()
     auto inButton = Button::create(canvas1);
 
     button2->add(inButton);
+    //inButton->enableInput();
     inButton->add(Label::create(canvas1, /*"Typeface.TTF"*/ "arial", /*L"ABCD"*/   L"The quick brown fox jumps over the lazy dog."));
     auto button3 = Button::create(canvas1);
     button3->setSize({ 200.0f, 40.0f });
@@ -45,12 +48,19 @@ int main()
 
     canvas1->add(verticalGrid1);
 
-    button2->onPressed = []()
+    std::shared_ptr<const Control> a = inButton;
+    auto childs = a->getChilds();
+
+    button2->onPressed = [](Vector2f val)
     {
-        std::cout << "Button 2 is pressed!" << std::endl;
+        std::cout << "Button 2 is pressed! :" << val.x << " " << val.y << std::endl;
     };
 
 
+   /* auto appWindow2 = context->addAppWindow(false, L"Example 2", { 400, 400 });
+    auto canvas2 = appWindow2->getCanvas();
+    canvas2->add(Button::create(canvas2));
+    */
     for (int i = 0; i < 100; i++)
     {
         std::this_thread::sleep_for(std::chrono::duration<double>(0.5f));

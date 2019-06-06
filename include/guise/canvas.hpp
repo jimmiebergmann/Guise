@@ -28,11 +28,11 @@
 
 #include "guise/build.hpp"
 #include "guise/control.hpp"
+#include "guise/control/dpiSensitive.hpp"
 #include "guise/renderer.hpp"
 #include "guise/style.hpp"
 #include "guise/input.hpp"
 #include "guise/control/plane.hpp"
-//#include "guise/utility/controlGrid.hpp"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -96,10 +96,17 @@ namespace Guise
 
         uint32_t getDpi() const;
 
+        void queueControlRendering(Control * control);
+
+        void registerDpiSensitive(DpiSensitive * object);
+
+        void unregisterDpiSensitive(DpiSensitive * object);
 
     private:
 
         Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet);
+
+        Control * queryControlHit(const Vector2f & point) const;
 
         uint32_t                        m_dpi;
         Input                           m_input;
@@ -108,6 +115,10 @@ namespace Guise
         Vector2ui32                     m_size;
         std::shared_ptr<Style::Sheet>   m_styleSheet;
         Control *                       m_focusedControl;
+        Control *                       m_hoveredControl;
+
+        std::map<size_t, std::vector<Control *> > m_renderControls;
+        std::set<DpiSensitive*>                   m_dpiSensitiveObjects;
 
     };
 

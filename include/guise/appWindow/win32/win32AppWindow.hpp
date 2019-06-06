@@ -45,6 +45,7 @@ namespace Guise
 
     public:
 
+        
         static std::shared_ptr<Win32AppWindow> create(const std::wstring & title = L"", const Vector2ui32 & size = { 0, 0 });
 
         ~Win32AppWindow();
@@ -59,6 +60,12 @@ namespace Guise
 
         Vector2ui32 getSize();
 
+        Vector2ui32 getDPiAwareSize();
+
+        void setDpi(const int32_t dpi);
+
+        int32_t getDpi() const;
+
         HDC getWindowContext() const;
        
     private:
@@ -71,11 +78,14 @@ namespace Guise
 
         void destroyWindow();
 
+        //int getDpi() const;
+
         static LRESULT windowProcStatic(HWND p_HWND, UINT p_Message, WPARAM p_WParam, LPARAM p_LParam);
         LRESULT windowProc(HWND p_HWND, UINT p_Message, WPARAM p_WParam, LPARAM p_LParam);
 
         std::shared_ptr<Renderer>   m_renderer;
         std::shared_ptr<Canvas>     m_canvas;
+        int32_t                     m_dpi;
         Input &                     m_input;
         std::wstring                m_title; 
         Vector2ui32                 m_size;

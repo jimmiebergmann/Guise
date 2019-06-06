@@ -79,14 +79,13 @@ namespace Guise
 
         virtual Bounds2f getSelectBounds() const;
 
-        virtual Control * queryHit(const Vector2f & point) const;
-
     private:
 
         Plane(Canvas & canvas);
         Plane(const Plane &) = delete;
 
         Bounds2f m_renderBounds;
+        Bounds2f m_childsBounds;
 
     };
 

@@ -106,8 +106,15 @@ namespace Guise
             const T c02, const T c12, const T c22, const T c32,
             const T c03, const T c13, const T c23, const T c33);
 
-        Matrix<4, 4, T> & orthographic(const T left, const T right, const T bottom,
-                                       const T top, const T zNear, const T zFar);
+        Matrix<4, 4, T> & loadOrthographic(const T left, const T right, const T bottom,
+                                           const T top, const T zNear, const T zFar);
+
+        Matrix<4, 4, T> & loadScale(float x, float y, float z);
+
+        Matrix<4, 4, T> & scale(float x, float y, float z);
+
+        Matrix<4, 4, T> operator *(const Matrix<4, 4, T> & matrix) const;
+
 
             /*Matrix4x4(const Matrix4x4<T> & matrix);
             template<typename U>

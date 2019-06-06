@@ -92,6 +92,7 @@ namespace Guise
     template <typename T>
     using Bounds2 = Bounds<2, T>;
     using Bounds2f = Bounds<2, float>;
+    using Bounds2i32 = Bounds<2, int32_t>;
 
 }
 

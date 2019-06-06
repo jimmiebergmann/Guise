@@ -47,6 +47,8 @@ namespace Guise
 
     public:
 
+        virtual int32_t getDpi() = 0;
+
         virtual void setCulling(const Vector2f & position, const Vector2f & size) = 0;
 
         virtual void drawQuad(const Bounds2f & bounds, const Vector4f & color) = 0;      
@@ -81,6 +83,10 @@ namespace Guise
         virtual void setClearColor(const Vector4f & color) = 0;
 
         virtual void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size) = 0;
+
+        virtual void setDpi(const int32_t dpi) = 0;
+
+        //virtual void setProjectionMatrix(Matrix4x4f & matrix) = 0;
 
         virtual void clearColor() = 0;
 

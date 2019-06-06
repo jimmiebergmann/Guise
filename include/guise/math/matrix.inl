@@ -45,21 +45,9 @@ namespace Guise
     {}
 
     template <typename T>
-    Matrix<4, 4, T> & Matrix<4, 4, T>::orthographic(const T left, const T right, const T bottom,
+    Matrix<4, 4, T> & Matrix<4, 4, T>::loadOrthographic(const T left, const T right, const T bottom,
                                                     const T top, const T zNear, const T zFar)
     {
-        /*T tx = -(right + left) / (right - left);
-        T ty = -(top + bottom) / (top - bottom);
-        T tz = -(zFar + zNear) / (zFar - zNear);
-
-        Identity();
-        m[0] = 2 / (p_Right - p_Left);
-        m[5] = 2.0f / (p_Top - p_Bottom);
-        m[10] = -2 / (p_ZFar - p_ZNear);
-        m[12] = TX;
-        m[13] = TY;
-        m[14] = TZ;*/
-
         m[0]  = static_cast<T>(2) / (right - left);
         m[1]  = static_cast<T>(0);
         m[2]  = static_cast<T>(0);
@@ -79,5 +67,49 @@ namespace Guise
 
         return *this;
     }
+
+    template <typename T>
+    Matrix<4, 4, T> & Matrix<4, 4, T>::loadScale(float , float , float )
+    {
+        return *this;
+    }
+
+    template <typename T>
+    Matrix<4, 4, T> & Matrix<4, 4, T>::scale(float x, float y, float z)
+    {
+        Matrix4x4<T> scale(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
+        return *this = *this * scale;
+    }
+
+    template <typename T>
+    Matrix<4, 4, T> Matrix<4, 4, T>::operator *(const Matrix<4, 4, T> & mat) const
+    {
+        auto & Mat1 = *this;
+        Matrix<4, 4, T> Dest;
+
+        Dest.m[0] = Mat1.m[0] * mat.m[0] + Mat1.m[4] * mat.m[1] + Mat1.m[8] * mat.m[2] + Mat1.m[12] * mat.m[3];
+        Dest.m[4] = Mat1.m[0] * mat.m[4] + Mat1.m[4] * mat.m[5] + Mat1.m[8] * mat.m[6] + Mat1.m[12] * mat.m[7];
+        Dest.m[8] = Mat1.m[0] * mat.m[8] + Mat1.m[4] * mat.m[9] + Mat1.m[8] * mat.m[10] + Mat1.m[12] * mat.m[11];
+        Dest.m[12] = Mat1.m[0] * mat.m[12] + Mat1.m[4] * mat.m[13] + Mat1.m[8] * mat.m[14] + Mat1.m[12] * mat.m[15];
+
+        Dest.m[1] = Mat1.m[1] * mat.m[0] + Mat1.m[5] * mat.m[1] + Mat1.m[9] * mat.m[2] + Mat1.m[13] * mat.m[3];
+        Dest.m[5] = Mat1.m[1] * mat.m[4] + Mat1.m[5] * mat.m[5] + Mat1.m[9] * mat.m[6] + Mat1.m[13] * mat.m[7];
+        Dest.m[9] = Mat1.m[1] * mat.m[8] + Mat1.m[5] * mat.m[9] + Mat1.m[9] * mat.m[10] + Mat1.m[13] * mat.m[11];
+        Dest.m[13] = Mat1.m[1] * mat.m[12] + Mat1.m[5] * mat.m[13] + Mat1.m[9] * mat.m[14] + Mat1.m[13] * mat.m[15];
+
+        Dest.m[2] = Mat1.m[2] * mat.m[0] + Mat1.m[6] * mat.m[1] + Mat1.m[10] * mat.m[2] + Mat1.m[14] * mat.m[3];
+        Dest.m[6] = Mat1.m[2] * mat.m[4] + Mat1.m[6] * mat.m[5] + Mat1.m[10] * mat.m[6] + Mat1.m[14] * mat.m[7];
+        Dest.m[10] = Mat1.m[2] * mat.m[8] + Mat1.m[6] * mat.m[9] + Mat1.m[10] * mat.m[10] + Mat1.m[14] * mat.m[11];
+        Dest.m[14] = Mat1.m[2] * mat.m[12] + Mat1.m[6] * mat.m[13] + Mat1.m[10] * mat.m[14] + Mat1.m[14] * mat.m[15];
+
+        Dest.m[3] = Mat1.m[3] * mat.m[0] + Mat1.m[7] * mat.m[1] + Mat1.m[11] * mat.m[2] + Mat1.m[15] * mat.m[3];
+        Dest.m[7] = Mat1.m[3] * mat.m[4] + Mat1.m[7] * mat.m[5] + Mat1.m[11] * mat.m[6] + Mat1.m[15] * mat.m[7];
+        Dest.m[11] = Mat1.m[3] * mat.m[8] + Mat1.m[7] * mat.m[9] + Mat1.m[11] * mat.m[10] + Mat1.m[15] * mat.m[11];
+        Dest.m[15] = Mat1.m[3] * mat.m[12] + Mat1.m[7] * mat.m[13] + Mat1.m[11] * mat.m[14] + Mat1.m[15] * mat.m[15];
+
+        return Dest;
+    }
+
+    
 
 }

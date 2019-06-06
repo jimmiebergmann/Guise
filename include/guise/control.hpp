@@ -82,23 +82,33 @@ namespace Guise
 
         virtual Control * handleInputEvent(const Input::Event & event);
 
-        virtual void update(const Bounds2f & canvasBounds);
+        virtual void update(const Bounds2f & canvasBounds/*, const bool markForDisplay = true*/);
 
         virtual void render(RendererInterface & rendererInterface);
 
         virtual Bounds2f getRenderBounds() const;
         virtual Bounds2f getSelectBounds() const;        
 
+        virtual void enable();
+        virtual void disable();
+        virtual bool isEnabled();
+
+        virtual void enableInput();
+        virtual void disableInput();
+        virtual bool isInputEnabled() const;
+
+        virtual void show();
+        virtual void hide(const bool occupySpace = false);
+        virtual bool isVisible() const;
+
         void forceUpdate();
         bool isUpdateForced();
         bool pollUpdateForced();
 
-        virtual Control * queryHit(const Vector2f & point) const;
+        virtual bool intersects(const Vector2f & point) const;
 
-        // Depreciated...
         virtual size_t getLevel() const;
         virtual void setLevel(const size_t level);
-        // ... Depreciated
 
         virtual std::weak_ptr<Control> getParent();
         virtual std::weak_ptr<const Control> getParent() const;
@@ -116,15 +126,19 @@ namespace Guise
 
         Bounds2f calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const;
 
+        Canvas &    m_canvas;
+        bool        m_enabled;
+        bool        m_inputEnabled;       
+        bool        m_visible;
+
     private:
 
         friend class ControlContainer;
-
-        Canvas &                m_canvas;
-        bool                    m_forceUpdate;
+        
+        bool                    m_forceUpdate;        
         size_t                  m_level;
         std::weak_ptr<Control>  m_parent;
-        mutable std::mutex      m_mutex;
+        //mutable std::mutex      m_mutex;
 
     };
 
@@ -158,13 +172,13 @@ namespace Guise
         std::vector<std::shared_ptr<Control> > getChilds();
         std::vector<std::shared_ptr<const Control> > getChilds() const;
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
         bool remove(Control & control);
         bool remove(const std::shared_ptr<Control> & control);
         bool remove(const size_t index);
         size_t removeAll();
 
-    private:
+    protected:
 
         std::shared_ptr<Control>    m_child;
         mutable std::mutex          m_mutex;

@@ -23,61 +23,68 @@
 *
 */
 
-#ifndef GUISE_CONTEXT_HPP
-#define GUISE_CONTEXT_HPP
+#ifndef GUISE_SIGNAL_HPP
+#define GUISE_SIGNAL_HPP
 
 #include "guise/build.hpp"
-#include "guise/renderer.hpp"
-#include "guise/appWindow.hpp"
-#include "guise/utility/semaphore.hpp"
-#include <memory>
-#include <thread>
-#include <atomic>
-#include <set>
-#include <chrono>
+#include <functional>
+#include <vector>
 
 namespace Guise
 {
 
-    /**
-    * Context class.
-    *
-    *
-    */
-    class GUISE_API Context
+    template<typename ... T>
+    class Signal
     {
 
     public:
+
+        using Callback = std::function<void(T...)>;
+        using CallbackNoParams = std::function<void()>;
+
+        Signal & operator =(const Callback & callback)
+        {
+            m_callbacks.push_back(callback);
+            return *this;
+        }
+
+        Signal & operator =(const CallbackNoParams & callback)
+        {
+            m_callbacksNoParams.push_back(callback);
+            return *this;
+        }
+
         
-        ~Context();
-              
-        static std::shared_ptr<Context> create();
-        
-        std::shared_ptr<AppWindow> addAppWindow(const std::wstring & title = L"", const Vector2ui32 & size = { 0, 0 });
+        Signal & operator()(T ... params)
+        {
+            for (auto & callback : m_callbacks)
+            {
+                callback(params...);
+            }
+            for (auto & callback : m_callbacksNoParams)
+            {
+                callback();
+            }
+            return *this;
+        }
 
-        void setMaxFrameTime(const std::chrono::duration<double> & frameTime);
-
-        std::chrono::duration<double> getMaxFrameTime() const;
-
-        static bool setDpiAware();
+        Signal & operator()()
+        {
+            for (auto & callback : m_callbacksNoParams)
+            {
+                callback();
+            }
+            return *this;
+        }
 
     private:
 
-        Context();
+        std::vector<Callback> m_callbacks;
+        std::vector<CallbackNoParams> m_callbacksNoParams;
 
-        Context(const Context &) = delete;
-
-        struct AppWindowData
-        {
-            std::thread m_thread;
-            std::shared_ptr<AppWindow> appWindow;
-        };
-
-        std::set<std::shared_ptr<AppWindowData> >   m_appWindows;
-        std::shared_ptr<Renderer>                   m_renderer;
-        std::atomic<std::chrono::duration<double>>  m_maxFrameTime;
     };
-
 }
+
+#include "guise/signal.inl"
 
 #endif

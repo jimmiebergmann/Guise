@@ -52,6 +52,8 @@ namespace Guise
     public:
 
         // Interface functions.
+        int32_t getDpi();
+
         void setCulling(const Vector2f & position, const Vector2f & size);
 
         void drawQuad(const Bounds2f & bounds, const Vector4f & color);
@@ -60,6 +62,7 @@ namespace Guise
         void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color);
   
         std::shared_ptr<Texture> createTexture();
+
 
         // Renderer functions.
         static std::shared_ptr<Renderer> create(const std::shared_ptr<AppWindow> & appWindow);
@@ -73,6 +76,10 @@ namespace Guise
 
         void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size);
 
+        //void setProjectionMatrix(Matrix4x4f & matrix);
+
+        void setDpi(const int32_t dpi);
+
         void clearColor();
 
         void present();
@@ -82,15 +89,17 @@ namespace Guise
         
     #if defined(GUISE_PLATFORM_WINDOWS)
         OpenGLRenderer(HDC deviceContextHandle);
-    #endif
 
         // Windows members.
-    #if defined(GUISE_PLATFORM_WINDOWS)
         HDC m_deviceContextHandle;  ///< Device context handle from the render output.
         HGLRC m_context;            ///< The OpenGL context.      
     #endif
 
-        Vector4f m_clearColor;
+        void updateProjectionMatrix();
+
+        Vector4f    m_clearColor;
+        Bounds2i32  m_viewPort;
+        int32_t     m_dpi;
 
     };
 

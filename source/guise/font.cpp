@@ -172,7 +172,7 @@ namespace Guise
 
         FT_Error error = 0;
 
-        const uint32_t fontSize = height * dpi / 96;
+        const uint32_t fontSize = height * dpi / GUISE_DEFAULT_DPI;
         if (fontSize != m_impl->currentFontSize)
         {
             if ((error = FT_Set_Char_Size(m_impl->face, 0, height * 64, dpi, dpi)) != 0)

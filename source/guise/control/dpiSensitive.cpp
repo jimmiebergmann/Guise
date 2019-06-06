@@ -23,60 +23,22 @@
 *
 */
 
-#ifndef GUISE_APPLICATION_WINDOW_HPP
-#define GUISE_APPLICATION_WINDOW_HPP
 
-#include "guise/build.hpp"
-#if defined(GUISE_PLATFORM_WINDOWS)
-    #include "guise/platform/win32Headers.hpp"
-#endif
+#include "guise/control/dpiSensitive.hpp"
 #include "guise/canvas.hpp"
-#include <memory>
-#include <string>
-#include <thread>
 
 namespace Guise
 {
 
-    // Forward declarations.
-    //class Context;
-
-    /**
-    * Application window base class.
-    *
-    *
-    */
-    class GUISE_API AppWindow
+    /*DpiSensitive::DpiSensitive(Canvas & canvas)
     {
 
-    public:
+    }
 
-        static std::shared_ptr<AppWindow> create(const std::wstring & title = L"", const Vector2ui32 & size = { 0, 0 });
+    DpiSensitive::~DpiSensitive()
+    {
 
-        virtual ~AppWindow();
+    }*/
 
-        virtual std::shared_ptr<Canvas> getCanvas() = 0;
-
-        virtual void setRenderer(const std::shared_ptr<Renderer> & renderer) = 0;
-
-        virtual void update() = 0;
-
-        virtual void render() = 0;
-
-        virtual void setDpi(const int32_t dpi) = 0;
-
-        virtual int32_t getDpi() const = 0;
-
-        virtual Vector2ui32 getSize() = 0;
-
-        virtual Vector2ui32 getDPiAwareSize() = 0;
-
-    #if defined(GUISE_PLATFORM_WINDOWS)
-        virtual HDC getWindowContext() const = 0;
-    #endif
-
-    };
 
 }
-
-#endif

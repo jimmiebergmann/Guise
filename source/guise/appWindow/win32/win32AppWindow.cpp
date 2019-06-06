@@ -32,6 +32,38 @@
 #include <iostream>
 namespace Guise
 {
+    /*static bool enableDpiAware(HWND windowHandle)
+    {
+    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
+        SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+        
+        if (!EnableNonClientDpiScaling(windowHandle))
+        {
+            return false;
+        }
+    #elif GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_VISTA
+        if (!SetProcessDPIAware())
+        {
+            return false;
+        }
+    #endif    
+
+        return true;
+    }*/
+
+    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
+    static int getSystemDpi(HWND windowHandle, HDC )
+    {
+        return static_cast<int>(GetDpiForWindow(windowHandle));
+    }
+    #else
+    static int getSystemDpi(HWND, HDC deviceContextHandle)
+    {
+        return GetDeviceCaps(deviceContextHandle, LOGPIXELSX);
+    }
+
+    #endif
+    
 
     Win32AppWindow::~Win32AppWindow()
     {
@@ -94,6 +126,22 @@ namespace Guise
         return m_size;
     }
 
+    Vector2ui32 Win32AppWindow::getDPiAwareSize()
+    {
+        return m_size * GUISE_DEFAULT_DPI / m_dpi;
+    }
+
+
+    void Win32AppWindow::setDpi(const int32_t dpi)
+    {
+        m_dpi = dpi;
+    }
+
+    int32_t Win32AppWindow::getDpi() const
+    {
+        return m_dpi;
+    }
+
     HDC Win32AppWindow::getWindowContext() const
     {
         return m_deviceContextHandle;
@@ -117,6 +165,7 @@ namespace Guise
 
     Win32AppWindow::Win32AppWindow(const std::wstring & title, const Vector2ui32 & size) :
         m_canvas(Canvas::create(size)),
+        m_dpi(GUISE_DEFAULT_DPI),
         m_input(m_canvas->getInput()),
         m_title(title),
         m_size(size),
@@ -219,7 +268,36 @@ namespace Guise
 
         // Get the device context
         m_deviceContextHandle = GetDC(m_windowHandle);
-        //m_DPI = GetDpiForWindow(m_WindowHandle);
+
+        int32_t systemDPi = getSystemDpi(m_windowHandle, m_deviceContextHandle);
+        if (systemDPi != m_dpi)
+        {
+            RECT rect;
+            if (GetWindowRect(m_windowHandle, &rect))
+            {
+                m_dpi = systemDPi;
+                m_size = m_size * m_dpi / GUISE_DEFAULT_DPI;
+
+                RECT newWindowRect;
+                newWindowRect.left = static_cast<LONG>(rect.left);
+                newWindowRect.right = static_cast<LONG>(m_size.x + rect.left);
+                newWindowRect.top = static_cast<LONG>(rect.top);
+                newWindowRect.bottom = static_cast<LONG>(m_size.y + rect.top);
+
+                AdjustWindowRectEx(&newWindowRect, m_win32Style, FALSE, m_win32ExtendedStyle);
+
+                SetWindowPos(m_windowHandle,
+                    NULL,
+                    newWindowRect.left,
+                    newWindowRect.top,
+                    newWindowRect.right - newWindowRect.left,
+                    newWindowRect.bottom - newWindowRect.top,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+            
+        }
+
+        m_canvas->setDpi(m_dpi);
 
         ShowWindow(m_windowHandle, SW_RESTORE);
         SetForegroundWindow(m_windowHandle);
@@ -275,7 +353,7 @@ namespace Guise
         return DefWindowProc(hWND, message, wParam, lParam);
     }
 
-    LRESULT Win32AppWindow::windowProc(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT Win32AppWindow::windowProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
     {
         switch (message)
         {
@@ -283,12 +361,29 @@ namespace Guise
         // Windows events.
         case WM_CREATE:
         {
+            //int iDpi = GetDpiForWindow(m_windowHandle);
+            //std::cout << iDpi << std::endl;
+            //int dpiScaledX = MulDiv(INITIALX_96DPI, iDpi, 96);
+            //int dpiScaledY = MulDiv(INITIALY_96DPI, iDpi, 96);
+            //int dpiScaledWidth = MulDiv(INITIALWIDTH_96DPI, iDpi, 96);
+            //int dpiScaledHeight = MulDiv(INITIALHEIGHT_96DPI, iDpi, 96);
+            //SetWindowPos(m_windowHandle, m_windowHandle, 100, 100, m_size.x, m_size.y, SWP_NOZORDER | SWP_NOACTIVATE);
             //SetProcessDpiAwareness(PROCESS_DPI_AWARENESS::PROCESS_PER_MONITOR_DPI_AWARE);
-            SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+            //SetProcessDPIAware();
+            
+            /*if (m_dpiAware)
+            {
+                if (!enableDpiAware(windowHandle))
+                {
+                    return FALSE;
+                }
+            }*/
+
+            
         }
+        break;
         case WM_ERASEBKGND:
             return 1;
-            break;
         case WM_PAINT:
         {
             
@@ -296,19 +391,20 @@ namespace Guise
         break;
         case WM_SIZE:
         {
-            if (!m_renderer)
+            m_size = { static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)) };
+            if (m_renderer)
             {
-                break;
-            }
-
-            Vector2ui32 size(static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)));
-            m_renderer->setViewportSize({0, 0}, size);
-            m_canvas->resize(size);
+                m_renderer->setViewportSize({ 0, 0 }, m_size);
+            }           
+            m_canvas->resize(m_size);
             update();
             render();
         }
         break;
-        //case WM_SIZING
+        /*case WM_SIZING:
+        {
+        }
+        break;*/
 
         // Keyboard events
         case WM_KEYDOWN:
@@ -364,14 +460,34 @@ namespace Guise
             m_input.pushEvent({ Input::EventType::MouseScroll, delta });
         } 
         break;
+    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_7
+        case WM_DPICHANGED:
+        {
+            m_dpi = LOWORD(wParam);
+
+            if (m_renderer)
+            {
+                m_renderer->setDpi(m_dpi);
+            }
+            m_canvas->setDpi(m_dpi);
+
+            RECT * const newSize = reinterpret_cast<RECT*>(lParam);
+            SetWindowPos(windowHandle,
+                NULL,
+                newSize->left,
+                newSize->top,
+                newSize->right - newSize->left,
+                newSize->bottom - newSize->top,
+                SWP_NOZORDER | SWP_NOACTIVATE);
+        }
+        break;
+    #endif
         default:
             break;
 
         }
 
-       
-
-        return DefWindowProc(hWND, message, wParam, lParam);
+        return DefWindowProc(windowHandle, message, wParam, lParam);
     }
 
 }

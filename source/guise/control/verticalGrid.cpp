@@ -146,6 +146,7 @@ namespace Guise
 
     void VerticalGrid::update(const Bounds2f & canvasBound)
     {
+        bool newChildBounds = false;
         const bool childsUpdate = pollUpdateForced();
         if (canvasBound != m_renderBounds || childsUpdate)
         {
@@ -153,11 +154,14 @@ namespace Guise
             if (renderBounds != m_renderBounds || childsUpdate)
             {
                 m_renderBounds = renderBounds;
+                newChildBounds = true;
 
                 auto & slotPadding = m_slotStyle.getPadding();
                 Bounds2f childBoundsLeft(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
                 childBoundsLeft.position.x  += slotPadding.x;
                 childBoundsLeft.size.x      -= (slotPadding.x + slotPadding.z);
+
+                m_childsBounds.clear();
 
                 auto childs = getChilds();
                 auto it = childs.begin();
@@ -166,6 +170,7 @@ namespace Guise
                     childBoundsLeft.position.y  += slotPadding.y;
                     childBoundsLeft.size.y      -= (slotPadding.y + slotPadding.w);
                     (*it)->update(childBoundsLeft);
+                    m_childsBounds.push_back(childBoundsLeft);
 
                     auto childRenderBounds = (*it)->getRenderBounds();
                     float childHeight = std::max(childRenderBounds.position.y - childBoundsLeft.position.y, 0.0f) + std::max(childRenderBounds.size.y, 0.0f);
@@ -174,62 +179,36 @@ namespace Guise
                     childBoundsLeft.size.y     -= childHeight;
                 }
 
-                for (it; childBoundsLeft.size.y > 0.0f && it != childs.end(); it++)
+                /*for (it; childBoundsLeft.size.y > 0.0f && it != childs.end(); it++)
                 {
-                    (*it)->update({ { 0.0f, 0.0f } ,{ 0.0f, 0.0f } });
-                }
+                    //(*it)->update({ { 0.0f, 0.0f } ,{ 0.0f, 0.0f } });
+                }*/
             }
         }
 
-        /*if (canvasBound != m_renderBounds)
+        getCanvas().queueControlRendering(this);
+
+        if (!newChildBounds)
         {
-            Bounds2f renderBounds = calcRenderBounds(canvasBound, m_position, m_size, m_overflow);
-            if (renderBounds != m_renderBounds)
+            auto childs = getChilds();
+            for (size_t i = 0; i < m_childsBounds.size(); i++)
             {
-                m_renderBounds = canvasBound;
-
-                getCanvas().registerControlBoundsChange(*this, m_renderBounds);
-
-                Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
-
-                auto childs = getChilds();
-                for (auto it = childs.begin(); it != childs.end(); it++)
-                {
-                    (*it)->update(childBounds);
-                }
+                childs[i]->update(m_childsBounds[i]);
             }
-        }*/
+        }
+        
     }
 
-    void VerticalGrid::render(RendererInterface & renderer)
+    void VerticalGrid::render(RendererInterface & /*renderer*/)
     {
-        auto childs = getChilds();
+        /*auto childs = getChilds();
         
         for (auto it = childs.begin(); it != childs.end(); it++)
         {
             (*it)->render(renderer);
-        }
+        }*/
     }
 
-    /*Control * VerticalGrid::press(const Vector2f & point)
-    {
-        if (getSelectBounds().intersects(point))
-        {
-            auto childs = getChilds();
-            for (auto it = childs.begin(); it != childs.end(); it++)
-            {
-                auto control = (*it)->press(point);
-                if (control)
-                {
-                    return control;
-                }
-            }
-
-            return this;
-        }
-
-        return nullptr;
-    }*/
 
     Bounds2f VerticalGrid::getRenderBounds() const
     {
@@ -239,20 +218,6 @@ namespace Guise
     Bounds2f VerticalGrid::getSelectBounds() const
     {
         return m_renderBounds;
-    }
-
-    Control * VerticalGrid::queryHit(const Vector2f & point) const
-    {
-        auto childs = getChilds();
-        for (auto it = childs.rbegin(); it != childs.rend(); it++)
-        {
-            if (auto hit = (*it)->queryHit(point))
-            {
-                return hit;
-            }
-        }
-
-        return nullptr;
     }
 
     VerticalGridStyle & VerticalGrid::getSlotStyle()

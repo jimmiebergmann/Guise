@@ -78,8 +78,6 @@ namespace Guise
 
         virtual Bounds2f getSelectBounds() const;
 
-        virtual Control * queryHit(const Vector2f & point) const;
-
         VerticalGridStyle & getSlotStyle();
 
     private:
@@ -87,8 +85,9 @@ namespace Guise
         VerticalGrid(std::shared_ptr<Canvas> & canvas);
         VerticalGrid(const VerticalGrid &) = delete;
 
-        Bounds2f            m_renderBounds;
-        VerticalGridStyle   m_slotStyle;
+        Bounds2f                m_renderBounds;
+        std::vector<Bounds2f>   m_childsBounds;
+        VerticalGridStyle       m_slotStyle;
 
     };
 

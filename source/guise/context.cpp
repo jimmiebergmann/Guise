@@ -49,6 +49,16 @@ namespace Guise
             auto renderer = Renderer::createDefault(appWindowData->appWindow);
             appWindowData->appWindow->setRenderer(renderer);
             renderer->setViewportSize({0, 0}, appWindow->getSize());
+            renderer->setDpi(appWindow->getDpi());
+
+            /*auto windowSize = appWindow->getSize();
+            auto windowDpi = appWindow->getDpi();
+            Matrix4x4f orthoMat;
+            orthoMat.loadOrthographic(0.0f, (float)windowSize.x, (float)windowSize.y, 0.0f, 0.0f, 1.0f);
+            float scale = static_cast<float>(windowDpi) / static_cast<float>(GUISE_DEFAULT_DPI);
+            orthoMat.scale(scale, scale, scale);
+            renderer->setProjectionMatrix(orthoMat);*/          
+
             windowIsCreated.notifyOne();
 
             while (1)
@@ -56,6 +66,20 @@ namespace Guise
                 auto timerStart = std::chrono::system_clock::now();
 
                 appWindow->update();
+
+                /*auto currentDpi = appWindowData->appWindow->getDpi();
+                auto currentSize = appWindow->getSize();
+                if (currentSize != windowSize || currentDpi != windowDpi)
+                {
+                    windowSize = currentSize;
+                    windowDpi = currentDpi;
+
+                    scale = static_cast<float>(windowDpi) / static_cast<float>(GUISE_DEFAULT_DPI);
+                    orthoMat.loadOrthographic(0.0f, (float)windowSize.x, (float)windowSize.y, 0.0f, 0.0f, 1.0f);
+                    orthoMat.scale(scale, scale, scale);
+                    renderer->setProjectionMatrix(orthoMat);
+                }*/
+
                 appWindow->render();
              
                 auto timerEnd = std::chrono::system_clock::now();
@@ -81,6 +105,15 @@ namespace Guise
     std::chrono::duration<double> Context::getMaxFrameTime() const
     {
         return m_maxFrameTime;
+    }
+
+    bool Context::setDpiAware()
+    {
+    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
+        return SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+    #else
+        return true;
+    #endif
     }
 
     Context::Context()

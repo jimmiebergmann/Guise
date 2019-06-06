@@ -24,6 +24,7 @@
 */
 
 #include "guise/canvas.hpp"
+#include <iostream>
 
 namespace Guise
 {
@@ -73,11 +74,10 @@ namespace Guise
 
     void Canvas::update()
     {
-        m_plane->update({ { 0.0f, 0.0f }, m_size });
+        m_plane->update({ { 0.0f, 0.0f }, m_size * GUISE_DEFAULT_DPI / m_dpi });
          
         m_input.update();
         
-        //const ControlGrid::Node * gridControls = nullptr;
         bool isHitsQueried = false;
         Control * controlHit = nullptr;
 
@@ -86,41 +86,35 @@ namespace Guise
         {
             switch (e.type)
             {
-                /*case Input::EventType::MousePress:
-                {
-                    
-    
-                }
-                break;*/
                 case Input::EventType::MousePress:
                 case Input::EventType::MouseRelease:
                 case Input::EventType::MouseMove:
                 case Input::EventType::MouseJustPressed:
+                case Input::EventType::MouseDoubleClick:
                 {
+                    e.position = e.position * GUISE_DEFAULT_DPI / static_cast<float>(m_dpi);
                     if (!isHitsQueried)
                     {
-                        //gridControls = m_controlGrid.query(e.position);
-                        controlHit = m_plane->queryHit(e.position);
+                        controlHit = queryControlHit(e.position);
                         isHitsQueried = true;
                     }
 
-                    if (controlHit && controlHit->handleInputEvent(e))
+                    if (controlHit)
                     {
-                        break;
+                        controlHit->handleInputEvent(e);
                     }
-     
+
+                    if (controlHit != m_hoveredControl)
+                    {
+                        if (m_hoveredControl)
+                        {
+                            m_hoveredControl->handleInputEvent(e);
+                            
+                        }
+                        m_hoveredControl = controlHit;
+                    }    
                 }
                 break;
-                /*case Input::EventType::MouseRelease:
-                {
-                    
-                }
-                break;
-                case Input::EventType::MouseMove:
-                {
-               
-                }
-                break;*/
                 default: break;
             }
         }
@@ -149,9 +143,15 @@ namespace Guise
 
     void Canvas::render(RendererInterface & renderInterface)
     {
-        m_plane->render(renderInterface);
-        //m_controlGrid.render(renderInterface, m_size);
-        //m_controlGrid.renderGrid(renderInterface, m_size);
+        for (auto levelIt = m_renderControls.begin(); levelIt != m_renderControls.end(); levelIt++)
+        {
+            for (auto controlIt = levelIt->second.begin(); controlIt != levelIt->second.end(); controlIt++)
+            {
+                (*controlIt)->render(renderInterface);
+            }
+        }
+
+        m_renderControls.clear();
     }
 
     const Input & Canvas::getInput() const
@@ -176,12 +176,6 @@ namespace Guise
     void Canvas::resize(const Vector2ui32 & size)
     {
         m_size = size;
-
-        /*if (size != m_size)
-        {
-            m_size = size;
-            m_controlGrid.resize(m_size);
-        } */ 
     }
 
     void Canvas::focusControl(Control * control)
@@ -191,7 +185,15 @@ namespace Guise
 
     void Canvas::setDpi(const uint32_t dpi)
     {
-        m_dpi = dpi;
+        if (dpi != m_dpi)
+        {
+            m_dpi = dpi;
+            for (auto it = m_dpiSensitiveObjects.begin(); it != m_dpiSensitiveObjects.end(); it++)
+            {
+                (*it)->onNewDpi(m_dpi);
+            }
+        }
+        
     }
 
     uint32_t Canvas::getDpi() const
@@ -199,27 +201,34 @@ namespace Guise
         return m_dpi;
     }
 
-    /*void Canvas::registerControlBoundsChange(Control & control, const Bounds2f & bounds)
+    void Canvas::queueControlRendering(Control * control)
     {
-        m_controlGrid.setControlBounds(control, bounds);
-    }*/
+        auto itLevel = m_renderControls.find(control->getLevel());
+        if (itLevel == m_renderControls.end())
+        {
+            itLevel = m_renderControls.insert({ control->getLevel(),{} }).first;
+        }
 
-    /*void Canvas::registerControlLevelChange(Control & control, const size_t level)
-    {
-        m_controlGrid.setControlLevel(control, level);
-    }*/
+        itLevel->second.push_back(control);
+    }
 
-    /*void Canvas::unregisterControl(Control & control)
+    void Canvas::registerDpiSensitive(DpiSensitive * object)
     {
-        m_controlGrid.removeControl(control);
-    }*/
+        m_dpiSensitiveObjects.insert(object);
+    }
+
+    void Canvas::unregisterDpiSensitive(DpiSensitive * object)
+    {
+        m_dpiSensitiveObjects.erase(object);
+    }
 
     Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet) :
-        m_dpi(96),
+        m_dpi(GUISE_DEFAULT_DPI),
         m_plane(nullptr),
         m_selectedControl(nullptr),
         m_size(size),
-        m_focusedControl(nullptr)
+        m_focusedControl(nullptr),
+        m_hoveredControl(nullptr)
     {
         
         if (styleSheet != nullptr)
@@ -235,6 +244,21 @@ namespace Guise
 
         m_plane = Plane::create(*this);
         m_plane->setLevel(1);
+    }
+
+    Control * Canvas::queryControlHit(const Vector2f & point) const
+    {
+         for (auto levelIt = m_renderControls.rbegin(); levelIt != m_renderControls.rend(); levelIt++)
+        {
+            for (auto controlIt = levelIt->second.rbegin(); controlIt != levelIt->second.rend(); controlIt++)
+            {
+                if ((*controlIt)->intersects(point))
+                {
+                    return *controlIt;
+                }
+            }
+        }
+        return nullptr;
     }
 
 }

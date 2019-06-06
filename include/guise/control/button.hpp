@@ -27,6 +27,7 @@
 #define GUISE_CONTROL_BUTTON_HPP
 
 #include "guise/control.hpp"
+#include "guise/signal.hpp"
 #include <functional>
 
 namespace Guise
@@ -51,13 +52,15 @@ namespace Guise
 
         virtual Bounds2f getSelectBounds() const;
 
-        virtual Control * queryHit(const Vector2f & point) const;
+        virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
 
         Style::BoxStyle & getActiveStyle();
         Style::BoxStyle & getDisabledStyle();
         Style::BoxStyle & getHoverStyle();
 
-        std::function<void()> onPressed;
+        Signal<Vector2f> onPressed;
+        Signal<Vector2f> onReleased;
+        Signal<Vector2f> onHover;       
 
     private:
 

@@ -33,6 +33,11 @@
 namespace Guise
 {
 
+    int32_t OpenGLRenderer::getDpi()
+    {
+        return m_dpi;
+    }
+
     void OpenGLRenderer::setCulling(const Vector2f &, const Vector2f &)
     {
 
@@ -112,17 +117,23 @@ namespace Guise
 
     void OpenGLRenderer::setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size)
     {
-        Matrix4x4f orthoMat;
-        orthoMat.orthographic(  (float)position.x, (float)position.x + (float)size.x,
-                                (float)position.y + (float)size.y, (float)position.y,
-                                0.0f, 1.0f);
+        m_viewPort = { position, size };
+        glViewport(position.x, position.y, size.x, size.y);
+        updateProjectionMatrix();
+    }
 
+    void OpenGLRenderer::setDpi(const int32_t dpi)
+    {
+        m_dpi = dpi;
+        updateProjectionMatrix();
+    }
+
+    /*void OpenGLRenderer::setProjectionMatrix(Matrix4x4f & matrix)
+    {
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glLoadMatrixf(orthoMat.m);
-
-        glViewport(position.x, position.y, size.x, size.y);
-    }
+        glLoadMatrixf(matrix.m);
+    }*/
 
     void OpenGLRenderer::clearColor()
     {
@@ -134,8 +145,21 @@ namespace Guise
         ::SwapBuffers(m_deviceContextHandle);
     }
 
+    void OpenGLRenderer::updateProjectionMatrix()
+    {
+        Matrix4x4f orthoMat;
+        orthoMat.loadOrthographic(0.0f, (float)m_viewPort.size.x, (float)m_viewPort.size.y, 0.0f, 0.0f, 1.0f);
+        float scale = static_cast<float>(m_dpi) / static_cast<float>(GUISE_DEFAULT_DPI);
+        orthoMat.scale(scale, scale, scale);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glLoadMatrixf(orthoMat.m);
+    }
+
     OpenGLRenderer::OpenGLRenderer(HDC deviceContextHandle) :
-        m_deviceContextHandle(deviceContextHandle)
+        m_deviceContextHandle(deviceContextHandle),
+        m_dpi(GUISE_DEFAULT_DPI)
     {
         // Filling the pixel fromat structure.
         static PIXELFORMATDESCRIPTOR pfd = {

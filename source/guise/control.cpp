@@ -39,13 +39,15 @@ namespace Guise
     // Control implementations.
     Control::Control(Canvas & canvas) :
         m_canvas(canvas),
-        m_level(0)
+        m_enabled(true),
+        m_inputEnabled(true),
+        m_visible(true),
+        m_level(0),
+        m_forceUpdate(false)       
     { }
 
     Control::~Control()
-    {
-        //m_canvas.unregisterControl(*this);
-    }
+    { }
 
     Canvas & Control::getCanvas()
     {
@@ -70,21 +72,6 @@ namespace Guise
     {
     }
 
-   /* Control * Control::mousePress(const Vector2f &)
-    {
-        return nullptr;
-    }
-
-    Control * Control::mouseRelease(const Vector2f &)
-    {
-        return nullptr;
-    }
-
-    Control * Control::mouseHover(const Vector2f &)
-    {
-        return nullptr;
-    }*/
-
     Bounds2f Control::getRenderBounds() const
     {
         return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
@@ -95,35 +82,80 @@ namespace Guise
         return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
     }
 
+    void Control::enable()
+    {
+        m_enabled = true;
+    }
+
+    void Control::disable()
+    {
+        m_enabled = true;
+    }
+
+    bool Control::isEnabled()
+    {
+        return true;
+    }
+
+    void Control::enableInput()
+    {
+        m_inputEnabled = true;
+    }
+
+    void Control::disableInput()
+    {
+        m_inputEnabled = false;
+    }
+
+    bool Control::isInputEnabled() const
+    {
+        return true;
+    }
+
+    void Control::show()
+    {
+        m_visible = true;
+    }
+
+    void Control::hide(const bool)
+    {
+        m_visible = false;
+    }
+
+    bool Control::isVisible() const
+    {
+        return m_visible;
+    }
+
     void Control::forceUpdate()
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         m_forceUpdate = true;
 
         if (auto parent = getParent().lock())
         {
-            parent->forceUpdate();
+            if (!parent->isUpdateForced())
+            {
+                parent->forceUpdate();
+            }           
         }
     }
 
     bool Control::isUpdateForced()
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
         return m_forceUpdate;
     }
 
     bool Control::pollUpdateForced()
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-
         const bool forced = m_forceUpdate;
         m_forceUpdate = false;
         return forced;
     }
 
-    Control * Control::queryHit(const Vector2f &) const
+
+    bool Control::intersects(const Vector2f & point) const
     {
-        return nullptr;
+        return m_enabled && m_inputEnabled && getSelectBounds().intersects(point);
     }
 
     size_t Control::getLevel() const
@@ -136,7 +168,6 @@ namespace Guise
         if (level != m_level)
         {
             m_level = level;
-            //m_canvas.registerControlLevelChange(*this, m_level);
         }
     }
 
@@ -184,8 +215,6 @@ namespace Guise
 
     void Control::release()
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-
         auto parent = m_parent.lock();
         if (!parent)
         {
@@ -237,14 +266,11 @@ namespace Guise
     void ControlContainer::adoptControl(Control & control)
     {
         control.release();
-
-        std::lock_guard<std::mutex> lock(control.m_mutex);
         control.m_parent = Control::shared_from_this();
     }
 
     void ControlContainer::releaseControl(Control & control)
     {
-        std::lock_guard<std::mutex> lock(control.m_mutex);
         control.m_parent.reset();
     }
 
@@ -411,13 +437,7 @@ namespace Guise
     std::vector<std::shared_ptr<const Control> > ControlContainerList::getChilds() const
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-
-        std::vector<std::shared_ptr<const Control> > childs;
-        for (auto & child : m_childs)
-        {
-            childs.push_back(child);
-        }
-        return childs;
+        return { m_childs.begin(), m_childs.end() };
     }
 
     bool ControlContainerList::add(const std::shared_ptr<Control> & control, const size_t index)

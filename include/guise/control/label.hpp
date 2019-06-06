@@ -27,6 +27,7 @@
 #define GUISE_CONTROL_LABEL_HPP
 
 #include "guise/control.hpp"
+#include "guise/control/dpiSensitive.hpp"
 #include "guise/font.hpp"
 
 namespace Guise
@@ -55,7 +56,7 @@ namespace Guise
 
     };
 
-    class GUISE_API Label : public LabelStyle, public Control
+    class GUISE_API Label : public LabelStyle, public Control, public DpiSensitive
     {
 
     public:
@@ -75,7 +76,7 @@ namespace Guise
 
         virtual Bounds2f getSelectBounds() const;
 
-        virtual Control * queryHit(const Vector2f & point) const;
+        ~Label();
 
         void setText(const std::wstring & text);
 
@@ -89,10 +90,13 @@ namespace Guise
         Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text);
         Label(const Label &) = delete;
 
+        void onNewDpi(const int32_t dpi);
+
         //static std::unique_ptr<uint8_t[]> stringToBitmap(const std::wstring & text, const std::string family, const uint32_t height,
         //                                                 const Texture::PixelFormat pixelFormat, Vector2ui32 & dimensions);
 
         bool                        m_changed;
+        int32_t                     m_dpi;
         std::shared_ptr<Font>       m_font;
         Bounds2f                    m_renderBounds;
         std::wstring                m_text;

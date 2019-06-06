@@ -169,14 +169,15 @@ namespace Guise
             if (renderBounds != m_renderBounds || childsUpdate)
             {
                 m_renderBounds = renderBounds;
+                m_childsBounds = Bounds2f(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
 
-                Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
+                /*Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
 
                 auto childs = getChilds();
                 for (auto it = childs.begin(); it != childs.end(); it++)
                 {
                     (*it)->update(childBounds);
-                }
+                }*/
 
             }
             
@@ -195,16 +196,24 @@ namespace Guise
                     (*it)->update(childBounds);
                 }
             }*/
-        } 
-    }
+        }
 
-    void Plane::render(RendererInterface & renderer)
-    {
+        getCanvas().queueControlRendering(this);
+
         auto childs = getChilds();
         for (auto it = childs.begin(); it != childs.end(); it++)
         {
-            (*it)->render(renderer);
+            (*it)->update(m_childsBounds);
         }
+    }
+
+    void Plane::render(RendererInterface & /*renderer*/)
+    {
+        /*auto childs = getChilds();
+        for (auto it = childs.begin(); it != childs.end(); it++)
+        {
+            (*it)->render(renderer);
+        }*/
     }
 
     Bounds2f Plane::getRenderBounds() const
@@ -217,28 +226,11 @@ namespace Guise
         return m_renderBounds;
     }
 
-    Control * Plane::queryHit(const Vector2f & point) const
-    {
-        auto childs = getChilds();
-        for (auto it = childs.rbegin(); it != childs.rend(); it++)
-        {
-            if (auto hit = (*it)->queryHit(point))
-            {
-                return hit;
-            }
-        }
-        if (m_renderBounds.intersects(point))
-        {
-            return const_cast<Plane *>(this);
-        }
-
-        return nullptr;
-    }
-
     Plane::Plane(Canvas & canvas) :
         ControlContainerList(canvas),
         PlaneStyle(canvas.getStyleSheet()->getSelector("plane")),
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f)
+        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
+        m_childsBounds(0.0f, 0.0f, 0.0f, 0.0f)
     { }
 
 }

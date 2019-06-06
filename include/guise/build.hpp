@@ -30,7 +30,31 @@
 
 // Win32
 #if defined( _WIN32 ) || defined( __WIN32__ ) || defined( _WIN64 ) || defined( __WIN64__ )
-    #define GUISE_PLATFORM_WINDOWS
+    #include "SDKDDKVer.h"
+
+    #define GUISE_PLATFORM_WINDOWS_10 0x0605
+    #define GUISE_PLATFORM_WINDOWS_8_1 0x0603
+    #define GUISE_PLATFORM_WINDOWS_8 0x0602
+    #define GUISE_PLATFORM_WINDOWS_7 0x0601
+    #define GUISE_PLATFORM_WINDOWS_VISTA 0x0600
+    #define GUISE_PLATFORM_WINDOWS_XP 0x0501
+#pragma comment(lib, "Shcore.lib")
+    #if(WINVER >= 0x0605)
+        #define GUISE_PLATFORM_WINDOWS GUISE_PLATFORM_WINDOWS_10
+    #elif(WINVER >= 0x0603)
+        #define GUISE_PLATFORM_WINDOWS GUISE_PLATFORM_WINDOWS_8_1
+        #pragma comment(lib, "Shcore.lib")
+    #elif(WINVER >= 0x0602)
+        #define GUISE_PLATFORM_WINDOWS GUISE_PLATFORM_WINDOWS_8
+    #elif(WINVER >= 0x0601)
+        #define GUISE_PLATFORM_WINDOWS GUISE_PLATFORM_WINDOWS_7
+    #elif(WINVER >= 0x0600)
+        #define GUISE_PLATFORM_WINDOWSGUISE_PLATFORM_WINDOWS_VISTA
+    #elif(WINVER >= 0x0501)
+        #define GUISE_PLATFORM_WINDOWS GUISE_PLATFORM_WINDOWS_XP
+    #else
+        #define GUISE_PLATFORM_WINDOWS 0x0000
+    #endif
 
     #include "guise/platform/win32Headers.hpp"
     #if defined (_MSC_VER)
@@ -74,6 +98,8 @@
 #else
     #define GUISE_API
 #endif
+
+#define GUISE_DEFAULT_DPI 96
 
 #include <stdint.h>
 
