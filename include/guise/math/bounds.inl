@@ -103,6 +103,20 @@ namespace Guise
     }
 
     template <typename T>
+    inline Bounds<2, T>  Bounds<2, T>::operator * (const T value) const
+    {
+        return { position * value, size * value};
+    }
+
+    template <typename T>
+    inline Bounds<2, T> &  Bounds<2, T>::operator *= (const T value)
+    {
+        position *= value;
+        size *= value;
+        return *this;
+    }
+
+    template <typename T>
     inline bool Bounds<2, T>::operator == (const Bounds<2, T> & bounds) const
     {
         return position == bounds.position && size == bounds.size;

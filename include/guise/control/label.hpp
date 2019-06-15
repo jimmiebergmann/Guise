@@ -35,28 +35,7 @@ namespace Guise
 
     class Texture;
 
-    class GUISE_API LabelStyle
-    {
-
-    public:
-
-        LabelStyle();
-        LabelStyle(const std::shared_ptr<Style::Selector> & selector);
-
-        const uint32_t getFontHeight() const;
-        const std::string & getFontFamily() const;
-
-        void setFontHeight(const uint32_t height);
-        void setFontFamily(const std::string & family);
-
-    protected:
-
-        uint32_t m_fontHeight;
-        std::string m_fontFamily;
-
-    };
-
-    class GUISE_API Label : public LabelStyle, public Control, public DpiSensitive
+    class GUISE_API Label : public Style::LabelStyle, public Control, public DpiSensitive
     {
 
     public:
@@ -98,6 +77,7 @@ namespace Guise
         bool                        m_changed;
         int32_t                     m_dpi;
         std::shared_ptr<Font>       m_font;
+        bool                        m_newTexture;
         Bounds2f                    m_renderBounds;
         std::wstring                m_text;
         std::shared_ptr<Texture>    m_texture;

@@ -156,7 +156,8 @@ namespace Guise
                 m_renderBounds = renderBounds;
                 newChildBounds = true;
 
-                auto & slotPadding = m_slotStyle.getPadding();
+                auto scale = m_canvas.getScale();
+                auto slotPadding = m_slotStyle.getPadding() * scale;
                 Bounds2f childBoundsLeft(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
                 childBoundsLeft.position.x  += slotPadding.x;
                 childBoundsLeft.size.x      -= (slotPadding.x + slotPadding.z);

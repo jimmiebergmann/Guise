@@ -94,7 +94,11 @@ namespace Guise
 
         void setDpi(const uint32_t dpi);
 
+        void setScale(const float scale);
+
         uint32_t getDpi() const;
+
+        float getScale() const;
 
         void queueControlRendering(Control * control);
 
@@ -109,6 +113,7 @@ namespace Guise
         Control * queryControlHit(const Vector2f & point) const;
 
         uint32_t                        m_dpi;
+        float                           m_scale;
         Input                           m_input;
         std::shared_ptr<Plane>          m_plane;
         Control *                       m_selectedControl;

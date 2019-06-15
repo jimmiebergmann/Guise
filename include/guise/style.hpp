@@ -32,6 +32,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <optional>
 
 namespace Guise
 {
@@ -50,27 +51,14 @@ namespace Guise
 
         public:
 
-            /*enum class Type
-            {
-                Unkown,
-
-                BackgroundColor,
-                BackgroundImage,
-                BorderColor,
-                BorderStyle,
-                BorderWidth,
-                Overflow,
-                Padding,
-                Position,
-                Size
-            };*/
-
             enum class DataType : uint32_t
             {
                 Boolean,
                 BorderStyle,
                 Float,
+                Integer,
                 Overflow,
+                String,
                 Vector2f,
                 Vector3f,
                 Vector4f
@@ -96,18 +84,23 @@ namespace Guise
             Property(const bool value);
             Property(const BorderStyle value);
             Property(const float value);
+            Property(const int value);
             Property(const Overflow value);
+            Property(const std::string & value);
             Property(const Vector2f & value);
             Property(const Vector3f & value);
             Property(const Vector4f & value);
 
+            ~Property();
 
             DataType getDataType() const;
 
             bool getBool() const;
             BorderStyle getBorderStyle() const;
             float getFloat() const;
+            int getInteger() const;
             Overflow getOverflow() const;
+            std::string getString() const;
             const Vector2f & getVector2f() const;
             const Vector3f & getVector3f() const;
             const Vector4f & getVector4f() const;
@@ -132,13 +125,15 @@ namespace Guise
 
             union
             {
-                bool        m_valueBoolean;
-                BorderStyle m_valueBorderStyle;
-                float       m_valueFloat;
-                Overflow    m_valueOverflow;
-                Vector2f    m_valueVector2f;
-                Vector3f    m_valueVector3f;
-                Vector4f    m_valueVector4f;
+                bool            m_valueBoolean;
+                BorderStyle     m_valueBorderStyle;
+                float           m_valueFloat;
+                int             m_valueInteger;
+                Overflow        m_valueOverflow;
+                std::string *   m_valueString;
+                Vector2f        m_valueVector2f;
+                Vector3f        m_valueVector3f;
+                Vector4f        m_valueVector4f;
             };
 
             DataType    m_dataType;
@@ -150,16 +145,6 @@ namespace Guise
         {
 
         public:
-
-            /*enum class Type
-            {
-                Custom,
-
-                Button,
-                Canvas,
-                Plane,
-                Window
-            };*/
 
             struct GUISE_API PropertyNameValue
             {
@@ -192,14 +177,6 @@ namespace Guise
 
         public:
 
-            /*enum class Entry
-            {
-                Button,
-                Canvas,
-                Plane,
-                Window
-            };*/
-
             struct GUISE_API SelectorNameValue
             {
                 SelectorNameValue(const std::string & name, const Selector & selector);
@@ -230,76 +207,22 @@ namespace Guise
 
         public:
 
-            PaddingStyle() :
-                m_padding(0.0f, 0.0f, 0.0f, 0.0f)
-            { }
+            PaddingStyle(PaddingStyle * parent = nullptr);
+            PaddingStyle(const std::shared_ptr<Selector> & selector, PaddingStyle * parent = nullptr);
 
-            PaddingStyle(const std::shared_ptr<Selector> & selector) :
-                PaddingStyle()
-            {
-                if (!selector)
-                {
-                    return;
-                }
+            Vector4f getPadding() const;
+            Vector2f getPaddingLow() const;
+            Vector2f getPaddingHigh() const;
 
-                auto padding = selector->getProperty("padding");
-                if (padding)
-                {
-                    switch (padding->getDataType())
-                    {
-                    case Property::DataType::Float:
-                    {
-                        m_padding.x = m_padding.y = m_padding.z = m_padding.w = padding->getFloat();
-                    }
-                    break;
-                    case Property::DataType::Vector2f:
-                    {
-                        m_padding = { padding->getVector2f(), 0.0f, 0.0f };
-                    }
-                    break;
-                    case Property::DataType::Vector4f:
-                    {
-                        m_padding = padding->getVector4f();
-                    }
-                    break;
-                    default: break;
-                    }
-                } 
-            }
-
-            const Vector4f & getPadding() const
-            {
-                return m_padding;
-            }
-            const Vector2f getPaddingLow() const
-            {
-                return { m_padding.x, m_padding.y };
-            }
-            const Vector2f getPaddingHigh() const
-            {
-                return { m_padding.z, m_padding.w };
-            }
-
-            void setPadding(const Vector4f & padding)
-            {
-                m_padding = padding;
-            }
-
-            void setPadding(const Vector2f & padding)
-            {
-                m_padding.x = padding.x;
-                m_padding.y = padding.y;
-                m_padding.z = m_padding.w = 0.0f;
-            }
-
-            void setPadding(const float & padding)
-            {
-                m_padding.x = m_padding.y = m_padding.z = m_padding.w = padding;
-            }
+            void setPadding(const Vector4f & padding);
+            void setPadding(const Vector2f & padding);
+            void setPadding(const float & padding);
 
         protected:
 
-            Vector4f m_padding;
+            PaddingStyle *          m_parent;
+
+            std::optional<Vector4f> m_padding;
 
         };
 
@@ -309,137 +232,111 @@ namespace Guise
 
         public:
 
-            BoxStyle() :
-                m_backgroundColor(1.0f, 1.0f, 1.0f, 1.0f),
-                m_borderColor(1.0f, 1.0f, 1.0f, 1.0f),
-                m_borderWidth(0.0f),
-                m_borderStyle(Property::BorderStyle::None),
-                m_position(0.0f, 0.0f),
-                m_size(0.0f, 0.0f),
+            BoxStyle(BoxStyle * parent = nullptr);
+            BoxStyle(const std::shared_ptr<Selector> & selector, BoxStyle * parent = nullptr);
+
+            const Vector4f getBackgroundColor() const;
+            const Vector4f getBorderColor() const;
+            Property::BorderStyle getBorderStyle() const;
+            float getBorderWidth() const;
+            const Vector2f getPosition() const;
+            const Vector2f getSize() const;
+            Property::Overflow getOverflow() const;
+
+            void setBackgroundColor(const Vector4f & color);
+            void setBorderColor(const Vector4f & color);
+            void setBorderStyle(const Property::BorderStyle borderStyle);
+            void setBorderWidth(const float width);
+            void setPosition(const Vector2f & position);
+            void setSize(const Vector2f & size);
+            void setOverflow(const Property::Overflow overflow);
+
+        protected:
+
+            BoxStyle *                                  m_parent;
+
+            std::optional<Vector4f>                     m_backgroundColor;
+            std::optional<Vector4f>                     m_borderColor;
+            std::optional<float>                        m_borderWidth;
+            std::optional<Style::Property::BorderStyle> m_borderStyle;
+            std::optional<Vector2f>                     m_position;
+            std::optional<Vector2f>                     m_size;
+            std::optional<Vector4f>                     m_padding;
+            std::optional<Style::Property::Overflow>    m_overflow;
+
+        };
+
+
+        class GUISE_API LabelStyle
+        {
+
+        public:
+
+            LabelStyle() :
+                m_fontFamily("Arial"),
+                m_fontSize(12),
                 m_overflow(Style::Property::Overflow::hidden)
             { }
 
-            BoxStyle(const std::shared_ptr<Selector> & selector) :
-                m_backgroundColor(1.0f, 1.0f, 1.0f, 1.0f),
-                m_borderColor(1.0f, 1.0f, 1.0f, 1.0f),
-                m_borderWidth(0.0f),
-                m_borderStyle(Property::BorderStyle::None),
-                m_position(0.0f, 0.0f),
-                m_size(0.0f, 0.0f),
-                m_overflow(Style::Property::Overflow::hidden),
-                PaddingStyle(selector)
+            LabelStyle(const std::shared_ptr<Selector> & selector) :
+                m_fontFamily("Arial"),
+                m_fontSize(12),
+                m_overflow(Style::Property::Overflow::hidden)
             {
                 if (!selector)
                 {
                     return;
                 }
 
-                auto position = selector->getProperty("position");
-                if (position && position->getDataType() == Property::DataType::Vector2f)
+                auto position = selector->getProperty("font-family");
+                if (position && position->getDataType() == Property::DataType::String)
                 {
-                    m_position = position->getVector2f();
+                    m_fontFamily = position->getString();
                 }
-                auto size = selector->getProperty("size");
-                if (size && size->getDataType() == Property::DataType::Vector2f)
+                auto size = selector->getProperty("font-size");
+                if (size && size->getDataType() == Property::DataType::Integer)
                 {
-                    m_size = size->getVector2f();
+                    m_fontSize = size->getInteger();
                 }
                 auto overflow = selector->getProperty("overflow");
                 if (overflow && overflow->getDataType() == Property::DataType::Overflow)
                 {
                     m_overflow = overflow->getOverflow();
                 }
-                auto backgroundColor = selector->getProperty("background-color");
-                if (backgroundColor && backgroundColor->getDataType() == Property::DataType::Vector4f)
-                {
-                    m_backgroundColor = backgroundColor->getVector4f();
-                }
-                auto borderColor = selector->getProperty("border-color");
-                if (borderColor && borderColor->getDataType() == Property::DataType::Vector4f)
-                {
-                    m_borderColor = borderColor->getVector4f();
-                }
-
-                auto borderStyle = selector->getProperty("border-style");
-                if (borderStyle && borderStyle->getDataType() == Property::DataType::BorderStyle)
-                {
-                    m_borderStyle = borderStyle->getBorderStyle();
-                }
-                auto borderWidth = selector->getProperty("border-width");
-                if (borderWidth && borderWidth->getDataType() == Property::DataType::Float)
-                {
-                    m_borderWidth = borderWidth->getFloat();
-                }
             }
 
-            const Vector4f & getBackgroundColor() const
+           
+            const std::string & getFontFamily() const
             {
-                return m_backgroundColor;
+                return m_fontFamily;
             }
-            const Vector4f & getBorderColor() const
+            const int getFontSize() const
             {
-                return m_borderColor;
-            }
-            Property::BorderStyle getBorderStyle() const
-            {
-                return m_borderStyle;
-            }
-            float getBorderWidth() const
-            {
-                return m_borderWidth;
-            }
-            const Vector2f & getPosition() const
-            {
-                return m_position;
-            }
-            const Vector2f & getSize() const
-            {
-                return m_size;
+                return m_fontSize;
             }
             Property::Overflow getOverflow() const
             {
                 return m_overflow;
             }
 
-            void setBackgroundColor(const Vector4f & color)
+            void setFontFamily(const std::string & family)
             {
-                m_backgroundColor = color;
+                m_fontFamily = family;
             }
-            void setBorderColor(const Vector4f & color)
+            void setFontSize(const int size)
             {
-                m_borderColor = color;
+                m_fontSize = size;
             }
-            void setBorderStyle(const Style::Property::BorderStyle borderStyle)
-            {
-                m_borderStyle = borderStyle;
-            }
-            void setBorderWidth(const float width)
-            {
-                m_borderWidth = width;
-            }
-            void setPosition(const Vector2f & position)
-            {
-                m_position = position;
-            }
-            void setSize(const Vector2f & size)
-            {
-                m_size = size;
-            }
-            void setOverflow(const Style::Property::Overflow overflow)
+            void setOverflow(const Property::Overflow overflow)
             {
                 m_overflow = overflow;
             }
 
         protected:
 
-            Vector4f m_backgroundColor;
-            Vector4f m_borderColor;
-            float m_borderWidth;
-            Style::Property::BorderStyle m_borderStyle;
-            Vector2f m_position;
-            Vector2f m_size;
-            Vector4f m_padding;
-            Style::Property::Overflow m_overflow;
+            std::string m_fontFamily;
+            int m_fontSize;
+            Property::Overflow m_overflow;
 
         };
         

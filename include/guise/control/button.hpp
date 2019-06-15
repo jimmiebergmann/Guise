@@ -70,10 +70,11 @@ namespace Guise
         Bounds2f m_renderBounds;
         Bounds2f m_childBounds;
 
-        Style::BoxStyle m_activeStyle;
-        Style::BoxStyle m_disabledStyle;
-        Style::BoxStyle m_hoverStyle;
-        Style::BoxStyle * m_currentStyle;
+        Style::BoxStyle     m_activeStyle;
+        Style::BoxStyle     m_disabledStyle;
+        Style::BoxStyle     m_hoverStyle;
+        Style::BoxStyle *   m_currentStyle;
+        bool                m_pressed;
 
     };
 

@@ -59,6 +59,8 @@ namespace Guise
         void drawQuad(const Bounds2f & bounds, const Vector4f & color);
         void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color);
 
+        void drawBorder(const Bounds2f & bounds, const float width, const Vector4f & color);
+
         void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color);
   
         std::shared_ptr<Texture> createTexture();

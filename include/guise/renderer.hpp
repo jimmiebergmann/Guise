@@ -54,6 +54,8 @@ namespace Guise
         virtual void drawQuad(const Bounds2f & bounds, const Vector4f & color) = 0;      
         virtual void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color) = 0;
 
+        virtual void drawBorder(const Bounds2f & bounds, const float width, const Vector4f & color) = 0;
+
         virtual void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color) = 0;
 
         virtual std::shared_ptr<Texture> createTexture() = 0;
@@ -85,8 +87,6 @@ namespace Guise
         virtual void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size) = 0;
 
         virtual void setDpi(const int32_t dpi) = 0;
-
-        //virtual void setProjectionMatrix(Matrix4x4f & matrix) = 0;
 
         virtual void clearColor() = 0;
 

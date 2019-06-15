@@ -81,6 +81,9 @@ namespace Guise
 
         Bounds<2, T> & operator = (const Bounds<2, T> & bounds);
 
+        Bounds<2, T> operator * (const T value) const;
+        Bounds<2, T> & operator *= (const T value);
+
         bool operator == (const Bounds<2, T> & bounds) const;
         bool operator != (const Bounds<2, T> & bounds) const;
 

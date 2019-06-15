@@ -29,6 +29,7 @@
 
 #include "guise/renderer/opengl/openglTexture.hpp"
 #include "guise/appWindow.hpp"
+#include <iostream>
 
 namespace Guise
 {
@@ -45,13 +46,17 @@ namespace Guise
 
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const Vector4f & color)
     {
+        Bounds2f newBounds = bounds;
+
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
+
         glColor4f(color.x, color.y, color.z, color.w);
         glVertex2f(bounds.position.x, bounds.position.y);
         glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
         glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
         glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+
         glEnd();
     }
 
@@ -75,6 +80,42 @@ namespace Guise
         glTexCoord2f(0.0f, 0.0f);
         glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
         
+        glEnd();
+    }
+
+    void OpenGLRenderer::drawBorder(const Bounds2f & bounds, const float width, const Vector4f & color)
+    {
+        glDisable(GL_TEXTURE_2D);
+
+        glDisable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+
+        const float widthX = bounds.size.x > width ? width : bounds.size.x;
+        const float widthY = bounds.size.y > width ? width : bounds.size.y;
+
+        glColor4f(color.x, color.y, color.z, color.w);
+
+        glVertex2f(bounds.position.x, bounds.position.y);
+        glVertex2f(bounds.position.x + bounds.size.x , bounds.position.y);
+        glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + widthY);
+        glVertex2f(bounds.position.x + widthX, bounds.position.y + widthY);
+       
+        glVertex2f(bounds.position.x + widthX, bounds.position.y + bounds.size.y - widthY);
+        glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + bounds.size.y - widthY);
+        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
+        glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+        
+        glVertex2f(bounds.position.x, bounds.position.y);
+        glVertex2f(bounds.position.x + widthX, bounds.position.y + widthY);
+        glVertex2f(bounds.position.x + widthX, bounds.position.y + bounds.size.y - widthY);
+        glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+        
+
+        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
+        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
+        glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + bounds.size.y - widthY);
+        glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + widthY);
+
         glEnd();
     }
 
@@ -128,13 +169,6 @@ namespace Guise
         updateProjectionMatrix();
     }
 
-    /*void OpenGLRenderer::setProjectionMatrix(Matrix4x4f & matrix)
-    {
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glLoadMatrixf(matrix.m);
-    }*/
-
     void OpenGLRenderer::clearColor()
     {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -149,8 +183,6 @@ namespace Guise
     {
         Matrix4x4f orthoMat;
         orthoMat.loadOrthographic(0.0f, (float)m_viewPort.size.x, (float)m_viewPort.size.y, 0.0f, 0.0f, 1.0f);
-        float scale = static_cast<float>(m_dpi) / static_cast<float>(GUISE_DEFAULT_DPI);
-        orthoMat.scale(scale, scale, scale);
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();

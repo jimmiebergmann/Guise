@@ -124,6 +124,10 @@ namespace Guise
 
     protected:
 
+        /*
+        * Returning DPI converted coordinates of rendering bounds by given parameters.
+        *
+        */
         Bounds2f calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const;
 
         Canvas &    m_canvas;

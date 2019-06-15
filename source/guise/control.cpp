@@ -84,17 +84,25 @@ namespace Guise
 
     void Control::enable()
     {
-        m_enabled = true;
+        if (!m_enabled)
+        {
+            m_enabled = true;
+            forceUpdate();
+        }      
     }
 
     void Control::disable()
     {
-        m_enabled = true;
+        if (m_enabled)
+        {
+            m_enabled = false;
+            forceUpdate();
+        }       
     }
 
     bool Control::isEnabled()
     {
-        return true;
+        return m_enabled;
     }
 
     void Control::enableInput()
@@ -109,7 +117,7 @@ namespace Guise
 
     bool Control::isInputEnabled() const
     {
-        return true;
+        return m_inputEnabled;
     }
 
     void Control::show()
@@ -227,8 +235,12 @@ namespace Guise
 
     Bounds2f Control::calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const
     {
+        const float scale = m_canvas.getScale();
+        const Vector2f newPos = position * scale;
+        const Vector2f newSize = size * scale;
+
         const bool clamp = overflow == Style::Property::Overflow::hidden;     
-        Bounds2f bounds = { canvasBound.position + position, size };
+        Bounds2f bounds = { canvasBound.position + newPos, newSize };
 
         if (clamp)
         {
@@ -237,19 +249,24 @@ namespace Guise
 
         Vector2f lower = bounds.position;
         Vector2f higherCanvas = canvasBound.position + canvasBound.size;
-        Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, size);
+        Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, newSize);
 
-        if ((clamp && higherThis.x > higherCanvas.x) || size.x <= 0.0f)
+        if ((clamp && higherThis.x > higherCanvas.x) || newSize.x <= 0.0f)
         {
             bounds.size.x = higherCanvas.x - lower.x;
         }
-        if ((clamp && higherThis.y > higherCanvas.y) || size.y <= 0.0f)
+        if ((clamp && higherThis.y > higherCanvas.y) || newSize.y <= 0.0f)
         {
             bounds.size.y = higherCanvas.y - lower.y;
         }
 
         bounds.size.x = std::max(0.0f, bounds.size.x);
         bounds.size.y = std::max(0.0f, bounds.size.y);
+
+        bounds.position.x = std::floor(bounds.position.x);
+        bounds.position.y = std::floor(bounds.position.y);
+        bounds.size.x = std::floor(bounds.size.x);
+        bounds.size.y = std::floor(bounds.size.y);
 
         return bounds;
     }

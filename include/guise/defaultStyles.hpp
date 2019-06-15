@@ -39,55 +39,79 @@ namespace Guise
 
             static const Selector button = Selector(
                 {
-                    { "padding",                { 15.0f } },
-                    { "background-color",   {   { 0.25f, 0.25f, 0.25f, 1.0 } } },
-                    { "padding",                { 15.0f } },
-                    { "border-style",           { Property::BorderStyle::Solid } },
-                    { "border-width",           { 10.0f } },
-                    { "border-color",       {   { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                    { "padding",                        { 15.0f } },
+                    { "background-color",   { Vector4f  { 0.25f, 0.25f, 0.25f, 1.0 } } },
+                    { "padding",                        { 15.0f } },
+                    { "border-style",                   { Property::BorderStyle::Solid } },
+                    { "border-width",                   { 1.0f } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                }
+            );
+
+            static const Selector buttonActive = Selector(
+                {
+                    { "background-color",   { Vector4f  { 1.00f, 0.20f, 0.20f, 1.0 } } },
+                    { "border-style",                   { Property::BorderStyle::Solid } },
+                    { "border-width",                   { 1.0f } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                }
+            );
+
+            static const Selector buttonDisabled = Selector(
+                {
+                    { "background-color",   { Vector4f  { 0.20f, 1.00f, 0.20f, 1.0 } } },
+                    { "border-style",                   { Property::BorderStyle::Solid } },
+                    { "border-width",                   { 1.0f } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
                 }
             );
 
             static const Selector buttonHover = Selector(
                 {
-                    { "padding",{ 15.0f } },
-                    { "background-color",{ { 1.0f, 0.25f, 0.25f, 1.0 } } },
-                    { "padding",{ 15.0f } },
-                    { "border-style",{ Property::BorderStyle::Solid } },
-                    { "border-width",{ 10.0f } },
-                    { "border-color",{ { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 0.20f, 0.20f, 1.00f, 1.0 } } },
+                    { "border-style",                   { Property::BorderStyle::Solid } },
+                    { "border-width",                   { 1.0f } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
                 }
             );
 
             static const Selector canvas = Selector(
                 {
-                    { "padding",                { 0.0f }  },
-                    { "background-color",   {   { 0.9f, 0.9f, 0.9f, 1.0f } } }
+                    { "padding",                        { 0.0f }  },
+                    { "background-color",   { Vector4f  { 0.9f, 0.9f, 0.9f, 1.0f } } }
+                }
+            );
+
+            static const Selector label = Selector(
+                {
+                    { "font-family",                    { "Arial" } },
+                    { "font-size",                      { 12 } },
+                    { "overflow",                       { Property::Overflow::hidden } }
                 }
             );
 
             static const Selector plane = Selector(
                 {
-                    { "padding",                { 0.0f } }
+                    { "padding",                        { 0.0f } }
                 }
             );
 
             static const Selector verticalGrid = Selector(
                 {
-                    { "padding",                { 5.0f } }
+                    { "padding",                        { 5.0f } }
                 }
             );
 
             static const Selector verticalGridSlot = Selector(
                 {
-                    { "padding",            {   { 5.0f, 1.0f, 3.0f, 1.0f } } }
+                    { "padding",            { Vector4f  { 5.0f, 1.0f, 3.0f, 1.0f } } }
                 }
             );
 
             static const Selector window = Selector(
                 {
-                    { "padding",                { 5.0f } },
-                    { "background-color",   {   { 0.7f, 0.7f, 0.7f, 1.0f } } }
+                    { "padding",                        { 5.0f } },
+                    { "background-color",   { Vector4f  { 0.7f, 0.7f, 0.7f, 1.0f } } }
                 }
             );
 

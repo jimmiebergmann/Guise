@@ -43,22 +43,54 @@ namespace Guise
 
     Control * Button::handleInputEvent(const Input::Event & e)
     {
+        if (!m_enabled)
+        {
+            return this;
+        }
+
         switch (e.type)
         {
             case Input::EventType::MouseMove:          
             {
                 if (m_renderBounds.intersects(e.position))
                 {
-                    m_currentStyle = &m_hoverStyle;
+                    if (m_pressed)
+                    {
+                        m_currentStyle = &m_activeStyle;
+                    }
+                    else
+                    {
+                        m_currentStyle = &m_hoverStyle;
+                    }
+
+                    onHover(e.position);
                 }
                 else
                 {
-                    m_currentStyle = this;
+                    m_currentStyle = this;                   
+                }
+
+                forceUpdate();
+            }
+            break;
+            case Input::EventType::MouseJustPressed:
+            {
+                if (m_renderBounds.intersects(e.position))
+                {
+                    m_pressed = true;
+                    onPressed(e.position);
                 }
             }
             break;
-            case Input::EventType::MouseJustPressed:    onPressed(e.position); break;
-            case Input::EventType::MouseDoubleClick:    onPressed(e.position); break;
+            case Input::EventType::MouseRelease:
+            {
+                m_pressed = false;
+                if (m_renderBounds.intersects(e.position))
+                {
+                    onReleased(e.position);
+                }
+            }
+            break;
             default: break;
         }
 
@@ -67,26 +99,24 @@ namespace Guise
 
     void Button::update(const Bounds2f & canvasBound)
     {
+        if (!m_enabled && m_currentStyle != &m_disabledStyle)
+        {
+            m_currentStyle = &m_disabledStyle;
+            forceUpdate();
+        }
+
         const bool childsUpdate = pollUpdateForced();
         if (canvasBound != m_renderBounds || childsUpdate)
         {
-            Bounds2f renderBounds = calcRenderBounds(canvasBound, m_position, m_size, m_overflow);
+            Bounds2f renderBounds = calcRenderBounds(canvasBound, m_currentStyle->getPosition(), m_currentStyle->getSize(), m_currentStyle->getOverflow());
             if (renderBounds != m_renderBounds || childsUpdate)
             {
-                m_renderBounds = renderBounds;
+                m_renderBounds = { renderBounds.position , renderBounds.size };
 
-                m_childBounds = Bounds2f(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - (getPaddingHigh() * 2.0f));
-
-                /*if (auto child = getChilds()[0])
-                {
-                    const Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - (getPaddingHigh() * 2.0f));
-
-                    if (childBounds != m_childBounds)
-                    {
-                        m_childBounds = childBounds;
-                        child->update(m_childBounds);
-                    }
-                }*/
+                const float scale = m_canvas.getScale();
+                const auto paddingLow = m_currentStyle->getPaddingLow() * scale;
+                const auto paddingHigh = m_currentStyle->getPaddingHigh() * scale;
+                m_childBounds = Bounds2f(m_renderBounds.position + paddingLow, m_renderBounds.size - paddingLow - paddingHigh);
             }
         }
 
@@ -100,28 +130,15 @@ namespace Guise
 
     void Button::render(RendererInterface & renderer)
     {
-        const bool drawBorder = m_currentStyle->getBorderStyle() != Style::Property::BorderStyle::None && m_currentStyle->getBorderWidth() > 0.0f;
-        Vector4f firstColor = drawBorder ? m_currentStyle->getBorderColor() : m_currentStyle->getBackgroundColor();
-        renderer.drawQuad(m_renderBounds, firstColor);
+        renderer.drawQuad(m_renderBounds, m_currentStyle->getBackgroundColor());
 
+        const bool drawBorder = m_currentStyle->getBorderStyle() != Style::Property::BorderStyle::None && m_currentStyle->getBorderWidth() > 0.0f;
         if (drawBorder)
         {
-            const auto borderWidth = m_currentStyle->getBorderWidth();
-            Bounds2f innerBounds = m_renderBounds;
-            innerBounds.position += {borderWidth, borderWidth};
-            innerBounds.size -= {borderWidth * 2.0f, borderWidth * 2.0f};
-
-            if (innerBounds.size.x > 0.0f && innerBounds.size.y > 0.0f)
-            {
-                renderer.drawQuad(innerBounds, m_currentStyle->getBackgroundColor());
-            } 
-        }
-
-        /*auto childs = getChilds();
-        if (childs.size() && childs[0])
-        {
-            childs[0]->render(renderer);
-        }*/
+            const float scale = m_canvas.getScale();
+            const float borderWidth = std::floor(m_currentStyle->getBorderWidth() * scale);
+            renderer.drawBorder(m_renderBounds, borderWidth, m_currentStyle->getBorderColor());
+        } 
     }
 
     Bounds2f Button::getRenderBounds() const
@@ -168,21 +185,22 @@ namespace Guise
         m_activeStyle(*this),
         m_disabledStyle(*this),
         m_hoverStyle(*this),
-        m_currentStyle(this)
+        m_currentStyle(this),
+        m_pressed(false)
     {
         if (auto activeStyle = canvas->getStyleSheet()->getSelector("button:active"))
         {
-            m_activeStyle = activeStyle;
+            m_activeStyle = { activeStyle, this };
         }
  
         if (auto disabledStyle = canvas->getStyleSheet()->getSelector("button:disabled"))
         {
-            m_disabledStyle = disabledStyle;
+            m_disabledStyle = { disabledStyle, this };
         }
 
         if (auto hoverStyle = canvas->getStyleSheet()->getSelector("button:hover"))
         {
-            m_hoverStyle = hoverStyle;
+            m_hoverStyle = { hoverStyle, this };
         }
     }
 

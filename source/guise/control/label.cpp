@@ -31,75 +31,7 @@
 
 namespace Guise
 {
-    // Label style implementations.
-    LabelStyle::LabelStyle() :
-        m_fontHeight(24),
-        m_fontFamily("Arial")
-    { }
-
-    LabelStyle::LabelStyle(const std::shared_ptr<Style::Selector> & selector) :
-        LabelStyle()
-    {
-        if (!selector)
-        {
-            return;
-        }
-
-        auto & properties = selector->getProperties();
-        for (auto it = properties.begin(); it != properties.end(); it++)
-        {
-            if (it->first == "font-family")
-            {
-                //m_font = it->second->getVector2f();
-            }
-            else if (it->first == "font-size")
-            {
-                /*switch (it->second->getDataType())
-                {
-                    case Style::Property::DataType::Float:
-                    {
-                        m_padding.x = m_padding.y = m_padding.w = m_padding.z = it->second->getFloat();
-                    }
-                    break;
-                    case Style::Property::DataType::Integer:
-                    {
-                        m_padding = { it->second->getVector2f(), 0.0f, 0.0f };
-                    }
-                    break;
-                    case Style::Property::DataType::Vector4f:
-                    {
-                        m_padding = it->second->getVector4f();
-                    }
-                    break;
-                    default: break;
-                }*/
-            }
-           
-        }
-    }
-
-
-
-    const uint32_t LabelStyle::getFontHeight() const
-    {
-        return m_fontHeight;
-    }
-    const std::string & LabelStyle::getFontFamily() const
-    {
-        return m_fontFamily;
-    }
-  
-
-    void LabelStyle::setFontHeight(const uint32_t height)
-    {
-        m_fontHeight = height;
-    }
-    void LabelStyle::setFontFamily(const std::string & family)
-    {
-        m_fontFamily = family;
-    }
-  
-
+ 
     // Button implementations.
     std::shared_ptr<Label> Label::create(std::shared_ptr<Canvas> & canvas, const std::wstring & text)
     {
@@ -118,9 +50,6 @@ namespace Guise
 
     Control * Label::handleInputEvent(const Input::Event &)
     {
-        
-        std::wcout << L"Hit label: " << m_text << std::endl;
-
         return this;
     }
 
@@ -149,7 +78,7 @@ namespace Guise
                 Vector2<size_t> dimensions = { 0, 0 };
                 size_t baseline = 0;
 
-                if (m_font->createBitmap(m_text, m_fontHeight, m_dpi, data, dimensions, baseline))
+                if (m_font->createBitmap(m_text, m_fontSize, m_dpi, data, dimensions, baseline))
                 {
                     if (!m_texture)
                     {
@@ -157,7 +86,8 @@ namespace Guise
                     }
 
                     m_texture->load(data.get(), Texture::PixelFormat::RGBA8, dimensions);
-                    m_renderBounds.size = m_texture->getDimensions() * GUISE_DEFAULT_DPI / m_dpi;
+
+                    m_renderBounds.size = m_texture->getDimensions();
                 }           
             }
         }
@@ -206,10 +136,11 @@ namespace Guise
 
     Label::Label(std::shared_ptr<Canvas> & canvas, const std::wstring & text) :
         Control(*canvas),
-        // LabelStyle(canvas->getStyleSheet()->getSelector("label")),
+        Style::LabelStyle(canvas->getStyleSheet()->getSelector("label")),
         m_changed(true),
         m_dpi(canvas->getDpi()),
         m_font(FontLibrary::get(m_fontFamily)),
+        m_newTexture(false),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_text(text),
         m_texture(nullptr)
@@ -219,10 +150,11 @@ namespace Guise
 
     Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :
         Control(*canvas),
+        Style::LabelStyle(canvas->getStyleSheet()->getSelector("label")),
         m_dpi(canvas->getDpi()),
-        // LabelStyle(canvas->getStyleSheet()->getSelector("label")),
         m_changed(true),
         m_font(FontLibrary::get(font)),
+        m_newTexture(false),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_text(text),
         m_texture(nullptr)

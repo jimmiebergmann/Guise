@@ -198,6 +198,8 @@ namespace Guise
 
         size_t queueSize() const;
 
+        Vector2f getLastMousePosition() const;
+
 #if defined(GUISE_PLATFORM_WINDOWS)
         static Key transalteWin32Key(const WORD key);
 #endif

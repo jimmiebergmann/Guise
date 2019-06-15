@@ -150,6 +150,7 @@ namespace Guise
             case Input::EventType::MouseRelease:
                 m_mouseReleased.insert({ e.button, e.position });
                 return;
+            case Input::EventType::MouseDoubleClick:
             case Input::EventType::MousePress:
                 if (m_mousePressed.find(e.button) == m_mousePressed.end())
                 {
@@ -171,6 +172,11 @@ namespace Guise
     size_t Input::queueSize() const
     {
         return m_eventQueue.size();
+    }
+
+    Vector2f Input::getLastMousePosition() const
+    {
+        return m_mousePosition;
     }
 
 #if defined(GUISE_PLATFORM_WINDOWS)

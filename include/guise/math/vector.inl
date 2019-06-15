@@ -154,49 +154,49 @@ namespace Guise
     template <typename T>
     inline Vector<2, T> Vector<2, T>::operator + (const Vector<2, T> & vector) const
     {
-        return Vector2<T>(x + vector.x, y + vector.y);
+        return Vector<2, T>(x + vector.x, y + vector.y);
     }
 
     template <typename T>
     inline Vector<2, T> Vector<2, T>::operator - () const
     {
-        return Vector2<T>(-x, -y);
+        return Vector<2, T>(-x, -y);
     }
 
     template <typename T>
     inline Vector<2, T> Vector<2, T>::operator - (const Vector<2, T> & vector) const
     {
-        return Vector2<T>(x - vector.x, y - vector.y);
+        return Vector<2, T>(x - vector.x, y - vector.y);
     }
 
     template <typename T>
     inline Vector<2, T> Vector<2, T>::operator * (const Vector<2, T> & vector) const
     {
-        return Vector2<T>(x * vector.x, y * vector.y);
+        return Vector<2, T>(x * vector.x, y * vector.y);
     }
 
     template <typename T>
     inline Vector<2, T> Vector<2, T>::operator * (const T value) const
     {
-        return Vector2<T>(x * value, y * value);
+        return Vector<2, T>(x * value, y * value);
     }
 
     template <typename T>
     inline Vector<2, T> Vector<2, T>::operator / (const Vector<2, T> & vector) const
     {
-        return Vector2<T>(x / vector.x, y / vector.y);
+        return Vector<2, T>(x / vector.x, y / vector.y);
     }
 
     template <typename T>
     inline Vector<2, T> Vector<2, T>::operator / (const T value) const
     {
-        return Vector2<T>(x / value, y / value);
+        return Vector<2, T>(x / value, y / value);
     }
 
     template <typename T>
     inline Vector<2, T> Vector<2, T>::absolute() const
     {
-        return Vector2<T>(std::abs(x), std::abs(y));
+        return Vector<2, T>(std::abs(x), std::abs(y));
     }
 
     template <typename T>
@@ -351,49 +351,49 @@ namespace Guise
     template <typename T>
     inline Vector<3, T> Vector<3, T>::operator + (const Vector<3, T> & vector) const
     {
-        return Vector2<T>(x + vector.x, y + vector.y, z + vector.z);
+        return Vector<3, T>(x + vector.x, y + vector.y, z + vector.z);
     }
 
     template <typename T>
     inline Vector<3, T> Vector<3, T>::operator - () const
     {
-        return Vector2<T>(-x, -y, -z);
+        return Vector<3, T>(-x, -y, -z);
     }
 
     template <typename T>
     inline Vector<3, T> Vector<3, T>::operator - (const Vector<3, T> & vector) const
     {
-        return Vector2<T>(x - vector.x, y - vector.y, z - vector.z);
+        return Vector<3, T>(x - vector.x, y - vector.y, z - vector.z);
     }
 
     template <typename T>
     inline Vector<3, T> Vector<3, T>::operator * (const Vector<3, T> & vector) const
     {
-        return Vector2<T>(x * vector.x, y * vector.y, z * vector.z);
+        return Vector<3, T>(x * vector.x, y * vector.y, z * vector.z);
     }
 
     template <typename T>
     inline Vector<3, T> Vector<3, T>::operator * (const T value) const
     {
-        return Vector2<T>(x * value, y * value, z * value);
+        return Vector<3, T>(x * value, y * value, z * value);
     }
 
     template <typename T>
     inline Vector<3, T> Vector<3, T>::operator / (const Vector<3, T> & vector) const
     {
-        return Vector2<T>(x / vector.x, y / vector.y, z / vector.z);
+        return Vector<3, T>(x / vector.x, y / vector.y, z / vector.z);
     }
 
     template <typename T>
     inline Vector<3, T> Vector<3, T>::operator / (const T value) const
     {
-        return Vector2<T>(x / value, y / value, z / value);
+        return Vector<3, T>(x / value, y / value, z / value);
     }
 
     template <typename T>
     inline Vector<3, T> Vector<3, T>::absolute() const
     {
-        return Vector2<T>(std::abs(x), std::abs(y), std::abs(z));
+        return Vector<3, T>(std::abs(x), std::abs(y), std::abs(z));
     }
 
     template <typename T>
@@ -563,49 +563,49 @@ namespace Guise
     template <typename T>
     inline Vector<4, T> Vector<4, T>::operator + (const Vector<4, T> & vector) const
     {
-        return Vector2<T>(x + vector.x, y + vector.y, z + vector.z, w + vector.w);
+        return Vector<4, T>(x + vector.x, y + vector.y, z + vector.z, w + vector.w);
     }
 
     template <typename T>
     inline Vector<4, T> Vector<4, T>::operator - () const
     {
-        return Vector2<T>(-x, -y, -z, -w);
+        return Vector<4, T>(-x, -y, -z, -w);
     }
 
     template <typename T>
     inline Vector<4, T> Vector<4, T>::operator - (const Vector<4, T> & vector) const
     {
-        return Vector2<T>(x - vector.x, y - vector.y, z - vector.z, w - vector.w);
+        return Vector<4, T>(x - vector.x, y - vector.y, z - vector.z, w - vector.w);
     }
 
     template <typename T>
     inline Vector<4, T> Vector<4, T>::operator * (const Vector<4, T> & vector) const
     {
-        return Vector2<T>(x * vector.x, y * vector.y, z * vector.z, w * vector.w);
+        return Vector<4, T>(x * vector.x, y * vector.y, z * vector.z, w * vector.w);
     }
 
     template <typename T>
     inline Vector<4, T> Vector<4, T>::operator * (const T value) const
     {
-        return Vector2<T>(x * value, y * value, z * value, w * value);
+        return Vector<4, T>(x * value, y * value, z * value, w * value);
     }
 
     template <typename T>
     inline Vector<4, T> Vector<4, T>::operator / (const Vector<4, T> & vector) const
     {
-        return Vector2<T>(x / vector.x, y / vector.y, z / vector.z, w / vector.w);
+        return Vector<4, T>(x / vector.x, y / vector.y, z / vector.z, w / vector.w);
     }
 
     template <typename T>
     inline Vector<4, T> Vector<4, T>::operator / (const T value) const
     {
-        return Vector2<T>(x / value, y / value, z / value, w / value);
+        return Vector<4, T>(x / value, y / value, z / value, w / value);
     }
 
     template <typename T>
     inline Vector<4, T> Vector<4, T>::absolute() const
     {
-        return Vector2<T>(std::abs(x), std::abs(y), std::abs(z), std::abs(w));
+        return Vector<4, T>(std::abs(x), std::abs(y), std::abs(z), std::abs(w));
     }
 
     template <typename T>

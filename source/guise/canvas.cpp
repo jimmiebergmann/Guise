@@ -74,49 +74,102 @@ namespace Guise
 
     void Canvas::update()
     {
-        m_plane->update({ { 0.0f, 0.0f }, m_size * GUISE_DEFAULT_DPI / m_dpi });
+        m_plane->update({ { 0.0f, 0.0f }, m_size });
          
         m_input.update();
         
-        bool isHitsQueried = false;
-        Control * controlHit = nullptr;
+        struct HitHelper
+        {
+            HitHelper() :
+                control(nullptr),
+                isQueried(false),
+                mouseMoved(false)
+            { }
+
+            Control * control;
+            bool isQueried;
+            Vector2f position;
+            bool mouseMoved;
+        } hit;
+
+        auto mouseMovedFunc = [this, &hit](Input::Event & e)
+        {         
+            hit.mouseMoved = true;
+
+            if (!hit.isQueried || hit.position != e.position)
+            {
+                hit.control = queryControlHit(e.position);
+                hit.position = e.position;
+                hit.isQueried = true;
+            }
+
+            if (hit.control)
+            {
+                hit.control->handleInputEvent(e);
+            }
+
+            if (hit.control != m_hoveredControl)
+            {
+                if (m_hoveredControl)
+                {
+                    m_hoveredControl->handleInputEvent(e);
+                }
+                m_hoveredControl = hit.control;
+            }
+        };
 
         Input::Event e;
         while (m_input.pollEvent(e))
         {
             switch (e.type)
             {
-                case Input::EventType::MousePress:
-                case Input::EventType::MouseRelease:
-                case Input::EventType::MouseMove:
                 case Input::EventType::MouseJustPressed:
-                case Input::EventType::MouseDoubleClick:
                 {
-                    e.position = e.position * GUISE_DEFAULT_DPI / static_cast<float>(m_dpi);
-                    if (!isHitsQueried)
+                    if (!hit.isQueried || hit.position != e.position)
                     {
-                        controlHit = queryControlHit(e.position);
-                        isHitsQueried = true;
+                        hit.control = queryControlHit(e.position);
+                        hit.position = e.position;
+                        hit.isQueried = true;
                     }
 
-                    if (controlHit)
+                    if (hit.control)
                     {
-                        controlHit->handleInputEvent(e);
+                        m_focusedControl = hit.control;
+                        m_focusedControl->handleInputEvent(e);
+                    }
+                }
+                break;
+                //case Input::EventType::MousePress:
+                //case Input::EventType::MouseDoubleClick:
+                case Input::EventType::MouseRelease:
+                {
+                    /*if (!hit.isQueried || hit.position != e.position)
+                    {
+                        hit.control = queryControlHit(e.position);
+                        hit.position = e.position;
+                        hit.isQueried = true;
+                    }*/
+
+                    if (m_focusedControl)
+                    {
+                        m_focusedControl->handleInputEvent(e);
                     }
 
-                    if (controlHit != m_hoveredControl)
-                    {
-                        if (m_hoveredControl)
-                        {
-                            m_hoveredControl->handleInputEvent(e);
-                            
-                        }
-                        m_hoveredControl = controlHit;
-                    }    
+                }
+                break;
+                case Input::EventType::MouseMove:
+                {
+                    mouseMovedFunc(e);
                 }
                 break;
                 default: break;
             }
+        }
+
+        if (!hit.mouseMoved)
+        {
+            Input::Event moveEvent(Input::EventType::MouseMove, m_input.getLastMousePosition());
+            mouseMovedFunc(moveEvent);
         }
 
         /*
@@ -188,17 +241,36 @@ namespace Guise
         if (dpi != m_dpi)
         {
             m_dpi = dpi;
+            m_scale = static_cast<float>(m_dpi) / GUISE_DEFAULT_DPI;
             for (auto it = m_dpiSensitiveObjects.begin(); it != m_dpiSensitiveObjects.end(); it++)
             {
                 (*it)->onNewDpi(m_dpi);
             }
+        }   
+    }
+
+    void Canvas::setScale(const float scale)
+    {
+        if (scale < 0.0f)
+        {
+            m_scale = 0.0f;
+        }
+        else
+        {
+            m_scale = scale;
         }
         
-    }
+        m_dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
+    }    
 
     uint32_t Canvas::getDpi() const
     {
         return m_dpi;
+    }
+
+    float Canvas::getScale() const
+    {
+        return m_scale;
     }
 
     void Canvas::queueControlRendering(Control * control)
@@ -248,7 +320,7 @@ namespace Guise
 
     Control * Canvas::queryControlHit(const Vector2f & point) const
     {
-         for (auto levelIt = m_renderControls.rbegin(); levelIt != m_renderControls.rend(); levelIt++)
+        for (auto levelIt = m_renderControls.rbegin(); levelIt != m_renderControls.rend(); levelIt++)
         {
             for (auto controlIt = levelIt->second.rbegin(); controlIt != levelIt->second.rend(); controlIt++)
             {
