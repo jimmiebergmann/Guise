@@ -65,7 +65,6 @@ namespace Guise
   
         std::shared_ptr<Texture> createTexture();
 
-
         // Renderer functions.
         static std::shared_ptr<Renderer> create(const std::shared_ptr<AppWindow> & appWindow);
     #if defined(GUISE_PLATFORM_WINDOWS)
@@ -77,8 +76,6 @@ namespace Guise
         void setClearColor(const Vector4f & color);
 
         void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size);
-
-        //void setProjectionMatrix(Matrix4x4f & matrix);
 
         void setDpi(const int32_t dpi);
 

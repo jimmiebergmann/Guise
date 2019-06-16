@@ -38,10 +38,8 @@ namespace Guise
 
     public:
 
-        /*DpiSensitive(Canvas & canvas);
-
         virtual ~DpiSensitive();
-        */
+        
         virtual void onNewDpi(const int32_t dpi) = 0;
 
     };

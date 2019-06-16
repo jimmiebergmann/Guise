@@ -30,15 +30,7 @@
 namespace Guise
 {
 
-    /*DpiSensitive::DpiSensitive(Canvas & canvas)
-    {
-
-    }
-
     DpiSensitive::~DpiSensitive()
-    {
-
-    }*/
-
+    { }
 
 }
