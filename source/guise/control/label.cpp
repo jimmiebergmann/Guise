@@ -134,9 +134,9 @@ namespace Guise
         return m_font;
     }
 
-    Label::Label(std::shared_ptr<Canvas> & canvas, const std::wstring & text) :
-        Control(*canvas),
+    Label::Label(std::shared_ptr<Canvas> & canvas, const std::wstring & text) :        
         Style::LabelStyle(canvas->getStyleSheet()->getSelector("label")),
+        Control(*canvas),
         m_changed(true),
         m_dpi(canvas->getDpi()),
         m_font(FontLibrary::get(m_fontFamily)),
@@ -148,11 +148,11 @@ namespace Guise
         getCanvas().registerDpiSensitive(this);
     }
 
-    Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :
-        Control(*canvas),
+    Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :       
         Style::LabelStyle(canvas->getStyleSheet()->getSelector("label")),
-        m_dpi(canvas->getDpi()),
+        Control(*canvas),        
         m_changed(true),
+        m_dpi(canvas->getDpi()),
         m_font(FontLibrary::get(font)),
         m_newTexture(false),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),

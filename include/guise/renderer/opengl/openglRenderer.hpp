@@ -66,9 +66,11 @@ namespace Guise
         std::shared_ptr<Texture> createTexture();
 
         // Renderer functions.
-        static std::shared_ptr<Renderer> create(const std::shared_ptr<AppWindow> & appWindow);
+        static std::shared_ptr<OpenGLRenderer> create(const std::shared_ptr<AppWindow> & appWindow);
     #if defined(GUISE_PLATFORM_WINDOWS)
-        static std::shared_ptr<Renderer> create(HDC deviceContextHandle);
+        static std::shared_ptr<OpenGLRenderer> create(::HDC deviceContextHandle);
+    #elif defined(GUISE_PLATFORM_LINUX)
+        static std::shared_ptr<OpenGLRenderer> create(::Display * display, ::Window window, int screen);
     #endif
 
         const Vector4f & getClearColor();
@@ -90,8 +92,14 @@ namespace Guise
         OpenGLRenderer(HDC deviceContextHandle);
 
         // Windows members.
-        HDC m_deviceContextHandle;  ///< Device context handle from the render output.
-        HGLRC m_context;            ///< The OpenGL context.      
+        ::HDC m_deviceContextHandle;  ///< Device context handle from the render output.
+        ::HGLRC m_context;            ///< The OpenGL context.
+    #elif defined(GUISE_PLATFORM_LINUX)
+        OpenGLRenderer(::Display * display, ::Window window, int screen);
+
+        // Linux memebers.
+        ::Display * m_display;
+        ::Window    m_window;      
     #endif
 
         void updateProjectionMatrix();

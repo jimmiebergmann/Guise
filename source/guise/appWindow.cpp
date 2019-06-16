@@ -27,6 +27,8 @@
 
 #if defined(GUISE_PLATFORM_WINDOWS)
 #include "guise/appWindow/win32/win32AppWindow.hpp"
+#elif defined(GUISE_PLATFORM_LINUX)
+#include "guise/appWindow/linux/linuxAppWindow.hpp"
 #endif
 
 namespace Guise
@@ -35,6 +37,8 @@ namespace Guise
     {
     #if defined(GUISE_PLATFORM_WINDOWS)
         return Win32AppWindow::create(title, size);
+    #elif defined(GUISE_PLATFORM_LINUX)
+    	return LinuxAppWindow::create(title, size);    
     #endif
     }
 

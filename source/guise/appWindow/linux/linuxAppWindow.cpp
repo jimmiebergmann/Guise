@@ -23,11 +23,10 @@
 *
 */
 
-#include "guise/appWindow/win32/win32AppWindow.hpp"
+#include "guise/appWindow/linux/linuxAppWindow.hpp"
 
-#if defined(GUISE_PLATFORM_WINDOWS)
+#if defined(GUISE_PLATFORM_LINUX)
 
-#include <shellscalingapi.h>
 #include <algorithm>
 
 namespace Guise
@@ -36,7 +35,7 @@ namespace Guise
     {
     #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
         SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-        
+        linuxAppWindow.hpp
         if (!EnableNonClientDpiScaling(windowHandle))
         {
             return false;
@@ -51,7 +50,7 @@ namespace Guise
         return true;
     }*/
 
-    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
+    /*#if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
     static int getSystemDpi(HWND windowHandle, HDC )
     {
         return static_cast<int>(GetDpiForWindow(windowHandle));
@@ -62,32 +61,32 @@ namespace Guise
         return GetDeviceCaps(deviceContextHandle, LOGPIXELSX);
     }
 
-    #endif
+    #endif*/
     
 
-    Win32AppWindow::~Win32AppWindow()
+    LinuxAppWindow::~LinuxAppWindow()
     {
         destroyWindow();
     }
 
-    std::shared_ptr<Win32AppWindow> Win32AppWindow::create(const std::wstring & title, const Vector2ui32 & size)
+    std::shared_ptr<LinuxAppWindow> LinuxAppWindow::create(const std::wstring & title, const Vector2ui32 & size)
     {
-        return std::shared_ptr<Win32AppWindow>(new Win32AppWindow(title, size));
+        return std::shared_ptr<LinuxAppWindow>(new LinuxAppWindow(title, size));
     }
 
-    std::shared_ptr<Canvas> Win32AppWindow::getCanvas()
+    std::shared_ptr<Canvas> LinuxAppWindow::getCanvas()
     {
         return m_canvas;
     }
 
-    void Win32AppWindow::setRenderer(const std::shared_ptr<Renderer> & renderer)
+    void LinuxAppWindow::setRenderer(const std::shared_ptr<Renderer> & renderer)
     {
         m_renderer = renderer;
     }
 
-    void Win32AppWindow::update()
+    void LinuxAppWindow::update()
     {
-        MSG message;
+        /*MSG message;
         while (::PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
         {
             // A modal function is being called when you press the alt key,
@@ -102,12 +101,12 @@ namespace Guise
             // This will call the WindowProcStatic function
             ::TranslateMessage(&message);
             ::DispatchMessage(&message);
-        }
+        }*/
 
         m_canvas->update();
     }
 
-    void Win32AppWindow::render()
+    void LinuxAppWindow::render()
     {
         if (!m_renderer)
         {
@@ -121,66 +120,108 @@ namespace Guise
         m_renderer->present();
     }
 
-    Vector2ui32 Win32AppWindow::getSize()
+    Vector2ui32 LinuxAppWindow::getSize()
     {
         return m_size;
     }
 
-    Vector2ui32 Win32AppWindow::getDPiAwareSize()
+    Vector2ui32 LinuxAppWindow::getDPiAwareSize()
     {
         return m_size * GUISE_DEFAULT_DPI / m_dpi;
     }
 
 
-    void Win32AppWindow::setDpi(const int32_t dpi)
+    void LinuxAppWindow::setDpi(const int32_t dpi)
     {
         m_dpi = dpi;
     }
 
-    int32_t Win32AppWindow::getDpi() const
+    int32_t LinuxAppWindow::getDpi() const
     {
         return m_dpi;
     }
 
-    HDC Win32AppWindow::getWin32HDC() const
+    ::Display * LinuxAppWindow::getLinuxDisplay() const
     {
-        return m_deviceContextHandle;
+        return m_display;
     }
 
-    std::string Win32AppWindow::createClassName()
+    ::Window LinuxAppWindow::getLinuxWindow() const
+    {
+        return m_window;
+    }
+
+    int LinuxAppWindow::getLinuxScreen() const
+    {
+        return m_screen;
+    }
+
+    /*std::string Win32AppWindow::createClassName()
     {
         static int classCount = 0;
         classCount++;
         return "guise_win32_class_" + std::to_string(classCount);
 
-        // Generate class name.
-        /*GUID guid = { 0 };
-        const size_t guidArraySize = 64;
-        wchar_t guidArray[guidArraySize] = { 0 };
-        CoCreateGuid(&guid);
-        StringFromGUID2(guid, guidArray, guidArraySize);
-        std::wstring className = L"guier_" + std::wstring(guidArray);
-        */
-    }
+    }*/
 
-    Win32AppWindow::Win32AppWindow(const std::wstring & title, const Vector2ui32 & size) :
+    LinuxAppWindow::LinuxAppWindow(const std::wstring & title, const Vector2ui32 & size) :
         m_canvas(Canvas::create(size)),
         m_dpi(GUISE_DEFAULT_DPI),
         m_input(m_canvas->getInput()),
         m_title(title),
         m_size(size),
-        m_windowHandle(NULL),
-        m_deviceContextHandle(NULL),
-        m_win32Style(0),
-        m_win32ExtendedStyle(0),
-        m_windowClassName(createClassName())
+        m_display(NULL),
+        m_window(0),
+        m_screen(0)
     {
         load();
     }
 
-    void Win32AppWindow::load()
+    void LinuxAppWindow::load()
     {
-        m_win32Style |= WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SIZEBOX;
+        // open a connection with X server
+        if( ( m_display = XOpenDisplay( NULL ) ) == NULL )
+        {
+            throw std::runtime_error("Failed to connect to X server.");
+        }
+
+        // Initialize the X thread
+        // Should we?!?!
+        XInitThreads();
+
+        // Get the screen
+        m_screen = DefaultScreen(m_display);
+
+        // Creat the window attributes
+        XSetWindowAttributes windowAttributes;
+        windowAttributes.colormap = DefaultColormap(m_display, m_screen);
+        windowAttributes.event_mask =   KeyPressMask | KeyReleaseMask |
+                                        ButtonPressMask | ButtonReleaseMask | ButtonMotionMask | PointerMotionMask |
+                                        EnterWindowMask | LeaveWindowMask | VisibilityChangeMask |
+                                        FocusChangeMask | ExposureMask | StructureNotifyMask;
+
+        // Create the window
+        m_window = XCreateWindow(m_display,
+                                 DefaultRootWindow(m_display),
+                                 0, 0, m_size.x, m_size.y,
+                                 0,
+                                 DefaultDepth(m_display, m_screen),
+                                 InputOutput,
+                                 DefaultVisual(m_display, m_screen),
+                                 CWBorderPixel | CWEventMask | CWColormap,
+                                 &windowAttributes );
+
+        // It's very important to set the delete message. Else we wont be able to close the window.
+        ::Atom wmDeleteMessage = XInternAtom(m_display, "WM_DELETE_WINDOW", false);
+        XSetWMProtocols(m_display, m_window, &wmDeleteMessage, 1);
+
+        XStoreName(m_display, m_window, "Guise window" );
+
+
+
+
+
+        /*m_win32Style |= WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SIZEBOX;
         m_win32ExtendedStyle |= WS_EX_APPWINDOW;
 
         // Create a window class(WNDCLASS - win32)
@@ -301,12 +342,12 @@ namespace Guise
 
         ShowWindow(m_windowHandle, SW_RESTORE);
         SetForegroundWindow(m_windowHandle);
-        SetFocus(m_windowHandle);
+        SetFocus(m_windowHandle);*/
     }
 
-    void Win32AppWindow::destroyWindow()
+    void LinuxAppWindow::destroyWindow()
     {
-        HINSTANCE Hinstance = GetModuleHandle(NULL);
+        /*HINSTANCE Hinstance = GetModuleHandle(NULL);
 
         // Destroy the window
         if (m_windowHandle)
@@ -331,9 +372,10 @@ namespace Guise
             #else
                 UnregisterClass(m_windowClassName.c_str(), Hinstance);
             #endif
-        }
+        }*/
     }
 
+/*
     LRESULT Win32AppWindow::windowProcStatic(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam)
     {
         if (message == WM_NCCREATE)
@@ -361,24 +403,6 @@ namespace Guise
         // Windows events.
         case WM_CREATE:
         {
-            //int iDpi = GetDpiForWindow(m_windowHandle);
-            //std::cout << iDpi << std::endl;
-            //int dpiScaledX = MulDiv(INITIALX_96DPI, iDpi, 96);
-            //int dpiScaledY = MulDiv(INITIALY_96DPI, iDpi, 96);
-            //int dpiScaledWidth = MulDiv(INITIALWIDTH_96DPI, iDpi, 96);
-            //int dpiScaledHeight = MulDiv(INITIALHEIGHT_96DPI, iDpi, 96);
-            //SetWindowPos(m_windowHandle, m_windowHandle, 100, 100, m_size.x, m_size.y, SWP_NOZORDER | SWP_NOACTIVATE);
-            //SetProcessDpiAwareness(PROCESS_DPI_AWARENESS::PROCESS_PER_MONITOR_DPI_AWARE);
-            //SetProcessDPIAware();
-            
-            /*if (m_dpiAware)
-            {
-                if (!enableDpiAware(windowHandle))
-                {
-                    return FALSE;
-                }
-            }*/
-
             
         }
         break;
@@ -401,10 +425,7 @@ namespace Guise
             render();
         }
         break;
-        /*case WM_SIZING:
-        {
-        }
-        break;*/
+        
 
         // Keyboard events
         case WM_KEYDOWN:
@@ -489,7 +510,7 @@ namespace Guise
 
         return DefWindowProc(windowHandle, message, wParam, lParam);
     }
-
+*/
 }
 
 #endif

@@ -164,9 +164,8 @@ namespace Guise
 
                 m_childsBounds.clear();
 
-                auto childs = getChilds();
-                auto it = childs.begin();
-                for (it; childBoundsLeft.size.y > 0.0f && it != childs.end(); it++)
+                auto childs = getChilds();                
+                for (auto it = childs.begin(); childBoundsLeft.size.y > 0.0f && it != childs.end(); it++)
                 {
                     childBoundsLeft.position.y  += slotPadding.y;
                     childBoundsLeft.size.y      -= (slotPadding.y + slotPadding.w);
@@ -179,11 +178,6 @@ namespace Guise
                     childBoundsLeft.position.y += childHeight + slotPadding.w;
                     childBoundsLeft.size.y     -= childHeight;
                 }
-
-                /*for (it; childBoundsLeft.size.y > 0.0f && it != childs.end(); it++)
-                {
-                    //(*it)->update({ { 0.0f, 0.0f } ,{ 0.0f, 0.0f } });
-                }*/
             }
         }
 
@@ -226,9 +220,9 @@ namespace Guise
         return m_slotStyle;
     }
 
-    VerticalGrid::VerticalGrid(std::shared_ptr<Canvas> & canvas) :
-        ControlContainerList(*canvas),
+    VerticalGrid::VerticalGrid(std::shared_ptr<Canvas> & canvas) :      
         VerticalGridStyle(canvas->getStyleSheet()->getSelector("vertical-grid")),
+        ControlContainerList(*canvas),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_slotStyle(canvas->getStyleSheet()->getSelector("vertical-grid-slot"))
     { }

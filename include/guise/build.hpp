@@ -120,6 +120,8 @@
 #define GUISE_DEFAULT_DPI 96
 
 #include <stdint.h>
+#include <stddef.h>
+#include <cstring>
 
 // Math types
 #include "guise/math/matrix.hpp"

@@ -174,6 +174,8 @@ namespace Guise
             Event(const EventType type, const Key value);
             Event(const EventType type, const Vector2f & value);
 
+            EventType   type;
+            Vector2f    position;
             union
             {
                 uint8_t     button;
@@ -181,9 +183,7 @@ namespace Guise
                 float       distance;
                 Key         key;    
             };
-            Vector2f    position;
-
-            EventType type;
+            
         };
 
         Input();

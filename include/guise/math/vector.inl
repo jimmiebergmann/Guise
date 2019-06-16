@@ -202,7 +202,7 @@ namespace Guise
     template <typename T>
     inline T Vector<2, T>::operator[] (const size_t index)
     {
-        return c[index];
+        return *(&x + (sizeof(T) * index));
     }
 
     template <typename T>
@@ -399,7 +399,7 @@ namespace Guise
     template <typename T>
     inline T Vector<3, T>::operator[] (const size_t index)
     {
-        return c[index];
+        return *(&x + (sizeof(T) * index));
     }
 
 
@@ -611,7 +611,7 @@ namespace Guise
     template <typename T>
     inline T Vector<4, T>::operator[] (const size_t index)
     {
-        return c[index];
+        return *(&x + (sizeof(T) * index));
     }
     
 }

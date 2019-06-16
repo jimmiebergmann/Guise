@@ -25,7 +25,6 @@
 
 #include "guise/renderer/opengl/opengl.hpp"
 
-
 #if !defined(GUISE_DISABLE_OPENGL)
 
 #if defined(GUISE_PLATFORM_WINDOWS)
@@ -35,8 +34,8 @@
 // Function for grabbing the opengl functions
 #if defined(GUISE_PLATFORM_WINDOWS)
     #define glGetProcAddress(extension) wglGetProcAddress(extension)
-#elif defined( BIT_PLATFORM_LINUX )
-    //#define glGetProcAddress( p_Ext ) glXGetProcAddress( ( const GLubyte *) p_Ext )
+#elif defined(GUISE_PLATFORM_LINUX)
+    #define glGetProcAddress(extension) glXGetProcAddress((const GLubyte *)extension )
     //#define GLX_CONTEXT_MAJOR_VERSION_ARB		0x2091
     //#define GLX_CONTEXT_MINOR_VERSION_ARB		0x2092
     //typedef ::GLXContext(*GLXCREATECONTEXTATTRIBSARBPROC)(::Display*, ::GLXFBConfig, ::GLXContext, int, const int*);

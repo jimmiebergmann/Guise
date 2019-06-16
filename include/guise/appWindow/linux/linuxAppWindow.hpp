@@ -23,12 +23,12 @@
 *
 */
 
-#ifndef GUISE_WINDOW_WIN32_APPLICATION_WINDOW_HPP
-#define GUISE_WINDOW_WIN32_APPLICATION_WINDOW_HPP
+#ifndef GUISE_WINDOW_LINUX_APPLICATION_WINDOW_HPP
+#define GUISE_WINDOW_LINUX_APPLICATION_WINDOW_HPP
 
 #include "guise/build.hpp"
 
-#if defined(GUISE_PLATFORM_WINDOWS)
+#if defined(GUISE_PLATFORM_LINUX)
 
 #include "guise/appWindow.hpp"
 
@@ -36,19 +36,19 @@ namespace Guise
 {
 
     /**
-    * Win32 window.
+    * Linux application window.
     *
     *
     */
-    class GUISE_API Win32AppWindow : public AppWindow
+    class GUISE_API LinuxAppWindow : public AppWindow
     {
 
     public:
 
         
-        static std::shared_ptr<Win32AppWindow> create(const std::wstring & title = L"", const Vector2ui32 & size = { 0, 0 });
+        static std::shared_ptr<LinuxAppWindow> create(const std::wstring & title = L"", const Vector2ui32 & size = { 0, 0 });
 
-        ~Win32AppWindow();
+        ~LinuxAppWindow();
        
         std::shared_ptr<Canvas> getCanvas();
 
@@ -66,34 +66,35 @@ namespace Guise
 
         int32_t getDpi() const;
 
-        HDC getWin32HDC() const;
+        ::Display * getLinuxDisplay() const;
+        ::Window getLinuxWindow() const;
+        int getLinuxScreen() const;
        
     private:
 
-        static std::string createClassName();
-
-        Win32AppWindow(const std::wstring & title, const Vector2ui32 & size);
+        /*static std::string createClassName();
+*/
+        LinuxAppWindow(const std::wstring & title, const Vector2ui32 & size);
 
         void load();
 
         void destroyWindow();
-
+/*
         //int getDpi() const;
 
         static LRESULT windowProcStatic(HWND p_HWND, UINT p_Message, WPARAM p_WParam, LPARAM p_LParam);
         LRESULT windowProc(HWND p_HWND, UINT p_Message, WPARAM p_WParam, LPARAM p_LParam);
-
+*/
         std::shared_ptr<Renderer>   m_renderer;
         std::shared_ptr<Canvas>     m_canvas;
         int32_t                     m_dpi;
         Input &                     m_input;
         std::wstring                m_title; 
         Vector2ui32                 m_size;
-        HWND		                m_windowHandle;
-        HDC			                m_deviceContextHandle;
-        DWORD                       m_win32Style;           ///< Win32 style of window.
-        DWORD                       m_win32ExtendedStyle;   ///< Win32 extended style of window.
-        std::string                 m_windowClassName;
+   
+        ::Display *                 m_display;        
+        ::Window                    m_window;
+        int                         m_screen;
 
     };
 

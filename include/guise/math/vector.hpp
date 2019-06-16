@@ -27,6 +27,7 @@
 #define GUISE_MATH_VECTOR2_HPP
 
 #include "guise/build.hpp"
+#include <algorithm>
 
 
 namespace Guise
@@ -124,11 +125,8 @@ namespace Guise
         static Vector<2, T> min(const Vector<2, T> & low, const Vector<2, T> & high);
         static Vector<2, T> max(const Vector<2, T> & low, const Vector<2, T> & high);
 
-        union {
-           
-            T c[2];
-            struct { T x, y; };
-        };
+        T x;
+        T y;
 
     };
 
@@ -190,11 +188,9 @@ namespace Guise
 
         T operator[] (const size_t index);
 
-        union {
-
-            T c[3];
-            struct { T x, y, z; };
-        };
+        T x;
+        T y;
+        T z;
 
     };
 
@@ -259,11 +255,10 @@ namespace Guise
 
         T operator[] (const size_t index);
 
-        union {
-
-            T c[4];
-            struct { T x, y, z, w; };
-        };
+        T x;
+        T y;
+        T z;
+        T w;       
 
     };
 

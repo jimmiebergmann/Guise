@@ -53,7 +53,7 @@ namespace Guise
 
             enum class DataType : uint32_t
             {
-                Boolean,
+                Boolean = 0,
                 BorderStyle,
                 Float,
                 Integer,
@@ -73,7 +73,7 @@ namespace Guise
 
             enum class Overflow : uint32_t
             {
-                hidden,
+                hidden = 0,
                 visible
             };
 

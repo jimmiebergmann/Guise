@@ -46,8 +46,6 @@ namespace Guise
 
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const Vector4f & color)
     {
-        Bounds2f newBounds = bounds;
-
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
 
@@ -135,15 +133,30 @@ namespace Guise
         return std::make_shared<OpenGLTexture>();
     }
 
-    std::shared_ptr<Renderer> OpenGLRenderer::create(const std::shared_ptr<AppWindow> & appWindow)
+    std::shared_ptr<OpenGLRenderer> OpenGLRenderer::create(const std::shared_ptr<AppWindow> & appWindow)
     {
-        auto windowContext = appWindow->getWindowContext();
-        return std::shared_ptr<Renderer>(new OpenGLRenderer(windowContext));
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        auto windowContext = appWindow->getWin32HDC();
+        return std::shared_ptr<OpenGLRenderer>(new OpenGLRenderer(windowContext));
+    #elif defined(GUISE_PLATFORM_LINUX)
+        auto display = appWindow->getLinuxDisplay();
+        auto window = appWindow->getLinuxWindow();
+        auto screen = appWindow->getLinuxScreen();
+        return std::shared_ptr<OpenGLRenderer>(new OpenGLRenderer(display, window, screen));
+    #endif
     }
-    std::shared_ptr<Renderer> OpenGLRenderer::create(HDC deviceContextHandle)
+
+#if defined(GUISE_PLATFORM_WINDOWS)
+    std::shared_ptr<OpenGLRenderer> OpenGLRenderer::create(::HDC deviceContextHandle)
     {
-        return std::shared_ptr<Renderer>(new OpenGLRenderer(deviceContextHandle));
+        return std::shared_ptr<OpenGLRenderer>(new OpenGLRenderer(deviceContextHandle));
     }
+#elif defined(GUISE_PLATFORM_WINDOWS)
+    std::shared_ptr<OpenGLRenderer> OpenGLRenderer::create(::Display * display, ::Window window, int screen)
+    {
+        return std::shared_ptr<OpenGLRenderer>(new OpenGLRenderer(display, window, screen));
+    }
+#endif
 
     const Vector4f & OpenGLRenderer::getClearColor()
     {
@@ -176,7 +189,11 @@ namespace Guise
 
     void OpenGLRenderer::present()
     {
+    #if defined(GUISE_PLATFORM_WINDOWS)
         ::SwapBuffers(m_deviceContextHandle);
+    #elif defined(GUISE_PLATFORM_LINUX)
+        ::glXSwapBuffers(m_display, m_window);
+    #endif
     }
 
     void OpenGLRenderer::updateProjectionMatrix()
@@ -189,6 +206,7 @@ namespace Guise
         glLoadMatrixf(orthoMat.m);
     }
 
+#if defined(GUISE_PLATFORM_WINDOWS)
     OpenGLRenderer::OpenGLRenderer(HDC deviceContextHandle) :
         m_deviceContextHandle(deviceContextHandle),
         m_dpi(GUISE_DEFAULT_DPI)
@@ -244,6 +262,17 @@ namespace Guise
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
+
+#elif defined(GUISE_PLATFORM_LINUX) 
+    OpenGLRenderer::OpenGLRenderer(::Display * display, ::Window window, int screen) :
+        m_display(display),
+        m_window(window),
+        m_dpi(GUISE_DEFAULT_DPI)
+    {
+
+    }
+
+#endif
 
 }
 

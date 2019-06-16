@@ -226,9 +226,9 @@ namespace Guise
         return m_renderBounds;
     }
 
-    Plane::Plane(Canvas & canvas) :
-        ControlContainerList(canvas),
+    Plane::Plane(Canvas & canvas) :       
         PlaneStyle(canvas.getStyleSheet()->getSelector("plane")),
+        ControlContainerList(canvas),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_childsBounds(0.0f, 0.0f, 0.0f, 0.0f)
     { }

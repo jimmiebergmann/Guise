@@ -42,8 +42,10 @@ int main()
     vertGrid1->add(button2);
     vertGrid1->add(button3);
     button1->add(button1_1);  
-    button1_1->add(Label::create(canvas1, "arial", L"The quick brown fox jumps over the lazy dog."));
+    button1_1->add(Label::create(canvas1, "/usr/share/fonts/truetype/freefont/freesans.ttf"/*"arial"*/, L"The quick brown fox jumps over the lazy dog."));
     
+
+    std::cout << "Started." << std::endl;
 
     /*button1->onPressed = []()
     {

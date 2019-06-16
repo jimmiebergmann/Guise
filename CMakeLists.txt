@@ -55,13 +55,15 @@ file(GLOB_RECURSE test_files "${CMAKE_SOURCE_DIR}/tests/*.cpp" "${CMAKE_SOURCE_D
 file(GLOB_RECURSE example1_files "${CMAKE_SOURCE_DIR}/examples/example1.cpp")
 
 # Guise dynamic lib
-include_directories ("${CMAKE_SOURCE_DIR}/include", "${CMAKE_SOURCE_DIR}/vendor") # Include header files
+include_directories ("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/vendor") # Include header files
 add_library(guise SHARED ${guise_files}) # Create shared library
 
 if(ENABLE_OPENGL_RENDERER)
 	if(WIN32)
 		target_link_libraries(guise "opengl32.lib")
-	endif(WIN32)
+	elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    target_link_libraries(guise "GL")
+  endif()
 else()
 	target_compile_definitions(guise PRIVATE GUISE_DISABLE_OPENGL)
 endif(ENABLE_OPENGL_RENDERER)

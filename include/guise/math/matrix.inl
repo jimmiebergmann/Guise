@@ -77,7 +77,7 @@ namespace Guise
     template <typename T>
     Matrix<4, 4, T> & Matrix<4, 4, T>::scale(float x, float y, float z)
     {
-        Matrix4x4<T> scale(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
+        Matrix<4, 4, T> scale(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
         return *this = *this * scale;
     }
 

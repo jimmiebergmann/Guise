@@ -29,7 +29,13 @@
 #include "guise/build.hpp"
 #if defined(GUISE_PLATFORM_WINDOWS)
     #include "guise/platform/win32Headers.hpp"
+#elif defined(GUISE_PLATFORM_LINUX)
+    #include <X11/Xlib.h>
+    #if defined(None)
+        #undef None
+    #endif
 #endif
+
 #include "guise/canvas.hpp"
 #include <memory>
 #include <string>
@@ -72,7 +78,13 @@ namespace Guise
         virtual Vector2ui32 getDPiAwareSize() = 0;
 
     #if defined(GUISE_PLATFORM_WINDOWS)
-        virtual HDC getWindowContext() const = 0;
+        virtual ::HDC getWin32HDC() const = 0;
+    #endif
+
+    #if defined(GUISE_PLATFORM_LINUX)
+        virtual ::Display * getLinuxDisplay() const = 0;
+        virtual ::Window getLinuxWindow() const = 0;
+        virtual int getLinuxScreen() const = 0;
     #endif
 
     };

@@ -30,8 +30,16 @@
 
 #if !defined(GUISE_DISABLE_OPENGL)
 
-#include <gl/GL.h>
+#include <GL/gl.h>
 #include "guise/renderer/opengl/glext.h"
+
+#if defined(GUISE_PLATFORM_LINUX)
+#include <GL/glx.h>
+#include <X11/Xlib.h>
+    #if defined(None)
+        #undef None
+    #endif
+#endif
 
 namespace Guise
 {

@@ -26,6 +26,7 @@
 #include "guise/font.hpp"
 #include <map>
 #include <unordered_map>
+#include <vector>
 #include <fstream>
 #include <limits>
 #include <algorithm>
@@ -378,6 +379,8 @@ namespace Guise
         free(charPath);
         
         return path;
+    #elif defined(GUISE_PLATFORM_LINUX)
+        return "";
     #endif
     }
 

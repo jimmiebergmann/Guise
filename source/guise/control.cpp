@@ -41,9 +41,9 @@ namespace Guise
         m_canvas(canvas),
         m_enabled(true),
         m_inputEnabled(true),
-        m_visible(true),
-        m_level(0),
-        m_forceUpdate(false)       
+        m_visible(true),       
+        m_forceUpdate(false),
+        m_level(0)     
     { }
 
     Control::~Control()

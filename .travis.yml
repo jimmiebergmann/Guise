@@ -20,6 +20,8 @@ before_install:
   # C++14, even C++17
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get update -qq
+  - sudo apt-get install -y mesa-common-dev
+  - sudo apt-get install -y libgl1-mesa-dev
 
 install: 
   # C++14, even C++17

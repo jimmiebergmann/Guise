@@ -178,15 +178,15 @@ namespace Guise
     }
 
     Button::Button(std::shared_ptr<Canvas> & canvas) :
-        ControlContainerSingle(*canvas),
         Style::BoxStyle(canvas->getStyleSheet()->getSelector("button")),
+        ControlContainerSingle(*canvas),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_childBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_activeStyle(*this),
         m_disabledStyle(*this),
         m_hoverStyle(*this),
         m_currentStyle(this),
-        m_pressed(false)
+        m_pressed(false)        
     {
         if (auto activeStyle = canvas->getStyleSheet()->getSelector("button:active"))
         {

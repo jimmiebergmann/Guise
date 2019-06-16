@@ -34,8 +34,8 @@ namespace Guise
 
     Input::Event::Event(const EventType type, const uint8_t value1, const Vector2f &value2) :
         type(type),
-        button(value1),
-        position(value2)
+        position(value2),
+        button(value1)       
     { }
 
     Input::Event::Event(const EventType type, const wchar_t value) :
