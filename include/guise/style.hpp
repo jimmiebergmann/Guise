@@ -123,6 +123,8 @@ namespace Guise
 
         private:
 
+            DataType    m_dataType;
+
             union
             {
                 bool            m_valueBoolean;
@@ -135,8 +137,6 @@ namespace Guise
                 Vector3f        m_valueVector3f;
                 Vector4f        m_valueVector4f;
             };
-
-            DataType    m_dataType;
 
         };
 

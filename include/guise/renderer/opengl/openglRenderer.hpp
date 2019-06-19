@@ -92,14 +92,16 @@ namespace Guise
         OpenGLRenderer(HDC deviceContextHandle);
 
         // Windows members.
-        ::HDC m_deviceContextHandle;  ///< Device context handle from the render output.
-        ::HGLRC m_context;            ///< The OpenGL context.
+        ::HDC           m_deviceContextHandle;  ///< Device context handle from the render output.
+        ::HGLRC         m_context;              ///< The OpenGL context.
     #elif defined(GUISE_PLATFORM_LINUX)
         OpenGLRenderer(::Display * display, ::Window window, int screen);
 
         // Linux memebers.
-        ::Display * m_display;
-        ::Window    m_window;      
+        ::Colormap      m_colormap;
+        ::GLXContext    m_context;
+        ::Display *     m_display;
+        ::Window        m_window;      
     #endif
 
         void updateProjectionMatrix();

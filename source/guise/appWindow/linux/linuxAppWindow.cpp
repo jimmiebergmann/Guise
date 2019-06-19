@@ -28,6 +28,7 @@
 #if defined(GUISE_PLATFORM_LINUX)
 
 #include <algorithm>
+#include <iostream>
 
 namespace Guise
 {
@@ -45,7 +46,7 @@ namespace Guise
         {
             return false;
         }
-    #endif    
+    #endif
 
         return true;
     }*/
@@ -62,7 +63,7 @@ namespace Guise
     }
 
     #endif*/
-    
+
 
     LinuxAppWindow::~LinuxAppWindow()
     {
@@ -86,6 +87,39 @@ namespace Guise
 
     void LinuxAppWindow::update()
     {
+        ::XEvent e;
+        while(XPending(m_display) > 0)
+        {
+            XNextEvent(m_display, &e );
+
+            switch(e.type)
+            {
+                case ConfigureNotify:
+                {
+                    Vector2ui32 size = { static_cast<uint32_t>(e.xconfigure.width), static_cast<uint32_t>(e.xconfigure.height) } ;  
+                    if(size != m_size)
+                    {
+                        m_size = size;
+                        if (m_renderer)
+                        {
+                            m_renderer->setViewportSize({ 0, 0 }, m_size);
+                        }
+                        m_canvas->resize(m_size);
+                        update();
+                        render();
+                    }
+                }
+                break;
+                case MotionNotify:
+                    m_input.pushEvent({ Input::EventType::MouseMove, { static_cast<float>(e.xmotion.x), static_cast<float>(e.xmotion.y) } });
+                    break;
+                default: break;
+            }
+
+
+            //std::cout << "X11 event: " << e.type << std::endl;
+        }
+
         /*MSG message;
         while (::PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
         {
@@ -156,14 +190,6 @@ namespace Guise
         return m_screen;
     }
 
-    /*std::string Win32AppWindow::createClassName()
-    {
-        static int classCount = 0;
-        classCount++;
-        return "guise_win32_class_" + std::to_string(classCount);
-
-    }*/
-
     LinuxAppWindow::LinuxAppWindow(const std::wstring & title, const Vector2ui32 & size) :
         m_canvas(Canvas::create(size)),
         m_dpi(GUISE_DEFAULT_DPI),
@@ -180,7 +206,7 @@ namespace Guise
     void LinuxAppWindow::load()
     {
         // open a connection with X server
-        if( ( m_display = XOpenDisplay( NULL ) ) == NULL )
+        if((m_display = XOpenDisplay(NULL)) == NULL)
         {
             throw std::runtime_error("Failed to connect to X server.");
         }
@@ -217,6 +243,15 @@ namespace Guise
 
         XStoreName(m_display, m_window, "Guise window" );
 
+        // Let's set up the window decoration and the functionality
+        //::Atom propertyAtom = XInternAtom(m_display, "_MOTIF_WM_HINTS", false);
+
+        // Let's set up the window decoration and the functionality
+        //::Atom PropertyAtom = XInternAtom( m_pDisplay, "_MOTIF_WM_HINTS", false );
+
+        // Display the window.
+        XMapWindow(m_display, m_window);
+        XFlush(m_display);
 
 
 
@@ -234,10 +269,10 @@ namespace Guise
         winClass.hInstance = winInstance;
         winClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
         winClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-        
-        
+
+
         auto canvasBGColor = m_canvas->getBackgroundColor();
-      
+
         Vector3i32 bgColorInt(canvasBGColor.x * 255.0f, canvasBGColor.y * 255.0f, canvasBGColor.z * 255.0f);
         Vector3<BYTE> bgColor(  std::min(std::max(bgColorInt.x, 0), 255),
                                 std::min(std::max(bgColorInt.y, 0), 255),
@@ -272,7 +307,7 @@ namespace Guise
         // Convert title if needed.
         #ifdef UNICODE
             std::wstring title = m_title;
-        #else   
+        #else
             std::string title = "";
             if (!m_title.empty())
             {
@@ -335,7 +370,7 @@ namespace Guise
                     newWindowRect.bottom - newWindowRect.top,
                     SWP_NOZORDER | SWP_NOACTIVATE);
             }
-            
+
         }
 
         m_canvas->setDpi(m_dpi);
@@ -347,32 +382,14 @@ namespace Guise
 
     void LinuxAppWindow::destroyWindow()
     {
-        /*HINSTANCE Hinstance = GetModuleHandle(NULL);
-
-        // Destroy the window
-        if (m_windowHandle)
+        if(m_display)
         {
-            // Release the device context
-            if (m_deviceContextHandle)
-            {
-                ReleaseDC(m_windowHandle, m_deviceContextHandle);
-            }
-
-            DestroyWindow(m_windowHandle);
+            XDestroyWindow(m_display, m_window );
+            XCloseDisplay(m_display);
+            m_display = NULL;
+            m_window = 0;
+            m_screen = 0;
         }
-
-        // Unregister the window class
-        if (m_windowClassName.size())
-        {
-            // Convert class name if needed.
-            #ifdef UNICODE
-                std::wstring tempClassName(m_windowClassName.length(), L' ');
-                std::copy(m_windowClassName.begin(), m_windowClassName.end(), tempClassName.begin());
-                UnregisterClass(tempClassName.c_str(), Hinstance);
-            #else
-                UnregisterClass(m_windowClassName.c_str(), Hinstance);
-            #endif
-        }*/
     }
 
 /*
@@ -403,14 +420,14 @@ namespace Guise
         // Windows events.
         case WM_CREATE:
         {
-            
+
         }
         break;
         case WM_ERASEBKGND:
             return 1;
         case WM_PAINT:
         {
-            
+
         }
         break;
         case WM_SIZE:
@@ -419,13 +436,13 @@ namespace Guise
             if (m_renderer)
             {
                 m_renderer->setViewportSize({ 0, 0 }, m_size);
-            }           
+            }
             m_canvas->resize(m_size);
             update();
             render();
         }
         break;
-        
+
 
         // Keyboard events
         case WM_KEYDOWN:
@@ -437,7 +454,7 @@ namespace Guise
         case WM_CHAR:
             m_input.pushEvent({Input::EventType::Texting, static_cast<wchar_t>(wParam)});
             break;
-        
+
         // Mouse events.
         case WM_MOUSEMOVE:
             m_input.pushEvent({ Input::EventType::MouseMove, { static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
@@ -479,7 +496,7 @@ namespace Guise
 
             float delta = static_cast<float>(zDelta) / static_cast<float>(WHEEL_DELTA);
             m_input.pushEvent({ Input::EventType::MouseScroll, delta });
-        } 
+        }
         break;
     #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_7
         case WM_DPICHANGED:

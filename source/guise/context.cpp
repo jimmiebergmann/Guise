@@ -57,7 +57,7 @@ namespace Guise
             orthoMat.loadOrthographic(0.0f, (float)windowSize.x, (float)windowSize.y, 0.0f, 0.0f, 1.0f);
             float scale = static_cast<float>(windowDpi) / static_cast<float>(GUISE_DEFAULT_DPI);
             orthoMat.scale(scale, scale, scale);
-            renderer->setProjectionMatrix(orthoMat);*/          
+            renderer->setProjectionMatrix(orthoMat);*/
 
             windowIsCreated.notifyOne();
 
@@ -81,7 +81,7 @@ namespace Guise
                 }*/
 
                 appWindow->render();
-             
+
                 auto timerEnd = std::chrono::system_clock::now();
                 std::chrono::duration<double> deltaTime = timerEnd - timerStart;
                 std::chrono::duration<double> frameSleepTime = getMaxFrameTime() - deltaTime;

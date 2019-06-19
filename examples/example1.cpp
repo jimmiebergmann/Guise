@@ -45,8 +45,6 @@ int main()
     button1_1->add(Label::create(canvas1, "/usr/share/fonts/truetype/freefont/freesans.ttf"/*"arial"*/, L"The quick brown fox jumps over the lazy dog."));
     
 
-    std::cout << "Started." << std::endl;
-
     /*button1->onPressed = []()
     {
         std::cout << "Lamda: Pressed button." << std::endl;

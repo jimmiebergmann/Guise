@@ -513,9 +513,9 @@ namespace Guise
             m_parent(parent)
         { }
 
-        BoxStyle::BoxStyle(const std::shared_ptr<Selector> & selector, BoxStyle * parent) :
-            m_parent(parent),
-            PaddingStyle(selector, parent)
+        BoxStyle::BoxStyle(const std::shared_ptr<Selector> & selector, BoxStyle * parent) :           
+            PaddingStyle(selector, parent),
+            m_parent(parent)
         {
             if (!selector)
             {

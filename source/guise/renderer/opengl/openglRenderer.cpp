@@ -65,19 +65,19 @@ namespace Guise
 
         glBegin(GL_QUADS);
         glColor4f(color.x, color.y, color.z, color.w);
-        
+
         glTexCoord2f(0.0f, 1.0f);
         glVertex2f(bounds.position.x, bounds.position.y);
-        
+
         glTexCoord2f(1.0f, 1.0f);
         glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
-        
+
         glTexCoord2f(1.0f, 0.0f);
         glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
-        
+
         glTexCoord2f(0.0f, 0.0f);
         glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
-        
+
         glEnd();
     }
 
@@ -97,17 +97,17 @@ namespace Guise
         glVertex2f(bounds.position.x + bounds.size.x , bounds.position.y);
         glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + widthY);
         glVertex2f(bounds.position.x + widthX, bounds.position.y + widthY);
-       
+
         glVertex2f(bounds.position.x + widthX, bounds.position.y + bounds.size.y - widthY);
         glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + bounds.size.y - widthY);
         glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
         glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
-        
+
         glVertex2f(bounds.position.x, bounds.position.y);
         glVertex2f(bounds.position.x + widthX, bounds.position.y + widthY);
         glVertex2f(bounds.position.x + widthX, bounds.position.y + bounds.size.y - widthY);
         glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
-        
+
 
         glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
         glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
@@ -263,12 +263,73 @@ namespace Guise
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-#elif defined(GUISE_PLATFORM_LINUX) 
+#elif defined(GUISE_PLATFORM_LINUX)
     OpenGLRenderer::OpenGLRenderer(::Display * display, ::Window window, int screen) :
+        m_context(NULL),
         m_display(display),
         m_window(window),
         m_dpi(GUISE_DEFAULT_DPI)
     {
+        if(display == NULL)
+        {
+            throw std::runtime_error("display is NULL.");
+        }
+        if(window == 0)
+        {
+            throw std::runtime_error("window is 0.");
+        }
+
+        // Create the visual information
+        GLint attribs[] =
+        {
+            GLX_RGBA, GLX_DOUBLEBUFFER,
+            GLX_RED_SIZE, 8,
+            GLX_GREEN_SIZE, 8,
+            GLX_BLUE_SIZE, 8,
+            GLX_DEPTH_SIZE, 16,
+            GLX_STENCIL_SIZE, 8,
+            0L, 0L
+        };
+
+        int fbElements = 0;
+        ::GLXFBConfig *fbc = glXChooseFBConfig(display, screen, 0, &fbElements);
+        std::cout << fbc << std::endl;
+
+        ::XVisualInfo * visualInfo = NULL;
+        if( (visualInfo = glXChooseVisual(m_display, 0, attribs) ) == NULL )
+        {
+            throw std::runtime_error("Cannot choose visual information.");
+        }
+
+        // Create the color map and set it
+        if(!(m_colormap = XCreateColormap(m_display, RootWindow(m_display, screen), visualInfo->visual, AllocNone)))
+        {
+            XFree(visualInfo);
+            throw std::runtime_error("Cannot create the colormap.");
+        }
+
+        //m_colormap = DefaultColormap(m_display, screen);
+
+        // Set the new color map
+        //XSetWindowColormap(m_display, m_window, m_colormap);
+
+        // Create a temporary context.
+        m_context = glXCreateContext(m_display, visualInfo, NULL, GL_TRUE);
+        if(!m_context)
+        {
+            XFree(visualInfo);
+            throw std::runtime_error("Cannot create OpenGL context.");
+        }
+
+        // Make the temporary context to the current one.
+        glXMakeCurrent(m_display, m_window, m_context);
+
+        // Clear the visual info since we are done with it.
+        XFree(visualInfo);
+
+        glEnable(GL_COLOR_MATERIAL);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     }
 
