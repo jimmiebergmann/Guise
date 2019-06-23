@@ -5,6 +5,7 @@
 #include "guise/control/movable.hpp"
 #include "guise/control/verticalGrid.hpp"
 #include "guise/control/label.hpp"
+#include "guise/control/textBox.hpp"
 #include "guise/font.hpp"
 #include <thread>
 #include <iostream>
@@ -21,29 +22,33 @@ int main()
     auto canvas1 = appWindow1->getCanvas();
     
     auto vertGrid1 = VerticalGrid::create(canvas1);
+    canvas1->add(vertGrid1);
 
     auto button1 = Button::create(canvas1);
     button1->setSize({ 200.0f, 60.0f });
     button1->getHoverStyle().setPadding(5.0f);
+    vertGrid1->add(button1);
+    
+    auto button1_1 = Button::create(canvas1);
+    //button1_1->add(Label::create(canvas1, /*"/usr/share/fonts/truetype/freefont/freesans.ttf"¨*/"arial", L"The quick brown fox jumps over the lazy dog."));
+    button1->add(button1_1);
 
     auto button2 = Button::create(canvas1);
     button2->setSize({ 300.0f, 80.0f });
+    vertGrid1->add(button2);
 
     auto button3 = Button::create(canvas1);
     button3->setSize({ 200.0f, 40.0f });
     button3->getActiveStyle().setBorderWidth(5.0f);
-
-
-    auto button1_1 = Button::create(canvas1);
-
-
-    canvas1->add(vertGrid1);
-    vertGrid1->add(button1);
-    vertGrid1->add(button2);
     vertGrid1->add(button3);
-    button1->add(button1_1);  
-    button1_1->add(Label::create(canvas1, "/usr/share/fonts/truetype/freefont/freesans.ttf"/*"arial"*/, L"The quick brown fox jumps over the lazy dog."));
-    
+
+    auto label1 = Label::create(canvas1, "arial", L"Name");
+    label1->setFontSize(10);
+    vertGrid1->add(label1);
+
+    auto textbox1 = TextBox::create(canvas1);
+
+    vertGrid1->add(textbox1);
 
     /*button1->onPressed = []()
     {

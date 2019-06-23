@@ -59,9 +59,9 @@ namespace Guise
         return m_canvas;
     }
 
-    Control * Control::handleInputEvent(const Input::Event &)
+    bool Control::handleInputEvent(const Input::Event &)
     {
-        return nullptr;
+        return false;
     }
 
     void Control::update(const Bounds2f &)
@@ -231,6 +231,10 @@ namespace Guise
 
         m_parent.reset();
         parent->remove(*this);
+    }
+
+    void Control::onActiveChange(bool)
+    {
     }
 
     Bounds2f Control::calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const

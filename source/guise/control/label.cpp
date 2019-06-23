@@ -48,15 +48,41 @@ namespace Guise
         return ControlType::Label;
     }
 
-    Control * Label::handleInputEvent(const Input::Event &)
+    bool Label::handleInputEvent(const Input::Event &)
     {
-        return this;
+        return false;
     }
 
     void Label::update(const Bounds2f & canvasBound)
     {
         m_renderBounds.position = canvasBound.position;
+
+        if (m_changed)
+        {
+            if (!m_text.size())
+            {
+                return;
+            }
+
+            if (m_font)
+            {
+                m_loadDimensions = { 0, 0 };
+                size_t baseline = 0;
+
+                if (m_font->createBitmap(m_text, m_fontSize, m_dpi, m_loadData, m_loadDimensions, baseline))
+                {
+                    m_renderBounds.size = m_loadDimensions;
+                }
+                else
+                {
+                    m_changed = false;
+                }
+            }
+
+        }
+
         getCanvas().queueControlRendering(this);
+        
     }
 
     void Label::render(RendererInterface & renderer)
@@ -64,38 +90,23 @@ namespace Guise
         if (m_changed)
         {
             m_changed = false;
-            m_renderBounds.size = { 0.0f, 0.0f };
 
-            if (!m_text.size())
+            if (m_loadData)
             {
-                m_texture.reset();
-                return;
-            }
-
-            if (m_font)
-            {
-                std::unique_ptr<uint8_t[]> data;
-                Vector2<size_t> dimensions = { 0, 0 };
-                size_t baseline = 0;
-
-                if (m_font->createBitmap(m_text, m_fontSize, m_dpi, data, dimensions, baseline))
+                if (!m_texture)
                 {
-                    if (!m_texture)
-                    {
-                        m_texture = renderer.createTexture();
-                    }
+                    m_texture = renderer.createTexture();
+                }
 
-                    m_texture->load(data.get(), Texture::PixelFormat::RGBA8, dimensions);
-
-                    m_renderBounds.size = m_texture->getDimensions();
-                }           
+                m_texture->load(m_loadData.get(), Texture::PixelFormat::RGBA8, m_loadDimensions);
+                m_loadData.reset();
             }
         }
 
         if (m_texture)
         {
-            renderer.drawQuad(m_renderBounds, m_texture, { 0.0f, 0.0, 0.0f, 1.0f });
-        }       
+            renderer.drawQuad(m_renderBounds, m_texture, getFontColor());
+        }
     }
 
 
@@ -140,7 +151,6 @@ namespace Guise
         m_changed(true),
         m_dpi(canvas->getDpi()),
         m_font(FontLibrary::get(m_fontFamily)),
-        m_newTexture(false),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_text(text),
         m_texture(nullptr)
@@ -154,7 +164,6 @@ namespace Guise
         m_changed(true),
         m_dpi(canvas->getDpi()),
         m_font(FontLibrary::get(font)),
-        m_newTexture(false),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_text(text),
         m_texture(nullptr)
@@ -166,6 +175,7 @@ namespace Guise
     {
         m_dpi = dpi;
         m_changed = true;
+        forceUpdate();
     }
 
 }

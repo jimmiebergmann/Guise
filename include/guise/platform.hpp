@@ -23,48 +23,29 @@
 *
 */
 
-#include "guise/control/window.hpp"
-#include "guise/canvas.hpp"
+#ifndef GUISE_PLATFORM_HPP
+#define GUISE_PLATFORM_HPP
+
+#include "guise/build.hpp"
+#include <string>
 
 namespace Guise
 {
-    std::shared_ptr<Window> Window::create(Canvas & canvas)
-    {
-        return std::shared_ptr<Window>(new Window(canvas));
-    }
 
-    ControlType Window::getType() const
-    {
-        return ControlType::Window;
-    }
-
-    bool Window::handleInputEvent(const Input::Event &/* event*/)
-    {
-        return false;
-    }
-
-    void Window::update(const Bounds2f & /*canvasBound*/)
+    /**
+    * Platform static class.
+    *
+    *
+    */
+    class GUISE_API Platform
     {
 
-    }
+    public:
+        
+        static std::wstring getClipboardText();
 
-    void Window::render(RendererInterface & /*renderer*/)
-    {
-    }
-
-    Bounds2f Window::getRenderBounds() const
-    {
-        return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
-    }
-
-    Bounds2f Window::getSelectBounds() const
-    {
-        return { {0.0f, 0.0f}, {0.0f, 0.0f} };
-    }
-
-    Window::Window(Canvas & canvas) :
-        ControlContainerSingle(canvas)//,
-        //Style::Selector(canvas.getStyleSheet()->getSelector(Style::Selector::Type::Window))
-    { }
+    };
 
 }
+
+#endif

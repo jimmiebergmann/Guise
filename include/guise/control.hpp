@@ -57,6 +57,7 @@ namespace Guise
         Button,
         Label,
         Plane,
+        TextBox,
         VerticalGrid,
         Window
     };
@@ -80,9 +81,9 @@ namespace Guise
 
         virtual ControlType getType() const = 0;
 
-        virtual Control * handleInputEvent(const Input::Event & event);
+        virtual bool handleInputEvent(const Input::Event & event);
 
-        virtual void update(const Bounds2f & canvasBounds/*, const bool markForDisplay = true*/);
+        virtual void update(const Bounds2f & canvasBounds);
 
         virtual void render(RendererInterface & rendererInterface);
 
@@ -121,6 +122,8 @@ namespace Guise
         virtual bool remove(const size_t index);
         virtual size_t removeAll();
         virtual void release();
+
+        virtual void onActiveChange(bool active);
 
     protected:
 

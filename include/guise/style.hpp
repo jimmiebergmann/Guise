@@ -261,82 +261,89 @@ namespace Guise
             std::optional<Style::Property::BorderStyle> m_borderStyle;
             std::optional<Vector2f>                     m_position;
             std::optional<Vector2f>                     m_size;
-            std::optional<Vector4f>                     m_padding;
             std::optional<Style::Property::Overflow>    m_overflow;
 
         };
 
+
+        class GUISE_API TextBoxStyle
+        {
+
+        public:
+
+            TextBoxStyle(TextBoxStyle * parent = nullptr);
+            TextBoxStyle(const std::shared_ptr<Selector> & selector, TextBoxStyle * parent = nullptr);
+
+            const Vector4f getBackgroundColor() const;
+            const Vector4f getBorderColor() const;
+            Property::BorderStyle getBorderStyle() const;
+            float getBorderWidth() const;
+            Vector4f getFontColor() const;
+            const std::string & getFontFamily() const;
+            const int getFontSize() const;
+            Property::Overflow getOverflow() const;
+            Vector4f getPadding() const;
+            Vector2f getPaddingLow() const;
+            Vector2f getPaddingHigh() const;
+            const Vector2f getPosition() const;
+            const Vector2f getSize() const;          
+
+            void setBackgroundColor(const Vector4f & color);
+            void setBorderColor(const Vector4f & color);
+            void setBorderStyle(const Property::BorderStyle borderStyle);
+            void setBorderWidth(const float width);
+            void setFontColor(const Vector4f & color);
+            void setFontFamily(const std::string & family);
+            void setFontSize(const int size);
+            void setOverflow(const Property::Overflow overflow);
+            void setPadding(const Vector4f & padding);
+            void setPadding(const Vector2f & padding);
+            void setPadding(const float & padding);
+            void setPosition(const Vector2f & position);
+            void setSize(const Vector2f & size);
+            
+        protected:
+          
+            TextBoxStyle *                              m_parent;
+
+            std::optional<Vector4f>                     m_backgroundColor;
+            std::optional<Vector4f>                     m_borderColor;
+            std::optional<float>                        m_borderWidth;
+            std::optional<Style::Property::BorderStyle> m_borderStyle;
+            std::optional<Vector4f>                     m_fontColor;
+            std::optional<std::string>                  m_fontFamily;
+            std::optional<int>                          m_fontSize;
+            std::optional<Style::Property::Overflow>    m_overflow;
+            std::optional<Vector4f>                     m_padding;
+            std::optional<Vector2f>                     m_position;
+            std::optional<Vector2f>                     m_size;
+
+        };
 
         class GUISE_API LabelStyle
         {
 
         public:
 
-            LabelStyle() :
-                m_fontFamily("Arial"),
-                m_fontSize(12),
-                m_overflow(Style::Property::Overflow::hidden)
-            { }
+            LabelStyle();
+            LabelStyle(const std::shared_ptr<Selector> & selector);
+          
+            const Vector4f & getFontColor() const;
+            const std::string & getFontFamily() const;
+            const int getFontSize() const;
+            Property::Overflow getOverflow() const;
 
-            LabelStyle(const std::shared_ptr<Selector> & selector) :
-                m_fontFamily("Arial"),
-                m_fontSize(12),
-                m_overflow(Style::Property::Overflow::hidden)
-            {
-                if (!selector)
-                {
-                    return;
-                }
-
-                auto position = selector->getProperty("font-family");
-                if (position && position->getDataType() == Property::DataType::String)
-                {
-                    m_fontFamily = position->getString();
-                }
-                auto size = selector->getProperty("font-size");
-                if (size && size->getDataType() == Property::DataType::Integer)
-                {
-                    m_fontSize = size->getInteger();
-                }
-                auto overflow = selector->getProperty("overflow");
-                if (overflow && overflow->getDataType() == Property::DataType::Overflow)
-                {
-                    m_overflow = overflow->getOverflow();
-                }
-            }
-
-           
-            const std::string & getFontFamily() const
-            {
-                return m_fontFamily;
-            }
-            const int getFontSize() const
-            {
-                return m_fontSize;
-            }
-            Property::Overflow getOverflow() const
-            {
-                return m_overflow;
-            }
-
-            void setFontFamily(const std::string & family)
-            {
-                m_fontFamily = family;
-            }
-            void setFontSize(const int size)
-            {
-                m_fontSize = size;
-            }
-            void setOverflow(const Property::Overflow overflow)
-            {
-                m_overflow = overflow;
-            }
+            void setFontColor(const Vector4f & color);
+            void setFontFamily(const std::string & family);
+            void setFontSize(const int size);
+            void setOverflow(const Property::Overflow overflow);
 
         protected:
 
-            std::string m_fontFamily;
-            int m_fontSize;
-            Property::Overflow m_overflow;
+            Vector4f            m_fontColor;
+            std::string         m_fontFamily;
+            int                 m_fontSize;
+            Property::Overflow  m_overflow;
 
         };
         

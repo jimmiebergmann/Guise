@@ -45,7 +45,7 @@ namespace Guise
 
         virtual ControlType getType() const;
 
-        virtual Control * handleInputEvent(const Input::Event & event);
+        virtual bool handleInputEvent(const Input::Event & event);
 
         virtual void update(const Bounds2f & canvasBound);
 
@@ -77,7 +77,8 @@ namespace Guise
         bool                        m_changed;
         int32_t                     m_dpi;
         std::shared_ptr<Font>       m_font;
-        bool                        m_newTexture;
+        std::unique_ptr<uint8_t[]>  m_loadData;
+        Vector2<size_t>             m_loadDimensions;
         Bounds2f                    m_renderBounds;
         std::wstring                m_text;
         std::shared_ptr<Texture>    m_texture;

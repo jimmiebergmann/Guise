@@ -90,7 +90,7 @@ namespace Guise
 
         void resize(const Vector2ui32 & size);
 
-        void focusControl(Control * control);
+        void setActiveControl(Control * control);
 
         void setDpi(const uint32_t dpi);
 
@@ -99,6 +99,8 @@ namespace Guise
         uint32_t getDpi() const;
 
         float getScale() const;
+
+        Control * getActiveControl();
 
         void queueControlRendering(Control * control);
 
@@ -119,7 +121,7 @@ namespace Guise
         Control *                       m_selectedControl;
         Vector2ui32                     m_size;
         std::shared_ptr<Style::Sheet>   m_styleSheet;
-        Control *                       m_focusedControl;
+        Control *                       m_activeControl;
         Control *                       m_hoveredControl;
 
         std::map<size_t, std::vector<Control *> > m_renderControls;

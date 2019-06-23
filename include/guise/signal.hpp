@@ -34,6 +34,73 @@ namespace Guise
 {
 
     template<typename ... T>
+    class Signal;
+
+    template<>
+    class Signal<>
+    {
+
+    public:
+
+        using Callback = std::function<void()>;
+
+        Signal & operator =(const Callback & callback)
+        {
+            m_callbacks.push_back(callback);
+            return *this;
+        }
+
+        Signal & operator()()
+        {
+            for (auto & callback : m_callbacks)
+            {
+                callback();
+            }
+            return *this;
+        }
+
+    private:
+
+        std::vector<Callback> m_callbacks;
+
+        /*
+        Signal & operator =(const CallbackNoParams & callback)
+        {
+            m_callbacksNoParams.push_back(callback);
+            return *this;
+        }
+
+        
+        Signal & operator()(T ... params)
+        {
+            for (auto & callback : m_callbacks)
+            {
+                callback(params...);
+            }
+            for (auto & callback : m_callbacksNoParams)
+            {
+                callback();
+            }
+            return *this;
+        }
+
+        Signal & operator()()
+        {
+            for (auto & callback : m_callbacksNoParams)
+            {
+                callback();
+            }
+            return *this;
+        }
+
+    private:
+
+        std::vector<Callback> m_callbacks;
+        std::vector<CallbackNoParams> m_callbacksNoParams;
+        */
+    };
+
+    template<typename ... T>
     class Signal
     {
 
@@ -54,7 +121,6 @@ namespace Guise
             return *this;
         }
 
-        
         Signal & operator()(T ... params)
         {
             for (auto & callback : m_callbacks)

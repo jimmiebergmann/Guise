@@ -139,9 +139,9 @@ namespace Guise
         return ControlType::VerticalGrid;
     }
 
-    Control * VerticalGrid::handleInputEvent(const Input::Event &/* event*/)
+    bool VerticalGrid::handleInputEvent(const Input::Event &/* event*/)
     {
-        return nullptr;
+        return false;
     }
 
     void VerticalGrid::update(const Bounds2f & canvasBound)

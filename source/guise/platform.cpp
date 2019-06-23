@@ -23,48 +23,44 @@
 *
 */
 
-#include "guise/control/window.hpp"
-#include "guise/canvas.hpp"
+#include "guise/platform.hpp"
 
 namespace Guise
 {
-    std::shared_ptr<Window> Window::create(Canvas & canvas)
+
+    std::wstring Platform::getClipboardText()
     {
-        return std::shared_ptr<Window>(new Window(canvas));
+    #if defined(GUISE_PLATFORM_WINDOWS)
+
+        if (!(::OpenClipboard(nullptr)))
+        {
+            return L"";
+        }
+
+        HANDLE data = ::GetClipboardData(CF_UNICODETEXT);
+        if (data == nullptr)
+        {
+            ::CloseClipboard();
+            return L"";
+        }
+
+        wchar_t * text = static_cast<wchar_t*>(::GlobalLock(data));
+        if (text == nullptr)
+        {
+            ::CloseClipboard();
+            return L"";
+        }
+
+        ::GlobalUnlock(data);
+        ::CloseClipboard();
+
+        return text;
+
+    #else
+        return L"";
+    #endif
     }
 
-    ControlType Window::getType() const
-    {
-        return ControlType::Window;
-    }
 
-    bool Window::handleInputEvent(const Input::Event &/* event*/)
-    {
-        return false;
-    }
-
-    void Window::update(const Bounds2f & /*canvasBound*/)
-    {
-
-    }
-
-    void Window::render(RendererInterface & /*renderer*/)
-    {
-    }
-
-    Bounds2f Window::getRenderBounds() const
-    {
-        return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
-    }
-
-    Bounds2f Window::getSelectBounds() const
-    {
-        return { {0.0f, 0.0f}, {0.0f, 0.0f} };
-    }
-
-    Window::Window(Canvas & canvas) :
-        ControlContainerSingle(canvas)//,
-        //Style::Selector(canvas.getStyleSheet()->getSelector(Style::Selector::Type::Window))
-    { }
 
 }

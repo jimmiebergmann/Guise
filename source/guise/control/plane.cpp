@@ -140,24 +140,9 @@ namespace Guise
         return ControlType::Plane;
     }
 
-    Control * Plane::handleInputEvent(const Input::Event & /*e*/)
+    bool Plane::handleInputEvent(const Input::Event & /*e*/)
     {
-       /* if (getSelectBounds().intersects(point))
-        {
-            auto childs = getChilds();
-            for (auto it = childs.begin(); it != childs.end(); it++)
-            {
-                auto control = (*it)->handleInputEvent(point);
-                if (control)
-                {
-                    return control;
-                }
-            }
-
-            return this;
-        }*/
-
-        return nullptr;
+        return false;
     }
 
     void Plane::update(const Bounds2f & canvasBound)

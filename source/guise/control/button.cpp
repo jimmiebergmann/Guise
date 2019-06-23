@@ -41,11 +41,11 @@ namespace Guise
         return ControlType::Button;
     }
 
-    Control * Button::handleInputEvent(const Input::Event & e)
+    bool Button::handleInputEvent(const Input::Event & e)
     {
         if (!m_enabled)
         {
-            return this;
+            return false;
         }
 
         switch (e.type)
@@ -94,7 +94,7 @@ namespace Guise
             default: break;
         }
 
-        return this;
+        return true;
     }
 
     void Button::update(const Bounds2f & canvasBound)

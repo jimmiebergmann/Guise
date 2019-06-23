@@ -132,27 +132,26 @@ namespace Guise
                         hit.isQueried = true;
                     }
 
-                    if (hit.control)
+                    setActiveControl(hit.control);
+
+                    if (m_activeControl)
                     {
-                        m_focusedControl = hit.control;
-                        m_focusedControl->handleInputEvent(e);
+                        m_activeControl->handleInputEvent(e);
                     }
                 }
                 break;
                 //case Input::EventType::MousePress:
                 //case Input::EventType::MouseDoubleClick:
+                case Input::EventType::KeyboardJustPressed:
+                case Input::EventType::KeyboardPress:
+                case Input::EventType::KeyboardHolding:
+                case Input::EventType::KeyboardRelease:
+                case Input::EventType::Texting:
                 case Input::EventType::MouseRelease:
                 {
-                    /*if (!hit.isQueried || hit.position != e.position)
+                    if (m_activeControl)
                     {
-                        hit.control = queryControlHit(e.position);
-                        hit.position = e.position;
-                        hit.isQueried = true;
-                    }*/
-
-                    if (m_focusedControl)
-                    {
-                        m_focusedControl->handleInputEvent(e);
+                        m_activeControl->handleInputEvent(e);
                     }
 
                 }
@@ -231,11 +230,6 @@ namespace Guise
         m_size = size;
     }
 
-    void Canvas::focusControl(Control * control)
-    {
-        m_focusedControl = control;
-    }
-
     void Canvas::setDpi(const uint32_t dpi)
     {
         if (dpi != m_dpi)
@@ -261,7 +255,21 @@ namespace Guise
         }
         
         m_dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
-    }    
+    }
+
+    void Canvas::setActiveControl(Control * control)
+    {
+        if (m_activeControl && control != m_activeControl)
+        {
+            m_activeControl->onActiveChange(false);
+        }
+
+        if (control)
+        {
+            m_activeControl = control;
+            m_activeControl->onActiveChange(true);
+        }   
+    }
 
     uint32_t Canvas::getDpi() const
     {
@@ -271,6 +279,11 @@ namespace Guise
     float Canvas::getScale() const
     {
         return m_scale;
+    }
+
+    Control * Canvas::getActiveControl()
+    {
+        return m_activeControl;
     }
 
     void Canvas::queueControlRendering(Control * control)
@@ -299,7 +312,7 @@ namespace Guise
         m_plane(nullptr),
         m_selectedControl(nullptr),
         m_size(size),
-        m_focusedControl(nullptr),
+        m_activeControl(nullptr),
         m_hoveredControl(nullptr)
     {
         

@@ -164,7 +164,8 @@ namespace Guise
         return m_isValid;
     }
 
-    bool Font::createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi, std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & /*baseline*/)
+    bool Font::createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi,
+                            std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline)
     {
         if (!m_isValid || !text.size())
         {
@@ -295,6 +296,8 @@ namespace Guise
 
             penPos += glyph->horiAdvance;
         }
+
+        baseline = lowDim.y > 0 ? 0 : static_cast<size_t>(std::abs(lowDim.y));
 
         return true;
     }

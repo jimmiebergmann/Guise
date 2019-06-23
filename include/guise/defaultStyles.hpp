@@ -41,7 +41,6 @@ namespace Guise
                 {
                     { "padding",                        { 15.0f } },
                     { "background-color",   { Vector4f  { 0.25f, 0.25f, 0.25f, 1.0 } } },
-                    { "padding",                        { 15.0f } },
                     { "border-style",                   { Property::BorderStyle::Solid } },
                     { "border-width",                   { 1.0f } },
                     { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
@@ -84,7 +83,7 @@ namespace Guise
 
             static const Selector label = Selector(
                 {
-                    { "font-family",                    { "Arial" } },
+                    { "font-family",                    { std::string("Arial") } },
                     { "font-size",                      { 12 } },
                     { "overflow",                       { Property::Overflow::hidden } }
                 }
@@ -96,6 +95,19 @@ namespace Guise
                 }
             );
 
+            static const Selector textBox = Selector(
+                {
+                    { "size",               { Vector2f  { 0.0f, 20.0f } } },
+                    { "padding",                        { 3.0f } },
+                    { "background-color",   { Vector4f  { 0.8f, 0.8f, 0.8f, 1.0 } } },
+                    { "border-style",                   { Property::BorderStyle::Solid } },
+                    { "border-width",                   { 1.0f } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } },
+                    { "font-family",                    { std::string("Arial") } },
+                    { "font-size",                      { 10 } }
+                }
+            );
+
             static const Selector verticalGrid = Selector(
                 {
                     { "padding",                        { 5.0f } }
@@ -104,7 +116,7 @@ namespace Guise
 
             static const Selector verticalGridSlot = Selector(
                 {
-                    { "padding",            { Vector4f  { 5.0f, 1.0f, 3.0f, 1.0f } } }
+                    { "padding",            { Vector4f  { 2.0f, 2.0f, 2.0f, 2.0f } } }
                 }
             );
 

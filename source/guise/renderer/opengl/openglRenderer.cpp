@@ -60,6 +60,12 @@ namespace Guise
 
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color)
     {
+        const Bounds2f newBounds =
+        {
+            { std::ceil(bounds.position.x), std::ceil(bounds.position.y) },
+            { std::ceil(bounds.size.x), std::ceil(bounds.size.y) }
+        };
+
         glEnable(GL_TEXTURE_2D);
         texture->bind(0);
 
@@ -67,18 +73,20 @@ namespace Guise
         glColor4f(color.x, color.y, color.z, color.w);
 
         glTexCoord2f(0.0f, 1.0f);
-        glVertex2f(bounds.position.x, bounds.position.y);
+        glVertex2f(newBounds.position.x, newBounds.position.y);
 
         glTexCoord2f(1.0f, 1.0f);
-        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
+        glVertex2f(newBounds.position.x + newBounds.size.x, newBounds.position.y);
 
         glTexCoord2f(1.0f, 0.0f);
-        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
+        glVertex2f(newBounds.position.x + newBounds.size.x, newBounds.position.y + newBounds.size.y);
 
         glTexCoord2f(0.0f, 0.0f);
-        glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+        glVertex2f(newBounds.position.x, newBounds.position.y + newBounds.size.y);
 
         glEnd();
+
+        texture->unbind();
     }
 
     void OpenGLRenderer::drawBorder(const Bounds2f & bounds, const float width, const Vector4f & color)

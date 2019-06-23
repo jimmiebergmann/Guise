@@ -56,6 +56,7 @@ namespace Guise
             MouseScroll,
             KeyboardJustPressed,
             KeyboardPress,
+            KeyboardHolding,
             KeyboardRelease,
             Texting
         };
@@ -196,12 +197,15 @@ namespace Guise
 
         void pushEvent(const Event & e);
 
+        bool getKeyState(const Key key) const;
+
         size_t queueSize() const;
 
         Vector2f getLastMousePosition() const;
 
 #if defined(GUISE_PLATFORM_WINDOWS)
-        static Key transalteWin32Key(const WORD key);
+        static Key translateFromWin32Key(const WORD key);
+        static WORD translateToWin32Key(const Key key);
 #endif
 
     private:

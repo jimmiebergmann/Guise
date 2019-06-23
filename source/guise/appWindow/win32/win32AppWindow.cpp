@@ -29,6 +29,7 @@
 
 #include <shellscalingapi.h>
 #include <algorithm>
+#include <iostream>
 
 namespace Guise
 {
@@ -287,15 +288,16 @@ namespace Guise
                 AdjustWindowRectEx(&newWindowRect, m_win32Style, FALSE, m_win32ExtendedStyle);
 
                 SetWindowPos(m_windowHandle,
-                    NULL,
-                    newWindowRect.left,
-                    newWindowRect.top,
-                    newWindowRect.right - newWindowRect.left,
-                    newWindowRect.bottom - newWindowRect.top,
-                    SWP_NOZORDER | SWP_NOACTIVATE);
-            }
-            
+                             NULL,
+                             newWindowRect.left,
+                             newWindowRect.top,
+                             newWindowRect.right - newWindowRect.left,
+                             newWindowRect.bottom - newWindowRect.top,
+                             SWP_NOZORDER | SWP_NOACTIVATE);
+            }   
         }
+
+        ::SetClipboardViewer(m_windowHandle);
 
         m_canvas->setDpi(m_dpi);
 
@@ -408,14 +410,23 @@ namespace Guise
 
         // Keyboard events
         case WM_KEYDOWN:
-            m_input.pushEvent({ Input::EventType::KeyboardPress, Input::transalteWin32Key(LOWORD(wParam)) });
+            m_input.pushEvent({ Input::EventType::KeyboardPress, Input::translateFromWin32Key(LOWORD(wParam)) });
             break;
         case WM_KEYUP:
-            m_input.pushEvent({ Input::EventType::KeyboardRelease, Input::transalteWin32Key(LOWORD(wParam)) });
+            m_input.pushEvent({ Input::EventType::KeyboardRelease, Input::translateFromWin32Key(LOWORD(wParam)) });
             break;
         case WM_CHAR:
             m_input.pushEvent({Input::EventType::Texting, static_cast<wchar_t>(wParam)});
+            break;        
+        /*case WM_ACTIVATE:
+            std::cout << "Active." << std::endl;
             break;
+        case WM_SETFOCUS:
+            std::cout << "Set focus." << std::endl;
+            break;
+        case WM_KILLFOCUS:
+            std::cout << "Kill focus." << std::endl;
+            break;*/
         
         // Mouse events.
         case WM_MOUSEMOVE:
