@@ -61,6 +61,39 @@ namespace Guise
 
     };
 
+
+    /**
+    * Bounds 1D template.
+    * @tparam T Data type of components.
+    *
+    */
+    template <typename T>
+    class Bounds<1, T>
+    {
+
+    public:
+
+        Bounds();
+        Bounds(const Vector<1, T> & position, const Vector<1, T> & size);
+        Bounds(const T p, const T s);
+        Bounds(const Bounds<1, T> & bounds);
+
+        bool intersects(const T point) const;
+
+        Bounds<1, T> & operator = (const Bounds<1, T> & bounds);
+
+        Bounds<1, T> operator * (const T value) const;
+        Bounds<1, T> & operator *= (const T value);
+
+        bool operator == (const Bounds<1, T> & bounds) const;
+        bool operator != (const Bounds<1, T> & bounds) const;
+
+        T position;
+        T size;
+
+    };
+
+
     /**
     * Bounds 2D template.
     * @tparam T Data type of components.
@@ -96,6 +129,11 @@ namespace Guise
     using Bounds2 = Bounds<2, T>;
     using Bounds2f = Bounds<2, float>;
     using Bounds2i32 = Bounds<2, int32_t>;
+
+    template <typename T>
+    using Bounds1 = Bounds<1, T>;
+    using Bounds1f = Bounds<1, float>;
+    using Bounds1i32 = Bounds<1, int32_t>;
 
 }
 

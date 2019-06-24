@@ -61,6 +61,35 @@ namespace Guise
     #endif
     }
 
+    bool Platform::setClipboardText(const std::wstring & text)
+    {
+#if defined(GUISE_PLATFORM_WINDOWS)
+        if (!text.size())
+        {
+            return false;
+        }
+
+        const size_t len = (text.size() + 1) * sizeof(std::wstring::size_type);
+        HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, len);
+        memcpy(::GlobalLock(hMem), text.c_str(), len);
+        ::GlobalUnlock(hMem);
+        
+        if (!(::OpenClipboard(nullptr)))
+        {
+            return false;
+        }
+        ::EmptyClipboard();
+
+        ::SetClipboardData(CF_UNICODETEXT, hMem);
+        ::CloseClipboard();
+
+        return true;
+
+    #else
+        return false;
+    #endif
+    }
+
 
 
 }

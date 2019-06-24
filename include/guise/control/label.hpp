@@ -71,9 +71,6 @@ namespace Guise
 
         void onNewDpi(const int32_t dpi);
 
-        //static std::unique_ptr<uint8_t[]> stringToBitmap(const std::wstring & text, const std::string family, const uint32_t height,
-        //                                                 const Texture::PixelFormat pixelFormat, Vector2ui32 & dimensions);
-
         bool                        m_changed;
         int32_t                     m_dpi;
         std::shared_ptr<Font>       m_font;

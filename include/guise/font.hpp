@@ -29,6 +29,7 @@
 #include "guise/build.hpp"
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace Guise
 {
@@ -48,7 +49,9 @@ namespace Guise
 
         bool isValid() const;
 
-        bool createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi, std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline);
+        bool createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi,
+            std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline,
+            std::vector<int32_t> * glyphPositions = nullptr);
 
     private:
 

@@ -155,50 +155,14 @@ namespace Guise
             {
                 m_renderBounds = renderBounds;
                 m_childsBounds = Bounds2f(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
-
-                /*Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
-
-                auto childs = getChilds();
-                for (auto it = childs.begin(); it != childs.end(); it++)
-                {
-                    (*it)->update(childBounds);
-                }*/
-
             }
-            
-            /*Bounds2f renderBounds = calcRenderBounds(canvasBound, m_position, m_size, m_overflow);
-            if (renderBounds != m_renderBounds)
-            {
-                m_renderBounds = canvasBound;
-
-                //getCanvas().registerControlBoundsChange(*this, m_renderBounds);
-
-                Bounds2f childBounds(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
-
-                auto childs = getChilds();
-                for (auto it = childs.begin(); it != childs.end(); it++)
-                {
-                    (*it)->update(childBounds);
-                }
-            }*/
         }
-
-        getCanvas().queueControlRendering(this);
 
         auto childs = getChilds();
         for (auto it = childs.begin(); it != childs.end(); it++)
         {
             (*it)->update(m_childsBounds);
         }
-    }
-
-    void Plane::render(RendererInterface & /*renderer*/)
-    {
-        /*auto childs = getChilds();
-        for (auto it = childs.begin(); it != childs.end(); it++)
-        {
-            (*it)->render(renderer);
-        }*/
     }
 
     Bounds2f Plane::getRenderBounds() const

@@ -64,6 +64,70 @@ namespace Guise
     }
 
 
+    // Bounds 1D implementations.
+    template <typename T>
+    inline Bounds<1, T>::Bounds()
+    { }
+
+    template <typename T>
+    inline Bounds<1, T>::Bounds(const Vector<1, T> & position, const Vector<1, T> & size) :
+        position(position),
+        size(size)
+    { }
+
+    template <typename T>
+    inline Bounds<1, T>::Bounds(const T p, const T s) :
+        position(p),
+        size(s)
+    { }
+
+    template <typename T>
+    inline bool Bounds<1, T>::intersects(const T point) const
+    {
+        return point >= position && point <= position + size ;
+    }
+
+    template <typename T>
+    inline Bounds<1, T>::Bounds(const Bounds<1, T> & bounds) :
+        position(bounds.position),
+        size(bounds.size)
+    { }
+
+    template <typename T>
+    inline Bounds<1, T> & Bounds<1, T>::operator = (const Bounds<1, T> & bounds)
+    {
+        position = bounds.position;
+        size = bounds.size;
+        return *this;
+    }
+
+    template <typename T>
+    inline Bounds<1, T>  Bounds<1, T>::operator * (const T value) const
+    {
+        return { position * value, size * value };
+    }
+
+    template <typename T>
+    inline Bounds<1, T> &  Bounds<1, T>::operator *= (const T value)
+    {
+        position *= value;
+        size *= value;
+        return *this;
+    }
+
+    template <typename T>
+    inline bool Bounds<1, T>::operator == (const Bounds<1, T> & bounds) const
+    {
+        return position == bounds.position && size == bounds.size;
+    }
+
+    template <typename T>
+    inline bool Bounds<1, T>::operator != (const Bounds<1, T> & bounds) const
+    {
+        return position != bounds.position || size != bounds.size;
+    }
+
+
     // Bounds 2D implementations.
     template <typename T>
     inline Bounds<2, T>::Bounds()

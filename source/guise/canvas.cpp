@@ -140,8 +140,6 @@ namespace Guise
                     }
                 }
                 break;
-                //case Input::EventType::MousePress:
-                //case Input::EventType::MouseDoubleClick:
                 case Input::EventType::KeyboardJustPressed:
                 case Input::EventType::KeyboardPress:
                 case Input::EventType::KeyboardHolding:
@@ -156,9 +154,16 @@ namespace Guise
 
                 }
                 break;
+                case Input::EventType::MousePress:
+                case Input::EventType::MouseDoubleClick:
                 case Input::EventType::MouseMove:
                 {
                     mouseMovedFunc(e);
+
+                    if (m_activeControl)
+                    {
+                        m_activeControl->handleInputEvent(e);
+                    }
                 }
                 break;
                 default: break;
@@ -259,16 +264,19 @@ namespace Guise
 
     void Canvas::setActiveControl(Control * control)
     {
-        if (m_activeControl && control != m_activeControl)
+        if (control != m_activeControl)
         {
-            m_activeControl->onActiveChange(false);
-        }
+            if (m_activeControl)
+            {
+                m_activeControl->onActiveChange(false);
+            }
 
-        if (control)
-        {
+            if (control)
+            {                
+                control->onActiveChange(true);
+            }
             m_activeControl = control;
-            m_activeControl->onActiveChange(true);
-        }   
+        }
     }
 
     uint32_t Canvas::getDpi() const

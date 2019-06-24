@@ -73,8 +73,6 @@ namespace Guise
 
         virtual void update(const Bounds2f & canvasBound);
 
-        virtual void render(RendererInterface & renderer);
-
         virtual Bounds2f getRenderBounds() const;
 
         virtual Bounds2f getSelectBounds() const;

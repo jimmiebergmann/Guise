@@ -44,6 +44,8 @@ namespace Guise
         
         static std::wstring getClipboardText();
 
+        static bool setClipboardText(const std::wstring & text);
+
     };
 
 }

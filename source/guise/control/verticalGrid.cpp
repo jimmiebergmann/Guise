@@ -181,8 +181,6 @@ namespace Guise
             }
         }
 
-        getCanvas().queueControlRendering(this);
-
         if (!newChildBounds)
         {
             auto childs = getChilds();
@@ -193,17 +191,6 @@ namespace Guise
         }
         
     }
-
-    void VerticalGrid::render(RendererInterface & /*renderer*/)
-    {
-        /*auto childs = getChilds();
-        
-        for (auto it = childs.begin(); it != childs.end(); it++)
-        {
-            (*it)->render(renderer);
-        }*/
-    }
-
 
     Bounds2f VerticalGrid::getRenderBounds() const
     {

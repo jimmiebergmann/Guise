@@ -37,27 +37,6 @@
 namespace Guise
 {
 
-    class TextInputHandler
-    {
-
-    public:
-
-        TextInputHandler();
-
-        void addEvent(const Input::Event & e);
-
-        Signal<> onPaste;
-        Signal<> onCopy;
-
-    private:
-
-        bool m_shiftKey;
-        bool m_controlKey;
-        bool m_cKey;
-        bool m_vKey;
-
-    };
-
     class GUISE_API TextBox :  public Style::TextBoxStyle, public Control, public DpiSensitive
     {
 
@@ -90,27 +69,25 @@ namespace Guise
 
         void onActiveChange(bool active);
 
-        struct Keys
-        {
-            bool Shift;
-            bool Control;
-            bool C;
-            bool V;
-        };
+        bool eraseSelected();
+
+        bool intersectText(const float point, size_t & index);
 
         bool                                    m_active;
         float                                   m_baseline;
         float                                   m_baseHeight;
         bool                                    m_changed; 
-        size_t                                  m_cursorPosition;
+        std::chrono::system_clock::time_point   m_cursorBlinkTimer;
+        size_t                                  m_cursorIndex;
+        size_t                                  m_cursorSelectFromIndex;
+        std::vector<int32_t>                    m_charPositions;
+        bool                                    m_mousePressed;
         int32_t                                 m_dpi;
         std::shared_ptr<Font>                   m_font;
         Bounds2f                                m_renderBounds;
-        Bounds2f                                m_childBounds;
+        Bounds2f                                m_textBounds;
         std::wstring                            m_text;
-        TextInputHandler                        m_textInputHandle;
-        std::shared_ptr<Texture>                m_textTexture;
-        std::chrono::system_clock::time_point   m_cursorBlinkTimer;
+        std::shared_ptr<Texture>                m_textTexture;     
 
     };
 

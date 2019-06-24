@@ -165,7 +165,8 @@ namespace Guise
     }
 
     bool Font::createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi,
-                            std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline)
+                            std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline,
+                            std::vector<int32_t> * glyphPositions)
     {
         if (!m_isValid || !text.size())
         {
@@ -201,6 +202,11 @@ namespace Guise
         // Calcualte text bounding box and pen start position.
         for (size_t i = 0; i < text.size(); i++)
         {
+            if (glyphPositions)
+            {
+                glyphPositions->push_back(static_cast<int32_t>(penPos));
+            }
+
             auto glyph = m_impl->getGlypth(text[i], fontSize);
             if (glyph)
             {
@@ -220,6 +226,7 @@ namespace Guise
 
                 // Calc X dimensions.
                 FT_Pos lowX = penPos + glyph->horiBearingX;
+
                 if (lowX < lowDim.x)
                 {
                     lowDim.x = lowX;
@@ -245,7 +252,12 @@ namespace Guise
                 }
 
                 penPos += glyph->horiAdvance;
-            }    
+            }
+        }
+
+        if (glyphPositions)
+        {
+            glyphPositions->push_back(static_cast<int32_t>(penPos));
         }
         
         penPos = -lowDim.x;
