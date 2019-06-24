@@ -78,10 +78,8 @@ namespace Guise
 
         void destroyWindow();
 
-        //int getDpi() const;
-
-        static LRESULT windowProcStatic(HWND p_HWND, UINT p_Message, WPARAM p_WParam, LPARAM p_LParam);
-        LRESULT windowProc(HWND p_HWND, UINT p_Message, WPARAM p_WParam, LPARAM p_LParam);
+        static LRESULT windowProcStatic(HWND HWND, UINT message, WPARAM wParam, LPARAM lParam);
+        LRESULT windowProc(HWND HWND, UINT message, WPARAM wParam, LPARAM lParam);
 
         std::shared_ptr<Renderer>   m_renderer;
         std::shared_ptr<Canvas>     m_canvas;

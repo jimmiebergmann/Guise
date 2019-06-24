@@ -47,8 +47,9 @@ int main()
     vertGrid1->add(label1);
 
     auto textbox1 = TextBox::create(canvas1);
-
     vertGrid1->add(textbox1);
+    auto textbox2 = TextBox::create(canvas1);
+    vertGrid1->add(textbox2);
 
     /*button1->onPressed = []()
     {

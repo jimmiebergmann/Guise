@@ -33,24 +33,6 @@
 
 namespace Guise
 {
-    /*static bool enableDpiAware(HWND windowHandle)
-    {
-    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
-        SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-        
-        if (!EnableNonClientDpiScaling(windowHandle))
-        {
-            return false;
-        }
-    #elif GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_VISTA
-        if (!SetProcessDPIAware())
-        {
-            return false;
-        }
-    #endif    
-
-        return true;
-    }*/
 
     #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
     static int getSystemDpi(HWND windowHandle, HDC )
@@ -297,8 +279,6 @@ namespace Guise
             }   
         }
 
-        ::SetClipboardViewer(m_windowHandle);
-
         m_canvas->setDpi(m_dpi);
 
         ShowWindow(m_windowHandle, SW_RESTORE);
@@ -359,142 +339,157 @@ namespace Guise
     {
         switch (message)
         {
-
-        // Windows events.
-        case WM_CREATE:
-        {
-            //int iDpi = GetDpiForWindow(m_windowHandle);
-            //std::cout << iDpi << std::endl;
-            //int dpiScaledX = MulDiv(INITIALX_96DPI, iDpi, 96);
-            //int dpiScaledY = MulDiv(INITIALY_96DPI, iDpi, 96);
-            //int dpiScaledWidth = MulDiv(INITIALWIDTH_96DPI, iDpi, 96);
-            //int dpiScaledHeight = MulDiv(INITIALHEIGHT_96DPI, iDpi, 96);
-            //SetWindowPos(m_windowHandle, m_windowHandle, 100, 100, m_size.x, m_size.y, SWP_NOZORDER | SWP_NOACTIVATE);
-            //SetProcessDpiAwareness(PROCESS_DPI_AWARENESS::PROCESS_PER_MONITOR_DPI_AWARE);
-            //SetProcessDPIAware();
-            
-            /*if (m_dpiAware)
+            case WM_CREATE:
+            {          
+            }
+            break;
+            case WM_ERASEBKGND:
+                return 1;
+            case WM_PAINT:
             {
-                if (!enableDpiAware(windowHandle))
+            
+            }
+            break;
+            case WM_SIZE:
+            {
+                m_size = { static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)) };
+                if (m_renderer)
                 {
-                    return FALSE;
-                }
-            }*/
-
-            
-        }
-        break;
-        case WM_ERASEBKGND:
-            return 1;
-        case WM_PAINT:
-        {
-            
-        }
-        break;
-        case WM_SIZE:
-        {
-            m_size = { static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)) };
-            if (m_renderer)
+                    m_renderer->setViewportSize({ 0, 0 }, m_size);
+                }           
+                m_canvas->resize(m_size);
+                update();
+                render();
+            }
+            break;
+            /*case WM_SIZING:
             {
-                m_renderer->setViewportSize({ 0, 0 }, m_size);
-            }           
-            m_canvas->resize(m_size);
-            update();
-            render();
-        }
-        break;
-        /*case WM_SIZING:
-        {
-        }
-        break;*/
-
-        // Keyboard events
-        case WM_KEYDOWN:
-            m_input.pushEvent({ Input::EventType::KeyboardPress, Input::translateFromWin32Key(LOWORD(wParam)) });
-            break;
-        case WM_KEYUP:
-            m_input.pushEvent({ Input::EventType::KeyboardRelease, Input::translateFromWin32Key(LOWORD(wParam)) });
-            break;
-        case WM_CHAR:
-            m_input.pushEvent({Input::EventType::Texting, static_cast<wchar_t>(wParam)});
-            break;        
-        /*case WM_ACTIVATE:
-            std::cout << "Active." << std::endl;
-            break;
-        case WM_SETFOCUS:
-            std::cout << "Set focus." << std::endl;
-            break;
-        case WM_KILLFOCUS:
-            std::cout << "Kill focus." << std::endl;
+            }
             break;*/
-        
-        // Mouse events.
-        case WM_MOUSEMOVE:
-            m_input.pushEvent({ Input::EventType::MouseMove, { static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_LBUTTONDOWN:
-            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(0), { static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_MBUTTONDOWN:
-            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(1),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_RBUTTONDOWN:
-            m_input.pushEvent({ Input::EventType::MousePress, uint8_t(2),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_LBUTTONUP:
-            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(0),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_MBUTTONUP:
-            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(1),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_RBUTTONUP:
-            m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(2),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_LBUTTONDBLCLK:
-            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(0),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_MBUTTONDBLCLK:
-            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(1),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_RBUTTONDBLCLK:
-            m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(2),{ static_cast<float>(LOWORD(lParam)), static_cast<float>(HIWORD(lParam)) } });
-            break;
-        case WM_MOUSEWHEEL:
-        {
-            auto zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-            if (zDelta == 0)
-            {
+
+            // Keyboard events
+            case WM_KEYDOWN:
+                m_input.pushEvent({ Input::EventType::KeyboardPress, Input::translateFromWin32Key(LOWORD(wParam)) });
                 break;
-            }
-
-            float delta = static_cast<float>(zDelta) / static_cast<float>(WHEEL_DELTA);
-            m_input.pushEvent({ Input::EventType::MouseScroll, delta });
-        } 
-        break;
-    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_7
-        case WM_DPICHANGED:
-        {
-            m_dpi = LOWORD(wParam);
-
-            if (m_renderer)
+            case WM_KEYUP:
+                m_input.pushEvent({ Input::EventType::KeyboardRelease, Input::translateFromWin32Key(LOWORD(wParam)) });
+                break;
+            case WM_CHAR:
+                m_input.pushEvent({Input::EventType::Texting, static_cast<wchar_t>(wParam)});
+                break;        
+            /*case WM_ACTIVATE:
+                std::cout << "Active." << std::endl;
+                break;
+            case WM_SETFOCUS:
+                std::cout << "Set focus." << std::endl;
+                break;
+            case WM_KILLFOCUS:
+                std::cout << "Kill focus." << std::endl;
+                break;*/
+        
+            // Mouse events.
+            case WM_MOUSEMOVE:
             {
-                m_renderer->setDpi(m_dpi);
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MouseMove, { static_cast<float>(point.x), static_cast<float>(point.y) } });
             }
-            m_canvas->setDpi(m_dpi);
-
-            RECT * const newSize = reinterpret_cast<RECT*>(lParam);
-            SetWindowPos(windowHandle,
-                NULL,
-                newSize->left,
-                newSize->top,
-                newSize->right - newSize->left,
-                newSize->bottom - newSize->top,
-                SWP_NOZORDER | SWP_NOACTIVATE);
-        }
-        break;
-    #endif
-        default:
             break;
+            case WM_LBUTTONDOWN:
+            {
+                ::SetCapture(m_windowHandle);
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MousePress, uint8_t(0),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_MBUTTONDOWN:
+            {
+                ::SetCapture(m_windowHandle);
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MousePress, uint8_t(1),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_RBUTTONDOWN:
+            {
+                ::SetCapture(m_windowHandle);
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MousePress, uint8_t(2),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_LBUTTONUP:
+            {
+                ::SetCapture(NULL);
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(0),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_MBUTTONUP:
+            {
+                ::SetCapture(NULL);
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(1),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_RBUTTONUP:
+            {
+                ::SetCapture(NULL);
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MouseRelease, uint8_t(2),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_LBUTTONDBLCLK:
+            {
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(0),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_MBUTTONDBLCLK:
+            {
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(1),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_RBUTTONDBLCLK:
+            {
+                auto point = MAKEPOINTS(lParam);
+                m_input.pushEvent({ Input::EventType::MouseDoubleClick, uint8_t(2),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+            }
+            break;
+            case WM_MOUSEWHEEL:
+            {
+                auto zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+                if (zDelta == 0)
+                {
+                    break;
+                }
+
+                float delta = static_cast<float>(zDelta) / static_cast<float>(WHEEL_DELTA);
+                m_input.pushEvent({ Input::EventType::MouseScroll, delta });
+            } 
+            break;
+        #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_7
+            case WM_DPICHANGED:
+            {
+                m_dpi = LOWORD(wParam);
+
+                if (m_renderer)
+                {
+                    m_renderer->setDpi(m_dpi);
+                }
+                m_canvas->setDpi(m_dpi);
+
+                RECT * const newSize = reinterpret_cast<RECT*>(lParam);
+                SetWindowPos(windowHandle,
+                    NULL,
+                    newSize->left,
+                    newSize->top,
+                    newSize->right - newSize->left,
+                    newSize->bottom - newSize->top,
+                    SWP_NOZORDER | SWP_NOACTIVATE);
+            }
+            break;
+        #endif
+            default:
+                break;
 
         }
 

@@ -78,6 +78,7 @@ namespace Guise
             break;
             case Input::EventType::MouseMove:
             {
+               // std::cout << "Move: " << e.position.x << " " << e.position.y << std::endl;
                 if (m_mousePressed)
                 {
                     size_t index = 0;
@@ -468,11 +469,15 @@ namespace Guise
             {
                 m_cursorIndex =  0;
                 m_cursorSelectFromIndex = 0;
-            }
-
-            m_cursorBlinkTimer = std::chrono::system_clock::now();
+            }    
         }
-        
+        else
+        {
+            m_cursorIndex = 0;
+            m_cursorSelectFromIndex = 0;
+        }
+
+        m_cursorBlinkTimer = std::chrono::system_clock::now();     
     }
 
     bool TextBox::eraseSelected()
