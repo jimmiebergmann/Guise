@@ -78,7 +78,25 @@ namespace Guise
             break;
             case Input::EventType::MouseMove:
             {
-                //std::cout << "Moving in text box!" << std::endl;
+                if (m_mousePressed)
+                {
+                    size_t index = 0;
+                    if (intersectText(e.position.x, index))
+                    {
+                        /*if (!shiftPressed)
+                        {
+                            m_cursorIndex = index;
+                        }*/
+
+                        m_cursorSelectFromIndex = index;
+                        m_cursorBlinkTimer = std::chrono::system_clock::now();
+                    }
+                    else
+                    {
+                        m_cursorIndex = 0;
+                        m_cursorSelectFromIndex = 0;
+                    }
+                }
             }
             break;
             case Input::EventType::Texting:
@@ -175,8 +193,6 @@ namespace Guise
                     break;
                     case Input::Key::C:
                     {
-                        //setClipboardText
-
                         if (m_cursorIndex != m_cursorSelectFromIndex)
                         {
                             size_t index1 = m_cursorIndex;
@@ -210,6 +226,15 @@ namespace Guise
                         }
 
                         m_cursorBlinkTimer = std::chrono::system_clock::now();
+                    }
+                    break;
+                    case Input::Key::A:
+                    {
+                        if (input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight))
+                        {
+                            m_cursorIndex = 0;
+                            m_cursorSelectFromIndex = m_charPositions.size() ? m_charPositions.size() - 1 : 0;
+                        }
                     }
                     break;
                     case Input::Key::Left:
@@ -268,14 +293,6 @@ namespace Guise
                 }
             }
             break;
-            /*case Input::EventType::MouseJustPressed:
-            {
-            }
-            break;
-            case Input::EventType::MouseRelease:
-            {
-            }
-            break;*/
             default: break;
         }
 
@@ -306,12 +323,6 @@ namespace Guise
             {
                 if (m_font)
                 {
-                    /*
-                    m_cursorIndex = m_text.size() - 1;
-                    m_cursorPosition = m_charPositions[m_cursorIndex];
-                    */
-
-
                     std::unique_ptr<uint8_t[]> data;
                     Vector2<size_t> dimensions = { 0, 0 };
 
@@ -342,10 +353,8 @@ namespace Guise
             renderer.drawBorder(m_renderBounds, borderWidth, getBorderColor());
         }
 
-        //float cursorPos = m_renderBounds.position.x + getPaddingLow().x + 1.0f;
-
+        const bool isSelected = m_cursorIndex != m_cursorSelectFromIndex;
         m_textBounds = { { m_renderBounds.position.x + getPaddingLow().x, m_renderBounds.position.y }, { 0.0f, 0.0f } };
-
         if (m_textTexture)
         {          
             // Render text     
@@ -354,8 +363,7 @@ namespace Guise
             renderer.drawQuad(m_textBounds, m_textTexture, getFontColor());
 
             // Render select background.
-            if (m_cursorIndex != m_cursorSelectFromIndex &&
-                m_cursorIndex < m_charPositions.size() && m_cursorSelectFromIndex < m_charPositions.size())
+            if (isSelected && m_cursorIndex < m_charPositions.size() && m_cursorSelectFromIndex < m_charPositions.size())
             {
                 size_t index1 = m_cursorIndex;
                 size_t index2 = m_cursorSelectFromIndex;
@@ -382,7 +390,7 @@ namespace Guise
 
             bool showCursor = (static_cast<int>(duration.count() * 1000.0f) % 1000) < 500;          
 
-            if (showCursor)
+            if (!isSelected && showCursor)
             {
                 float cursorPosition = static_cast<float>(m_charPositions.size()) ? static_cast<float>(m_charPositions[m_cursorIndex]) : 0.0f;
                 cursorPosition += m_textBounds.position.x;

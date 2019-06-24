@@ -97,14 +97,14 @@ namespace Guise
 
             static const Selector textBox = Selector(
                 {
-                    { "size",               { Vector2f  { 0.0f, 20.0f } } },
+                    { "size",               { Vector2f  { 0.0f, 80.0f } } },
                     { "padding",                        { 3.0f } },
                     { "background-color",   { Vector4f  { 0.8f, 0.8f, 0.8f, 1.0 } } },
                     { "border-style",                   { Property::BorderStyle::Solid } },
                     { "border-width",                   { 1.0f } },
                     { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } },
                     { "font-family",                    { std::string("Arial") } },
-                    { "font-size",                      { 10 } }
+                    { "font-size",                      { 48 } }
                 }
             );
 
