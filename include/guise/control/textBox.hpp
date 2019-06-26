@@ -71,6 +71,8 @@ namespace Guise
 
         bool eraseSelected();
 
+        std::wstring getSelected();
+
         bool intersectText(const float point, size_t & index);
 
         bool                                    m_active;

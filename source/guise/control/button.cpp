@@ -48,10 +48,12 @@ namespace Guise
             return false;
         }
 
+        std::cout << "Event: " << (int)e.type << std::endl;
+
         switch (e.type)
-        {
+        {           
             case Input::EventType::MouseMove:          
-            {
+            {               
                 if (m_renderBounds.intersects(e.position))
                 {
                     if (m_pressed)
@@ -162,24 +164,24 @@ namespace Guise
         return false;
     }
 
-    Style::BoxStyle & Button::getActiveStyle()
+    ButtonStyle & Button::getActiveStyle()
     {
         return m_activeStyle;
     }
 
-    Style::BoxStyle & Button::getDisabledStyle()
+    ButtonStyle & Button::getDisabledStyle()
     {
         return m_disabledStyle;
     }
 
-    Style::BoxStyle & Button::getHoverStyle()
+    ButtonStyle & Button::getHoverStyle()
     {
         return m_hoverStyle;
     }
 
     Button::Button(std::shared_ptr<Canvas> & canvas) :
-        Style::BoxStyle(canvas->getStyleSheet()->getSelector("button")),
         ControlContainerSingle(*canvas),
+        ButtonStyle(canvas->getStyleSheet()->getSelector("button")),        
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_childBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_activeStyle(*this),

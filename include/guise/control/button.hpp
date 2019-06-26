@@ -33,7 +33,23 @@
 namespace Guise
 {
 
-    class GUISE_API Button : public Style::BoxStyle, public ControlContainerSingle
+    class GUISE_API ButtonStyle : public Style::PaintRectStyle, public Style::ParentStyle
+    {
+
+    public:
+
+        ButtonStyle(ButtonStyle * parent = nullptr) :
+            Style::PaintRectStyle(parent),
+            Style::ParentStyle(parent)
+        { }
+        ButtonStyle(const std::shared_ptr<Style::Selector> & selector, ButtonStyle * parent = nullptr) :
+            Style::PaintRectStyle(selector, parent),
+            Style::ParentStyle(selector, parent)
+        { }
+
+    };
+
+    class GUISE_API Button : public ControlContainerSingle, public ButtonStyle
     {
 
     public:
@@ -54,9 +70,9 @@ namespace Guise
 
         virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
 
-        Style::BoxStyle & getActiveStyle();
-        Style::BoxStyle & getDisabledStyle();
-        Style::BoxStyle & getHoverStyle();
+        ButtonStyle & getActiveStyle();
+        ButtonStyle & getDisabledStyle();
+        ButtonStyle & getHoverStyle();
 
         Signal<Vector2f> onPressed;
         Signal<Vector2f> onReleased;
@@ -70,11 +86,11 @@ namespace Guise
         Bounds2f m_renderBounds;
         Bounds2f m_childBounds;
 
-        Style::BoxStyle     m_activeStyle;
-        Style::BoxStyle     m_disabledStyle;
-        Style::BoxStyle     m_hoverStyle;
-        Style::BoxStyle *   m_currentStyle;
-        bool                m_pressed;
+        ButtonStyle     m_activeStyle;
+        ButtonStyle     m_disabledStyle;
+        ButtonStyle     m_hoverStyle;
+        ButtonStyle *   m_currentStyle;
+        bool            m_pressed;
 
     };
 

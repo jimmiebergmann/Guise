@@ -61,8 +61,9 @@ namespace Guise
                 String,
                 Vector2f,
                 Vector3f,
-                Vector4f
-
+                Vector4f,
+                VerticalAlign,
+                HorizontalAlign
             };
 
             enum class BorderStyle : uint32_t
@@ -77,7 +78,20 @@ namespace Guise
                 visible
             };
 
-            
+            enum class HorizontalAlign : uint32_t
+            {
+                Left = 0,
+                Center,
+                Right
+            };
+
+            enum class VerticalAlign : uint32_t
+            {
+                Top = 0,
+                Center,
+                Bottom
+            };
+        
             Property(const Property & property);
             Property(const std::shared_ptr<Property> & property);
 
@@ -90,6 +104,8 @@ namespace Guise
             Property(const Vector2f & value);
             Property(const Vector3f & value);
             Property(const Vector4f & value);
+            Property(const HorizontalAlign value);
+            Property(const VerticalAlign value);           
 
             ~Property();
 
@@ -104,6 +120,8 @@ namespace Guise
             const Vector2f & getVector2f() const;
             const Vector3f & getVector3f() const;
             const Vector4f & getVector4f() const;
+            HorizontalAlign getHorizontalAlign() const;
+            VerticalAlign getVerticalAlign() const;
 
             void setBool(const bool value);
             void setBorderStyle(const BorderStyle value);
@@ -112,7 +130,9 @@ namespace Guise
             void setVector2f(const Vector2f & value);
             void setVector3f(const Vector3f & value);
             void setVector4f(const Vector4f & value);
-
+            void setHorizontalAlign(const HorizontalAlign value);
+            void setVerticalAlign(const VerticalAlign value);
+            
             Property & operator = (const bool value);
             Property & operator = (const BorderStyle value);
             Property & operator = (const float value);
@@ -120,6 +140,8 @@ namespace Guise
             Property & operator = (const Vector2f & value);
             Property & operator = (const Vector3f & value);
             Property & operator = (const Vector4f & value);
+            Property & operator = (const HorizontalAlign value);
+            Property & operator = (const VerticalAlign value);
 
         private:
 
@@ -136,6 +158,8 @@ namespace Guise
                 Vector2f        m_valueVector2f;
                 Vector3f        m_valueVector3f;
                 Vector4f        m_valueVector4f;
+                VerticalAlign   m_valueVerticalAlign;
+                HorizontalAlign m_valueHorizontalAlign;
             };
 
         };
@@ -201,14 +225,17 @@ namespace Guise
         };
 
 
+        // =================================================================
+        // STYLES
+        // =================================================================
 
-        class GUISE_API PaddingStyle
+        class GUISE_API ParentStyle
         {
 
         public:
 
-            PaddingStyle(PaddingStyle * parent = nullptr);
-            PaddingStyle(const std::shared_ptr<Selector> & selector, PaddingStyle * parent = nullptr);
+            ParentStyle(ParentStyle * parent = nullptr);
+            ParentStyle(const std::shared_ptr<Selector> & selector, ParentStyle * parent = nullptr);
 
             Vector4f getPadding() const;
             Vector2f getPaddingLow() const;
@@ -217,53 +244,123 @@ namespace Guise
             void setPadding(const Vector4f & padding);
             void setPadding(const Vector2f & padding);
             void setPadding(const float & padding);
+            void setPaddingLow(const Vector2f & paddingLow);
+            void setPaddingHigh(const Vector2f & paddingHigh);
 
         protected:
 
-            PaddingStyle *          m_parent;
+            ParentStyle *          m_parent;
 
             std::optional<Vector4f> m_padding;
 
         };
 
 
-        class GUISE_API BoxStyle : public PaddingStyle
+        class GUISE_API AlignStyle
         {
 
         public:
 
-            BoxStyle(BoxStyle * parent = nullptr);
-            BoxStyle(const std::shared_ptr<Selector> & selector, BoxStyle * parent = nullptr);
+            AlignStyle(AlignStyle * parent = nullptr);
+            AlignStyle(const std::shared_ptr<Selector> & selector, AlignStyle * parent = nullptr);
 
-            const Vector4f getBackgroundColor() const;
-            const Vector4f getBorderColor() const;
-            Property::BorderStyle getBorderStyle() const;
-            float getBorderWidth() const;
-            const Vector2f getPosition() const;
-            const Vector2f getSize() const;
-            Property::Overflow getOverflow() const;
+            Property::HorizontalAlign getHorizontalAlign() const;
+            Property::VerticalAlign getVerticalAlign() const;
 
-            void setBackgroundColor(const Vector4f & color);
-            void setBorderColor(const Vector4f & color);
-            void setBorderStyle(const Property::BorderStyle borderStyle);
-            void setBorderWidth(const float width);
-            void setPosition(const Vector2f & position);
-            void setSize(const Vector2f & size);
-            void setOverflow(const Property::Overflow overflow);
+            void setHorizontalAlign(const Property::HorizontalAlign horizontalAlign);
+            void setVerticalAlign(const Property::VerticalAlign verticalAlign);
 
         protected:
 
-            BoxStyle *                                  m_parent;
+            AlignStyle * m_parent;
 
-            std::optional<Vector4f>                     m_backgroundColor;
-            std::optional<Vector4f>                     m_borderColor;
-            std::optional<float>                        m_borderWidth;
-            std::optional<Style::Property::BorderStyle> m_borderStyle;
-            std::optional<Vector2f>                     m_position;
-            std::optional<Vector2f>                     m_size;
-            std::optional<Style::Property::Overflow>    m_overflow;
+            std::optional<Property::HorizontalAlign> m_horizontalAlign;
+            std::optional<Property::VerticalAlign> m_verticalAlign;
 
         };
+
+        class GUISE_API RectStyle : public AlignStyle
+        {
+
+        public:
+
+            RectStyle(RectStyle * parent = nullptr);
+            RectStyle(const std::shared_ptr<Selector> & selector, RectStyle * parent = nullptr);
+
+            Property::Overflow getOverflow() const;
+            Vector4f getMargin() const;
+            Vector2f getMarginLow() const;
+            Vector2f getMarginHigh() const;
+            const Vector2f getPosition() const;
+            const Vector2f getSize() const;
+           
+            void setMargin(const Vector4f & margin);
+            void setMargin(const Vector2f & margin);
+            void setMargin(const float margin);
+            void setMarginLow(const Vector2f & marginLow);
+            void setMarginHigh(const Vector2f & marginHigh);
+            void setOverflow(const Property::Overflow overflow);
+            void setPosition(const Vector2f & position);
+            void setSize(const Vector2f & size);
+            
+        protected:
+
+            RectStyle * m_parent;
+
+            std::optional<Vector4f>                     m_margin;
+            std::optional<Style::Property::Overflow>    m_overflow;
+            std::optional<Vector2f>                     m_position;
+            std::optional<Vector2f>                     m_size;
+
+        };
+
+        class GUISE_API BorderStyle
+        {
+
+        public:
+
+            BorderStyle(BorderStyle * parent = nullptr);
+            BorderStyle(const std::shared_ptr<Selector> & selector, BorderStyle * parent = nullptr);
+
+            const Vector4f getBorderColor() const;
+            Property::BorderStyle getBorderStyle() const;
+            float getBorderWidth() const;
+
+            void setBorderColor(const Vector4f & color);
+            void setBorderStyle(const Property::BorderStyle style);
+            void setBorderWidth(const float width);
+
+        protected:
+
+            BorderStyle * m_parent;
+
+            std::optional<Vector4f>                     m_borderColor;
+            std::optional<Style::Property::BorderStyle> m_borderStyle;
+            std::optional<float>                        m_borderWidth;            
+
+        };
+
+        class GUISE_API PaintRectStyle : public RectStyle, public BorderStyle
+        {
+
+        public:
+
+            PaintRectStyle(PaintRectStyle * parent = nullptr);
+            PaintRectStyle(const std::shared_ptr<Selector> & selector, PaintRectStyle * parent = nullptr);
+
+            const Vector4f getBackgroundColor() const;
+   
+            void setBackgroundColor(const Vector4f & color);
+
+        protected:
+
+            PaintRectStyle * m_parent;
+
+            std::optional<Vector4f>                     m_backgroundColor;
+
+        };
+
+
 
 
         class GUISE_API TextBoxStyle
@@ -346,6 +443,7 @@ namespace Guise
             Property::Overflow  m_overflow;
 
         };
+
         
     }
 

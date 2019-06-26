@@ -192,20 +192,31 @@ namespace Guise
                         }
                     }
                     break;
+                    case Input::Key::X:
+                    {
+                        if (input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight))
+                        {
+                            auto cutText = getSelected();
+                            if (cutText.size() && Platform::setClipboardText(cutText))
+                            {
+                                eraseSelected();
+                                m_changed = true;
+                                onChange(m_text);
+                                m_cursorBlinkTimer = std::chrono::system_clock::now();
+                            }
+                        }                       
+                    }
+                    break;
                     case Input::Key::C:
                     {
-                        if (m_cursorIndex != m_cursorSelectFromIndex)
+                        if (input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight))
                         {
-                            size_t index1 = m_cursorIndex;
-                            size_t index2 = m_cursorSelectFromIndex;
-                            if (index1 > index2)
+                            auto copyText = getSelected();
+                            if (copyText.size())
                             {
-                                std::swap(index1, index2);
+                                Platform::setClipboardText(copyText);
                             }
-
-                            std::wstring data = m_text.substr(index1, index2 - index1);
-                            Platform::setClipboardText(data);
-                        }
+                        }        
                     }
                     break;
                     case Input::Key::V:
@@ -489,7 +500,7 @@ namespace Guise
             std::swap(index1, index2);
         }
 
-        if (m_cursorIndex == m_cursorSelectFromIndex || index2 >= m_charPositions.size())
+        if (m_cursorIndex == m_cursorSelectFromIndex || index2 > m_text.size())
         {
             return false;
         }
@@ -499,6 +510,23 @@ namespace Guise
         m_cursorIndex = index1;
         m_cursorSelectFromIndex = index1;
         return true;
+    }
+
+    std::wstring TextBox::getSelected()
+    {
+        size_t index1 = m_cursorIndex;
+        size_t index2 = m_cursorSelectFromIndex;
+        if (index1 > index2)
+        {
+            std::swap(index1, index2);
+        }
+
+        if (m_cursorIndex == m_cursorSelectFromIndex || index2 >= m_charPositions.size())
+        {
+            return L"";
+        }
+
+        return m_text.substr(index1, index2 - index1);
     }
 
     bool TextBox::intersectText(const float point, size_t & index)
