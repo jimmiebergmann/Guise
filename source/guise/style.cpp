@@ -92,16 +92,16 @@ namespace Guise
         {
             switch (property.m_dataType)
             {
-                case Property::DataType::Boolean:       m_valueBoolean      = property.m_valueBoolean; break;
-                case Property::DataType::BorderStyle:   m_valueBorderStyle  = property.m_valueBorderStyle; break;
-                case Property::DataType::Float:         m_valueFloat        = property.m_valueFloat; break;
-                case Property::DataType::Integer:       m_valueInteger      = property.m_valueInteger; break;
-                case Property::DataType::Overflow:      m_valueOverflow     = property.m_valueOverflow; break;
-                case Property::DataType::String:        m_valueString       = new std::string(*property.m_valueString); break;
-                case Property::DataType::Vector2f:      m_valueVector2f     = property.m_valueVector2f; break;
-                case Property::DataType::Vector3f:      m_valueVector3f     = property.m_valueVector3f; break;
-                case Property::DataType::Vector4f:      m_valueVector4f     = property.m_valueVector4f; break;
-                default: break;
+            case Property::DataType::Boolean:       m_valueBoolean = property.m_valueBoolean; break;
+            case Property::DataType::BorderStyle:   m_valueBorderStyle = property.m_valueBorderStyle; break;
+            case Property::DataType::Float:         m_valueFloat = property.m_valueFloat; break;
+            case Property::DataType::Integer:       m_valueInteger = property.m_valueInteger; break;
+            case Property::DataType::Overflow:      m_valueOverflow = property.m_valueOverflow; break;
+            case Property::DataType::String:        m_valueString = new std::string(*property.m_valueString); break;
+            case Property::DataType::Vector2f:      m_valueVector2f = property.m_valueVector2f; break;
+            case Property::DataType::Vector3f:      m_valueVector3f = property.m_valueVector3f; break;
+            case Property::DataType::Vector4f:      m_valueVector4f = property.m_valueVector4f; break;
+            default: break;
             }
         }
 
@@ -115,16 +115,16 @@ namespace Guise
 
             switch (property->m_dataType)
             {
-                case Property::DataType::Boolean:       m_valueBoolean = property->m_valueBoolean; break;
-                case Property::DataType::BorderStyle:   m_valueBorderStyle = property->m_valueBorderStyle; break;
-                case Property::DataType::Float:         m_valueFloat = property->m_valueFloat; break;
-                case Property::DataType::Integer:       m_valueInteger = property->m_valueInteger; break;
-                case Property::DataType::Overflow:      m_valueOverflow = property->m_valueOverflow; break;
-                case Property::DataType::String:        m_valueString = new std::string(*property->m_valueString); break;
-                case Property::DataType::Vector2f:      m_valueVector2f = property->m_valueVector2f; break;
-                case Property::DataType::Vector3f:      m_valueVector3f = property->m_valueVector3f; break;
-                case Property::DataType::Vector4f:      m_valueVector4f = property->m_valueVector4f; break;
-                default: break;
+            case Property::DataType::Boolean:       m_valueBoolean = property->m_valueBoolean; break;
+            case Property::DataType::BorderStyle:   m_valueBorderStyle = property->m_valueBorderStyle; break;
+            case Property::DataType::Float:         m_valueFloat = property->m_valueFloat; break;
+            case Property::DataType::Integer:       m_valueInteger = property->m_valueInteger; break;
+            case Property::DataType::Overflow:      m_valueOverflow = property->m_valueOverflow; break;
+            case Property::DataType::String:        m_valueString = new std::string(*property->m_valueString); break;
+            case Property::DataType::Vector2f:      m_valueVector2f = property->m_valueVector2f; break;
+            case Property::DataType::Vector3f:      m_valueVector3f = property->m_valueVector3f; break;
+            case Property::DataType::Vector4f:      m_valueVector4f = property->m_valueVector4f; break;
+            default: break;
             }
         }
 
@@ -132,7 +132,7 @@ namespace Guise
             m_dataType(DataType::Boolean),
             m_valueBoolean(value)
         { }
-        Property::Property( const BorderStyle value) :
+        Property::Property(const BorderStyle value) :
             m_dataType(DataType::BorderStyle),
             m_valueBorderStyle(value)
         { }
@@ -171,7 +171,7 @@ namespace Guise
         Property::Property(const VerticalAlign value) :
             m_dataType(DataType::VerticalAlign),
             m_valueVerticalAlign(value)
-        { }       
+        { }
 
         Property::~Property()
         {
@@ -443,6 +443,7 @@ namespace Guise
                     { "plane",  DefaultStyles::plane },
                     { "vertical-grid", DefaultStyles::verticalGrid },
                     { "text-box", DefaultStyles::textBox },
+                    { "text-box-text", DefaultStyles::textBoxText },
                     { "vertical-grid-slot", DefaultStyles::verticalGridSlot },
                     { "window", DefaultStyles::window }
                 }
@@ -495,23 +496,23 @@ namespace Guise
             {
                 switch (padding->getDataType())
                 {
-                    case Property::DataType::Float:
-                    {
-                        auto val = padding->getFloat();
-                        m_padding = { val, val, val, val };
-                    }
-                    break;
-                    case Property::DataType::Vector2f:
-                    {
-                        m_padding = { padding->getVector2f(), padding->getVector2f() };
-                    }
-                    break;
-                    case Property::DataType::Vector4f:
-                    {
-                        m_padding = padding->getVector4f();
-                    }
-                    break;
-                    default: break;
+                case Property::DataType::Float:
+                {
+                    auto val = padding->getFloat();
+                    m_padding = { val, val, val, val };
+                }
+                break;
+                case Property::DataType::Vector2f:
+                {
+                    m_padding = { padding->getVector2f(), padding->getVector2f() };
+                }
+                break;
+                case Property::DataType::Vector4f:
+                {
+                    m_padding = padding->getVector4f();
+                }
+                break;
+                default: break;
                 }
             }
         }
@@ -585,12 +586,12 @@ namespace Guise
             {
                 switch (vertAlign->getDataType())
                 {
-                    case Property::DataType::VerticalAlign:
-                    {
-                        m_verticalAlign = vertAlign->getVerticalAlign();
-                    }
-                    break;
-                    default: break;
+                case Property::DataType::VerticalAlign:
+                {
+                    m_verticalAlign = vertAlign->getVerticalAlign();
+                }
+                break;
+                default: break;
                 }
             }
 
@@ -603,12 +604,12 @@ namespace Guise
             {
                 switch (horiAlign->getDataType())
                 {
-                    case Property::DataType::HorizontalAlign:
-                    {
-                        m_horizontalAlign = horiAlign->getHorizontalAlign();
-                    }
-                    break;
-                    default: break;
+                case Property::DataType::HorizontalAlign:
+                {
+                    m_horizontalAlign = horiAlign->getHorizontalAlign();
+                }
+                break;
+                default: break;
                 }
             }
         }
@@ -652,23 +653,23 @@ namespace Guise
             {
                 switch (margin->getDataType())
                 {
-                    case Property::DataType::Float:
-                    {
-                        auto val = margin->getFloat();
-                        m_margin = { val, val, val, val };
-                    }
-                    break;
-                    case Property::DataType::Vector2f:
-                    {
-                        m_margin = { margin->getVector2f(), margin->getVector2f() };
-                    }
-                    break;
-                    case Property::DataType::Vector4f:
-                    {
-                        m_margin = margin->getVector4f();
-                    }
-                    break;
-                    default: break;
+                case Property::DataType::Float:
+                {
+                    auto val = margin->getFloat();
+                    m_margin = { val, val, val, val };
+                }
+                break;
+                case Property::DataType::Vector2f:
+                {
+                    m_margin = { margin->getVector2f(), margin->getVector2f() };
+                }
+                break;
+                case Property::DataType::Vector4f:
+                {
+                    m_margin = margin->getVector4f();
+                }
+                break;
+                default: break;
                 }
             }
             auto overflow = selector->getProperty("overflow");
@@ -685,12 +686,12 @@ namespace Guise
             if (size && size->getDataType() == Property::DataType::Vector2f)
             {
                 m_size = size->getVector2f();
-            }               
+            }
         }
 
         Property::Overflow RectStyle::getOverflow() const
         {
-            return m_overflow.has_value() ? m_overflow.value() : (m_parent ? m_parent->getOverflow() : Property::Overflow::hidden);
+            return m_overflow.has_value() ? m_overflow.value() : (m_parent ? m_parent->getOverflow() : Property::Overflow::Hidden);
         }
         Vector4f RectStyle::getMargin() const
         {
@@ -838,23 +839,23 @@ namespace Guise
             {
                 switch (bgColor->getDataType())
                 {
-                    case Property::DataType::Float:
-                    {
-                        auto val = bgColor->getFloat();
-                        m_backgroundColor = { val, val, val, 1.0f };
-                    }
-                    break;
-                    case Property::DataType::Vector3f:
-                    {
-                        m_backgroundColor = { bgColor->getVector3f(), 1.0f };
-                    }
-                    break;
-                    case Property::DataType::Vector4f:
-                    {
-                        m_backgroundColor = bgColor->getVector4f();
-                    }
-                    break;
-                    default: break;
+                case Property::DataType::Float:
+                {
+                    auto val = bgColor->getFloat();
+                    m_backgroundColor = { val, val, val, 1.0f };
+                }
+                break;
+                case Property::DataType::Vector3f:
+                {
+                    m_backgroundColor = { bgColor->getVector3f(), 1.0f };
+                }
+                break;
+                case Property::DataType::Vector4f:
+                {
+                    m_backgroundColor = bgColor->getVector4f();
+                }
+                break;
+                default: break;
                 }
             }
         }
@@ -870,27 +871,13 @@ namespace Guise
         }
 
 
+        // Font style implementations.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // Text box style implementations.
-        TextBoxStyle::TextBoxStyle(TextBoxStyle * parent) :
+        FontStyle::FontStyle(FontStyle * parent) :
             m_parent(parent)
         { }
 
-        TextBoxStyle::TextBoxStyle(const std::shared_ptr<Selector> & selector, TextBoxStyle * parent) :
+        FontStyle::FontStyle(const std::shared_ptr<Selector> & selector, FontStyle * parent) :
             m_parent(parent)
         {
             if (!selector)
@@ -898,68 +885,62 @@ namespace Guise
                 return;
             }
 
-            auto position = selector->getProperty("position");
-            if (position && position->getDataType() == Property::DataType::Vector2f)
+            auto fontBgColor = selector->getProperty("font-background-color");
+            if (fontBgColor)
             {
-                m_position = position->getVector2f();
-            }
-            auto size = selector->getProperty("size");
-            if (size && size->getDataType() == Property::DataType::Vector2f)
-            {
-                m_size = size->getVector2f();
-            }
-            auto overflow = selector->getProperty("overflow");
-            if (overflow && overflow->getDataType() == Property::DataType::Overflow)
-            {
-                m_overflow = overflow->getOverflow();
-            }
-            auto backgroundColor = selector->getProperty("background-color");
-            if (backgroundColor && backgroundColor->getDataType() == Property::DataType::Vector4f)
-            {
-                m_backgroundColor = backgroundColor->getVector4f();
-            }
-            auto borderColor = selector->getProperty("border-color");
-            if (borderColor && borderColor->getDataType() == Property::DataType::Vector4f)
-            {
-                m_borderColor = borderColor->getVector4f();
-            }
-            auto borderStyle = selector->getProperty("border-style");
-            if (borderStyle && borderStyle->getDataType() == Property::DataType::BorderStyle)
-            {
-                m_borderStyle = borderStyle->getBorderStyle();
-            }
-            auto borderWidth = selector->getProperty("border-width");
-            if (borderWidth && borderWidth->getDataType() == Property::DataType::Float)
-            {
-                m_borderWidth = borderWidth->getFloat();
+                switch (fontBgColor->getDataType())
+                {
+                case Property::DataType::Integer:
+                {
+                    float val = static_cast<float>(fontBgColor->getInteger());
+                    m_fontBackgroundColor = { val, val, val, 1.0f };
+                }
+                break;
+                case Property::DataType::Float:
+                {
+                    float val = static_cast<float>(fontBgColor->getFloat());
+                    m_fontBackgroundColor = { val, val, val, 1.0f };
+                }
+                case Property::DataType::Vector3f:
+                {
+                    m_fontBackgroundColor = { fontBgColor->getVector3f(), 1.0f };
+                }
+                break;
+                case Property::DataType::Vector4f:
+                {
+                    m_fontBackgroundColor = fontBgColor->getVector4f();
+                }
+                break;
+                default: break;
+                }
             }
             auto fontColor = selector->getProperty("font-color");
             if (fontColor)
             {
                 switch (fontColor->getDataType())
                 {
-                    case Property::DataType::Integer:
-                    {
-                        float val = static_cast<float>(fontColor->getInteger());
-                        m_fontColor = { val, val, val, 1.0f };
-                    }
-                    break;
-                    case Property::DataType::Float:
-                    {
-                        float val = static_cast<float>(fontColor->getFloat());
-                        m_fontColor = { val, val, val, 1.0f };
-                    }
-                    case Property::DataType::Vector3f:
-                    {
-                        m_fontColor = { fontColor->getVector3f(), 1.0f };
-                    }
-                    break;
-                    case Property::DataType::Vector4f:
-                    {
-                        m_fontColor = fontColor->getVector4f();
-                    }
-                    break;
-                    default: break;
+                case Property::DataType::Integer:
+                {
+                    float val = static_cast<float>(fontColor->getInteger());
+                    m_fontColor = { val, val, val, 1.0f };
+                }
+                break;
+                case Property::DataType::Float:
+                {
+                    float val = static_cast<float>(fontColor->getFloat());
+                    m_fontColor = { val, val, val, 1.0f };
+                }
+                case Property::DataType::Vector3f:
+                {
+                    m_fontColor = { fontColor->getVector3f(), 1.0f };
+                }
+                break;
+                case Property::DataType::Vector4f:
+                {
+                    m_fontColor = fontColor->getVector4f();
+                }
+                break;
+                default: break;
                 }
             }
             auto fontFamily = selector->getProperty("font-family");
@@ -972,245 +953,69 @@ namespace Guise
             {
                 m_fontSize = fontSize->getInteger();
             }
-            auto padding = selector->getProperty("padding");
-            if (padding)
+            auto overflow = selector->getProperty("overflow");
+            if (overflow && overflow->getDataType() == Property::DataType::Overflow)
             {
-                switch (padding->getDataType())
-                {
-                    case Property::DataType::Float:
-                    {
-                        auto val = padding->getFloat();
-                        m_padding = { val, val, val, val };
-                    }
-                    break;
-                    case Property::DataType::Vector2f:
-                    {
-                        m_padding = { padding->getVector2f(), padding->getVector2f() };
-                    }
-                    break;
-                    case Property::DataType::Vector4f:
-                    {
-                        m_padding = padding->getVector4f();
-                    }
-                    break;
-                    default: break;
-                }
+                m_overflow = overflow->getOverflow();
             }
         }
 
-        const Vector4f TextBoxStyle::getBackgroundColor() const
+        const Vector4f FontStyle::getFontBackgroundColor() const
         {
-            return m_backgroundColor.has_value() ? m_backgroundColor.value() : (m_parent ? m_parent->getBackgroundColor() : Vector4f{ 0.0f, 0.0f, 0.0f, 0.0f });
+            return m_fontBackgroundColor.has_value() ? m_fontBackgroundColor.value() : (m_parent ? m_parent->getFontBackgroundColor() : Vector4f{ 0.0f, 0.0f, 0.0f, 0.0f });
         }
-        const Vector4f TextBoxStyle::getBorderColor() const
+        const Vector4f FontStyle::getFontColor() const
         {
-            return m_borderColor.has_value() ? m_borderColor.value() : (m_parent ? m_parent->getBorderColor() : Vector4f{ 0.0f, 0.0f, 0.0f, 0.0f });
+            return m_fontColor.has_value() ? m_fontColor.value() : (m_parent ? m_parent->getFontColor() : Vector4f{ 0.0f, 0.0f, 0.0f, 0.0f });
         }
-        Property::BorderStyle TextBoxStyle::getBorderStyle() const
+        const std::string FontStyle::getFontFamily() const
         {
-            return m_borderStyle.has_value() ? m_borderStyle.value() : (m_parent ? m_parent->getBorderStyle() : Property::BorderStyle::None);
+            return m_fontFamily.has_value() ? m_fontFamily.value() : (m_parent ? m_parent->getFontFamily() : "");
         }
-        float TextBoxStyle::getBorderWidth() const
-        {
-            return m_borderWidth.has_value() ? m_borderWidth.value() : (m_parent ? m_parent->getBorderWidth() : 0.0f);
-        }
-        Vector4f TextBoxStyle::getFontColor() const
-        {
-            return m_fontColor.has_value() ? m_fontColor.value() : (m_parent ? m_parent->getFontColor() : Vector4f{ 0.0f, 0.0f, 0.0f, 1.0f });
-        }
-        const std::string & TextBoxStyle::getFontFamily() const
-        {
-            return m_fontFamily.has_value() ? m_fontFamily.value() : (m_parent ? m_parent->getFontFamily() : g_emptyString);
-        }
-        const int TextBoxStyle::getFontSize() const
+        const int32_t FontStyle::getFontSize() const
         {
             return m_fontSize.has_value() ? m_fontSize.value() : (m_parent ? m_parent->getFontSize() : 0);
-        }
-        Vector4f TextBoxStyle::getPadding() const
-        {
-            return m_padding.has_value() ? m_padding.value() : (m_parent ? m_parent->getPadding() : Vector4f{ 0.0f, 0.0f, 0.0f, 0.0f });
-        }
-        Vector2f TextBoxStyle::getPaddingLow() const
-        {
-            return m_padding.has_value() ? Vector2f{ m_padding.value().x, m_padding.value().y } : (m_parent ? m_parent->getPaddingLow() : Vector2f{ 0.0f, 0.0f });
-        }
-        Vector2f TextBoxStyle::getPaddingHigh() const
-        {
-            return m_padding.has_value() ? Vector2f{ m_padding.value().z, m_padding.value().w } : (m_parent ? m_parent->getPaddingHigh() : Vector2f{ 0.0f, 0.0f });
-        }
-        const Vector2f TextBoxStyle::getPosition() const
-        {
-            return m_position.has_value() ? m_position.value() : (m_parent ? m_parent->getPosition() : Vector2f{ 0.0f, 0.0f });
-        }
-        const Vector2f TextBoxStyle::getSize() const
-        {
-            return m_size.has_value() ? m_size.value() : (m_parent ? m_parent->getSize() : Vector2f{ 0.0f, 0.0f });
-        }
-        Property::Overflow TextBoxStyle::getOverflow() const
-        {
-            return m_overflow.has_value() ? m_overflow.value() : (m_parent ? m_parent->getOverflow() : Property::Overflow::hidden);
-        }
+        }  
 
-        void TextBoxStyle::setBackgroundColor(const Vector4f & color)
+        void FontStyle::setFontBackgroundColor(const Vector4f & color)
         {
-            m_backgroundColor = color;
+            m_fontBackgroundColor = color;
         }
-        void TextBoxStyle::setBorderColor(const Vector4f & color)
-        {
-            m_borderColor = color;
-        }
-        void TextBoxStyle::setBorderStyle(const Property::BorderStyle borderStyle)
-        {
-            m_borderStyle = borderStyle;
-        }
-        void TextBoxStyle::setBorderWidth(const float width)
-        {
-            m_borderWidth = width;
-        }
-        void TextBoxStyle::setFontColor(const Vector4f & color)
+        void FontStyle::setFontColor(const Vector4f & color)
         {
             m_fontColor = color;
         }
-        void TextBoxStyle::setFontFamily(const std::string & family)
+        void FontStyle::setFontFamily(const std::string & family)
         {
             m_fontFamily = family;
         }
-        void TextBoxStyle::setFontSize(const int size)
+        void FontStyle::setFontSize(const int32_t size)
         {
             m_fontSize = size;
         }
-        void TextBoxStyle::setPadding(const Vector4f & padding)
-        {
-            m_padding = padding;
-        }
-        void TextBoxStyle::setPadding(const Vector2f & padding)
-        {
-            if (!m_padding.has_value())
-            {
-                m_padding = { 0.0f, 0.0f, 0.0f, 0.0f };
-            }
-
-            m_padding.value().x = padding.x;
-            m_padding.value().y = padding.y;
-        }
-        void TextBoxStyle::setPadding(const float & padding)
-        {
-            m_padding = { padding, padding, padding, padding };
-        }
-        void TextBoxStyle::setPosition(const Vector2f & position)
-        {
-            m_position = position;
-        }
-        void TextBoxStyle::setSize(const Vector2f & size)
-        {
-            m_size = size;
-        }
-        void TextBoxStyle::setOverflow(const Property::Overflow overflow)
-        {
-            m_overflow = overflow;
-        }
 
 
-        // Label style implementations.
-        LabelStyle::LabelStyle() :
-            m_fontColor(0.0f, 0.0f, 0.0f, 1.0f),
-            m_fontFamily("Arial"),
-            m_fontSize(12),
-            m_overflow(Style::Property::Overflow::hidden)
+        // Parent rect style.
+        ParentRectStyle::ParentRectStyle(ParentRectStyle * parent) :
+            Style::RectStyle(parent),
+            Style::ParentStyle(parent)
         { }
 
-        LabelStyle::LabelStyle(const std::shared_ptr<Selector> & selector) :
-            m_fontColor(0.0f, 0.0f, 0.0f, 1.0f),
-            m_fontFamily("Arial"),
-            m_fontSize(12),
-            m_overflow(Style::Property::Overflow::hidden)
-        {
-            if (!selector)
-            {
-                return;
-            }
+        ParentRectStyle::ParentRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentRectStyle * parent) :
+            Style::RectStyle(selector, parent),
+            Style::ParentStyle(selector, parent)
+        { }
 
-            auto fontColor = selector->getProperty("font-color");
-            if (fontColor)
-            {
-                switch (fontColor->getDataType())
-                {
-                    case Property::DataType::Integer:
-                    {
-                        float val = static_cast<float>(fontColor->getInteger());
-                        m_fontColor = { val, val, val, 1.0f };
-                    }
-                    break;
-                    case Property::DataType::Float:
-                    {
-                        float val = static_cast<float>(fontColor->getFloat());
-                        m_fontColor = { val, val, val, 1.0f };
-                    }
-                    case Property::DataType::Vector3f:
-                    {
-                        m_fontColor = { fontColor->getVector3f(), 1.0f };
-                    }
-                    break;
-                    case Property::DataType::Vector4f:
-                    {
-                        m_fontColor = fontColor->getVector4f();
-                    }
-                    break;
-                    default: break;
-                }
-            }
 
-            auto fontFamily = selector->getProperty("font-family");
-            if (fontFamily && fontFamily->getDataType() == Property::DataType::String)
-            {
-                m_fontFamily = fontFamily->getString();
-            }
-            auto fontSize = selector->getProperty("font-size");
-            if (fontSize && fontSize->getDataType() == Property::DataType::Integer)
-            {
-                m_fontSize = fontSize->getInteger();
-            }
-            auto overflow = selector->getProperty("overflow");
-            if (overflow && overflow->getDataType() == Property::DataType::Overflow)
-            {
-                m_overflow = overflow->getOverflow();
-            }
-        }
-
-        const Vector4f & LabelStyle::getFontColor() const
-        {
-            return m_fontColor;
-        }
-
-        const std::string & LabelStyle::getFontFamily() const
-        {
-            return m_fontFamily;
-        }
-        const int LabelStyle::getFontSize() const
-        {
-            return m_fontSize;
-        }
-        Property::Overflow LabelStyle::getOverflow() const
-        {
-            return m_overflow;
-        }
-
-        void LabelStyle::setFontColor(const Vector4f & color)
-        {
-            m_fontColor = color;
-        }
-        void LabelStyle::setFontFamily(const std::string & family)
-        {
-            m_fontFamily = family;
-        }
-        void LabelStyle::setFontSize(const int size)
-        {
-            m_fontSize = size;
-        }
-        void LabelStyle::setOverflow(const Property::Overflow overflow)
-        {
-            m_overflow = overflow;
-        }
+        // Parent paint rect style.
+        ParentPaintRectStyle::ParentPaintRectStyle(ParentPaintRectStyle * parent) :
+            Style::PaintRectStyle(parent),
+            Style::ParentStyle(parent)
+        { }
+        ParentPaintRectStyle::ParentPaintRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentPaintRectStyle * parent) :
+            Style::PaintRectStyle(selector, parent),
+            Style::ParentStyle(selector, parent)
+        { }
 
     }
 

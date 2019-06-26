@@ -74,8 +74,8 @@ namespace Guise
 
             enum class Overflow : uint32_t
             {
-                hidden = 0,
-                visible
+                Hidden = 0,
+                Visible
             };
 
             enum class HorizontalAlign : uint32_t
@@ -225,10 +225,6 @@ namespace Guise
         };
 
 
-        // =================================================================
-        // STYLES
-        // =================================================================
-
         class GUISE_API ParentStyle
         {
 
@@ -279,6 +275,7 @@ namespace Guise
 
         };
 
+
         class GUISE_API RectStyle : public AlignStyle
         {
 
@@ -314,6 +311,7 @@ namespace Guise
 
         };
 
+
         class GUISE_API BorderStyle
         {
 
@@ -340,6 +338,7 @@ namespace Guise
 
         };
 
+
         class GUISE_API PaintRectStyle : public RectStyle, public BorderStyle
         {
 
@@ -361,90 +360,57 @@ namespace Guise
         };
 
 
-
-
-        class GUISE_API TextBoxStyle
+        class GUISE_API FontStyle : RectStyle
         {
 
         public:
 
-            TextBoxStyle(TextBoxStyle * parent = nullptr);
-            TextBoxStyle(const std::shared_ptr<Selector> & selector, TextBoxStyle * parent = nullptr);
+            FontStyle(FontStyle * parent = nullptr);
+            FontStyle(const std::shared_ptr<Selector> & selector, FontStyle * parent = nullptr);
 
-            const Vector4f getBackgroundColor() const;
-            const Vector4f getBorderColor() const;
-            Property::BorderStyle getBorderStyle() const;
-            float getBorderWidth() const;
-            Vector4f getFontColor() const;
-            const std::string & getFontFamily() const;
-            const int getFontSize() const;
-            Property::Overflow getOverflow() const;
-            Vector4f getPadding() const;
-            Vector2f getPaddingLow() const;
-            Vector2f getPaddingHigh() const;
-            const Vector2f getPosition() const;
-            const Vector2f getSize() const;          
+            const Vector4f getFontBackgroundColor() const;
+            const Vector4f getFontColor() const;
+            const std::string getFontFamily() const;
+            const int32_t getFontSize() const;
 
-            void setBackgroundColor(const Vector4f & color);
-            void setBorderColor(const Vector4f & color);
-            void setBorderStyle(const Property::BorderStyle borderStyle);
-            void setBorderWidth(const float width);
+            void setFontBackgroundColor(const Vector4f & color);
             void setFontColor(const Vector4f & color);
             void setFontFamily(const std::string & family);
-            void setFontSize(const int size);
-            void setOverflow(const Property::Overflow overflow);
-            void setPadding(const Vector4f & padding);
-            void setPadding(const Vector2f & padding);
-            void setPadding(const float & padding);
-            void setPosition(const Vector2f & position);
-            void setSize(const Vector2f & size);
-            
-        protected:
-          
-            TextBoxStyle *                              m_parent;
+            void setFontSize(const int32_t size);
 
-            std::optional<Vector4f>                     m_backgroundColor;
-            std::optional<Vector4f>                     m_borderColor;
-            std::optional<float>                        m_borderWidth;
-            std::optional<Style::Property::BorderStyle> m_borderStyle;
-            std::optional<Vector4f>                     m_fontColor;
-            std::optional<std::string>                  m_fontFamily;
-            std::optional<int>                          m_fontSize;
-            std::optional<Style::Property::Overflow>    m_overflow;
-            std::optional<Vector4f>                     m_padding;
-            std::optional<Vector2f>                     m_position;
-            std::optional<Vector2f>                     m_size;
+        protected:
+
+            FontStyle * m_parent;
+
+            std::optional<Vector4f>     m_fontBackgroundColor;
+            std::optional<Vector4f>     m_fontColor;
+            std::optional<std::string>  m_fontFamily;
+            std::optional<int32_t>          m_fontSize;
 
         };
 
-        class GUISE_API LabelStyle
+
+        class GUISE_API ParentRectStyle : public Style::RectStyle, public Style::ParentStyle
         {
 
         public:
 
-            LabelStyle();
-            LabelStyle(const std::shared_ptr<Selector> & selector);
-          
-            const Vector4f & getFontColor() const;
-            const std::string & getFontFamily() const;
-            const int getFontSize() const;
-            Property::Overflow getOverflow() const;
-
-            void setFontColor(const Vector4f & color);
-            void setFontFamily(const std::string & family);
-            void setFontSize(const int size);
-            void setOverflow(const Property::Overflow overflow);
-
-        protected:
-
-            Vector4f            m_fontColor;
-            std::string         m_fontFamily;
-            int                 m_fontSize;
-            Property::Overflow  m_overflow;
+            ParentRectStyle(ParentRectStyle * parent = nullptr);
+            ParentRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentRectStyle * parent = nullptr);
 
         };
 
-        
+
+        class GUISE_API ParentPaintRectStyle : public Style::PaintRectStyle, public Style::ParentStyle
+        {
+
+        public:
+
+            ParentPaintRectStyle(ParentPaintRectStyle * parent = nullptr);
+            ParentPaintRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentPaintRectStyle * parent = nullptr);
+
+        };       
+
     }
 
 }

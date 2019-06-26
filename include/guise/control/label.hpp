@@ -35,7 +35,7 @@ namespace Guise
 
     class Texture;
 
-    class GUISE_API Label : public Style::LabelStyle, public Control, public DpiSensitive
+    class GUISE_API Label : public Control, public Style::FontStyle, public DpiSensitive
     {
 
     public:

@@ -69,7 +69,7 @@ namespace Guise
                 m_loadDimensions = { 0, 0 };
                 size_t baseline = 0;
 
-                if (m_font->createBitmap(m_text, m_fontSize, m_dpi, m_loadData, m_loadDimensions, baseline))
+                if (m_font->createBitmap(m_text, getFontSize(), m_dpi, m_loadData, m_loadDimensions, baseline))
                 {
                     m_renderBounds.size = m_loadDimensions;
                 }
@@ -146,11 +146,11 @@ namespace Guise
     }
 
     Label::Label(std::shared_ptr<Canvas> & canvas, const std::wstring & text) :        
-        Style::LabelStyle(canvas->getStyleSheet()->getSelector("label")),
         Control(*canvas),
+        Style::FontStyle(canvas->getStyleSheet()->getSelector("label")),       
         m_changed(true),
         m_dpi(canvas->getDpi()),
-        m_font(FontLibrary::get(m_fontFamily)),
+        m_font(FontLibrary::get(getFontFamily())),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_text(text),
         m_texture(nullptr)
@@ -159,8 +159,8 @@ namespace Guise
     }
 
     Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :       
-        Style::LabelStyle(canvas->getStyleSheet()->getSelector("label")),
-        Control(*canvas),        
+        Control(*canvas),
+        Style::FontStyle(canvas->getStyleSheet()->getSelector("label")),          
         m_changed(true),
         m_dpi(canvas->getDpi()),
         m_font(FontLibrary::get(font)),

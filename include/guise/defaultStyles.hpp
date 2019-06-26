@@ -83,9 +83,10 @@ namespace Guise
 
             static const Selector label = Selector(
                 {
+                    { "font-color",         { Vector4f  { 0.0f, 0.0f, 0.0f, 1.0f } } },
                     { "font-family",                    { std::string("Arial") } },
                     { "font-size",                      { 12 } },
-                    { "overflow",                       { Property::Overflow::hidden } }
+                    { "overflow",                       { Property::Overflow::Hidden } }
                 }
             );
 
@@ -103,8 +104,14 @@ namespace Guise
                     { "border-style",                   { Property::BorderStyle::Solid } },
                     { "border-width",                   { 1.0f } },
                     { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } },
-                    { "font-family",                    { std::string("Arial") } },
-                    { "font-size",                      { 48 } }
+                }
+            );
+
+            static const Selector textBoxText = Selector(
+                {
+                    { "font-color",{ Vector4f{ 0.0f, 0.0f, 0.0f, 1.0f } } },
+                    { "font-family",{ std::string("Arial") } },
+                    { "font-size",{ 48 } }
                 }
             );
 

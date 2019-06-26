@@ -29,105 +29,6 @@
 
 namespace Guise
 {
-    // Plane style implementations.
-    PlaneStyle::PlaneStyle() :
-        m_position(0.0f, 0.0f),
-        m_size(0.0f, 0.0f),
-        m_padding(0.0f, 0.0f, 0.0f, 0.0f),
-        m_overflow(Style::Property::Overflow::hidden)
-    { }
-
-    PlaneStyle::PlaneStyle(const std::shared_ptr<Style::Selector> & selector) :
-        PlaneStyle()
-    {
-        if (!selector)
-        {
-            return;
-        }
-
-        auto & properties = selector->getProperties();
-        for (auto it = properties.begin(); it != properties.end(); it++)
-        {
-            if (it->first == "position")
-            {
-                m_position = it->second->getVector2f();
-            }
-            else if (it->first == "size")
-            {
-                m_size = it->second->getVector2f();
-            }
-            else if (it->first == "padding")
-            {
-                switch (it->second->getDataType())
-                {
-                    case Style::Property::DataType::Float:
-                    {
-                        m_padding.x = m_padding.y = m_padding.w = m_padding.z = it->second->getFloat();
-                    }
-                    break;
-                    case Style::Property::DataType::Vector2f:
-                    {
-                        m_padding = { it->second->getVector2f(), 0.0f, 0.0f };
-                    }
-                    break;
-                    case Style::Property::DataType::Vector4f:
-                    {
-                        m_padding = it->second->getVector4f();
-                    }
-                    break;
-                    default: break;
-                }
-            }
-            else if (it->first == "overflow")
-            {
-                m_overflow = it->second->getOverflow();
-            }          
-        }
-    }
-
-    
-    const Vector2f & PlaneStyle::getPosition() const
-    {
-        return m_position;
-    }
-    const Vector2f & PlaneStyle::getSize() const
-    {
-        return m_size;
-    }
-    const Vector4f & PlaneStyle::getPadding() const
-    {
-        return m_padding;
-    }
-    const Vector2f PlaneStyle::getPaddingLow() const
-    {
-        return { m_padding.x, m_padding.y };
-    }
-    const Vector2f PlaneStyle::getPaddingHigh() const
-    {
-        return { m_padding.z, m_padding.w };
-    }
-    Style::Property::Overflow PlaneStyle::getOverflow() const
-    {
-        return m_overflow;
-    }
-
-    void PlaneStyle::setPosition(const Vector2f & position)
-    {
-        m_position = position;
-    }
-    void PlaneStyle::setSize(const Vector2f & size)
-    {
-        m_size = size;
-    }
-    void PlaneStyle::setPadding(const Vector4f & padding)
-    {
-        m_padding = padding;
-    }
-    void PlaneStyle::setOverflow(const Style::Property::Overflow overflow)
-    {
-        m_overflow = overflow;
-    }
-
 
     // Plane implementations.
     std::shared_ptr<Plane> Plane::create(Canvas & canvas)
@@ -150,7 +51,7 @@ namespace Guise
         const bool childsUpdate = pollUpdateForced();
         if (canvasBound != m_renderBounds || childsUpdate)
         {
-            Bounds2f renderBounds = calcRenderBounds(canvasBound, m_position, m_size, m_overflow);
+            Bounds2f renderBounds = calcRenderBounds(canvasBound, getPosition(), getSize(), getOverflow());
             if (renderBounds != m_renderBounds || childsUpdate)
             {
                 m_renderBounds = renderBounds;
@@ -176,7 +77,7 @@ namespace Guise
     }
 
     Plane::Plane(Canvas & canvas) :       
-        PlaneStyle(canvas.getStyleSheet()->getSelector("plane")),
+        Style::ParentRectStyle(canvas.getStyleSheet()->getSelector("plane")),
         ControlContainerList(canvas),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_childsBounds(0.0f, 0.0f, 0.0f, 0.0f)

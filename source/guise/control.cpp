@@ -243,7 +243,7 @@ namespace Guise
         const Vector2f newPos = position * scale;
         const Vector2f newSize = size * scale;
 
-        const bool clamp = overflow == Style::Property::Overflow::hidden;     
+        const bool clamp = overflow == Style::Property::Overflow::Hidden;     
         Bounds2f bounds = { canvasBound.position + newPos, newSize };
 
         if (clamp)

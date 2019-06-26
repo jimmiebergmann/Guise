@@ -340,10 +340,10 @@ namespace Guise
 
                     size_t baseline = 0;
                     m_charPositions.clear();
-                    if (m_font->createBitmap(m_text, getFontSize(), m_dpi, data, dimensions, baseline, &m_charPositions))
+                    if (m_font->createBitmap(m_text, m_textStyle.getFontSize(), m_dpi, data, dimensions, baseline, &m_charPositions))
                     {
                         m_baseline = static_cast<float>(baseline);
-                        m_baseHeight = static_cast<float>(getFontSize()) * scale;
+                        m_baseHeight = static_cast<float>(m_textStyle.getFontSize()) * scale;
 
                         if (!m_textTexture)
                         {
@@ -372,7 +372,7 @@ namespace Guise
             // Render text     
             m_textBounds.size = m_textTexture->getDimensions();
             m_textBounds.position.y += m_renderBounds.size.y - ((m_renderBounds.size.y - m_baseHeight) / 2.0f) + m_baseline - m_textBounds.size.y;
-            renderer.drawQuad(m_textBounds, m_textTexture, getFontColor());
+            renderer.drawQuad(m_textBounds, m_textTexture, m_textStyle.getFontColor());
 
             // Render select background.
             if (isSelected && m_cursorIndex < m_charPositions.size() && m_cursorSelectFromIndex < m_charPositions.size())
@@ -408,7 +408,7 @@ namespace Guise
                 cursorPosition += m_textBounds.position.x;
 
                 Bounds2f cursorBounds = { { cursorPosition, m_renderBounds.position.y },{ 1.0f, m_renderBounds.size.y } };
-                renderer.drawQuad(cursorBounds, getFontColor());
+                renderer.drawQuad(cursorBounds, m_textStyle.getFontColor());
             }         
         }   
     }
@@ -423,14 +423,20 @@ namespace Guise
         return m_renderBounds;
     }
 
+    Style::FontStyle & TextBox::getTextStyle()
+    {
+        return m_textStyle;
+    }
+
     TextBox::~TextBox()
     {
         getCanvas().unregisterDpiSensitive(this);
     }
 
-    TextBox::TextBox(std::shared_ptr<Canvas> & canvas) :
-        Style::TextBoxStyle(canvas->getStyleSheet()->getSelector("text-box")),
+    TextBox::TextBox(std::shared_ptr<Canvas> & canvas) :       
         Control(*canvas),
+        Style::PaintRectStyle(canvas->getStyleSheet()->getSelector("text-box")),
+        Style::ParentStyle(canvas->getStyleSheet()->getSelector("text-box")),
         m_active(false),
         m_baseline(0.0f),
         m_baseHeight(0.0f),
@@ -438,26 +444,16 @@ namespace Guise
         m_cursorIndex(0),
         m_cursorSelectFromIndex(0),
         m_dpi(canvas->getDpi()),
-        m_font(FontLibrary::get(getFontFamily())),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_textBounds(0.0f, 0.0f, 0.0f, 0.0f)
     {
         getCanvas().registerDpiSensitive(this);
 
-        /*if (auto activeStyle = canvas->getStyleSheet()->getSelector("button:active"))
+        if (auto textStyle = canvas->getStyleSheet()->getSelector("text-box-text"))
         {
-            m_activeStyle = { activeStyle, this };
+            m_textStyle = { textStyle };
+            m_font = FontLibrary::get(m_textStyle.getFontFamily());
         }
-
-        if (auto disabledStyle = canvas->getStyleSheet()->getSelector("button:disabled"))
-        {
-            m_disabledStyle = { disabledStyle, this };
-        }
-
-        if (auto hoverStyle = canvas->getStyleSheet()->getSelector("button:hover"))
-        {
-            m_hoverStyle = { hoverStyle, this };
-        }*/
     }
 
     void TextBox::onNewDpi(const int32_t dpi)

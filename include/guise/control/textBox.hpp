@@ -37,7 +37,7 @@
 namespace Guise
 {
 
-    class GUISE_API TextBox :  public Style::TextBoxStyle, public Control, public DpiSensitive
+    class GUISE_API TextBox : public Control, public Style::PaintRectStyle, public Style::ParentStyle, public DpiSensitive
     {
 
     public:
@@ -57,6 +57,8 @@ namespace Guise
         virtual Bounds2f getSelectBounds() const;
 
         Signal<const std::wstring &> onChange;
+
+        Style::FontStyle & getTextStyle();
 
         ~TextBox();
 
@@ -89,7 +91,9 @@ namespace Guise
         Bounds2f                                m_renderBounds;
         Bounds2f                                m_textBounds;
         std::wstring                            m_text;
-        std::shared_ptr<Texture>                m_textTexture;     
+        std::shared_ptr<Texture>                m_textTexture; 
+
+        Style::FontStyle                        m_textStyle;
 
     };
 

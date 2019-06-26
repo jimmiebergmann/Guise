@@ -28,106 +28,7 @@
 
 namespace Guise
 {
-    // Vertical grid style implementations.
-    VerticalGridStyle::VerticalGridStyle() :
-        m_position(0.0f, 0.0f),
-        m_size(0.0f, 0.0f),
-        m_padding(0.0f, 0.0f, 0.0f, 0.0f),
-        m_overflow(Style::Property::Overflow::hidden)
-    { }
-
-    VerticalGridStyle::VerticalGridStyle(const std::shared_ptr<Style::Selector> & selector) :
-        VerticalGridStyle()
-    {
-        if (!selector)
-        {
-            return;
-        }
-        
-        auto & properties = selector->getProperties();
-        for (auto it = properties.begin(); it != properties.end(); it++)
-        {
-            if (it->first == "position")
-            {
-                m_position = it->second->getVector2f();
-            }
-            else if (it->first == "size")
-            {
-                m_size = it->second->getVector2f();
-            }
-            else if (it->first == "padding")
-            {
-                switch (it->second->getDataType())
-                {
-                case Style::Property::DataType::Float:
-                {
-                    m_padding.x = m_padding.y = m_padding.w = m_padding.z = it->second->getFloat();
-                }
-                break;
-                case Style::Property::DataType::Vector2f:
-                {
-                    m_padding = { it->second->getVector2f(), 0.0f, 0.0f };
-                }
-                break;
-                case Style::Property::DataType::Vector4f:
-                {
-                    m_padding = it->second->getVector4f();
-                }
-                break;
-                default: break;
-                }
-            }
-            else if (it->first == "overflow")
-            {
-                m_overflow = it->second->getOverflow();
-            }
-        }
-    }
-
-
-    const Vector2f & VerticalGridStyle::getPosition() const
-    {
-        return m_position;
-    }
-    const Vector2f & VerticalGridStyle::getSize() const
-    {
-        return m_size;
-    }
-    const Vector4f & VerticalGridStyle::getPadding() const
-    {
-        return m_padding;
-    }
-    const Vector2f VerticalGridStyle::getPaddingLow() const
-    {
-        return { m_padding.x, m_padding.y };
-    }
-    const Vector2f VerticalGridStyle::getPaddingHigh() const
-    {
-        return { m_padding.z, m_padding.w };
-    }
-    Style::Property::Overflow VerticalGridStyle::getOverflow() const
-    {
-        return m_overflow;
-    }
-
-    void VerticalGridStyle::setPosition(const Vector2f & position)
-    {
-        m_position = position;
-    }
-    void VerticalGridStyle::setSize(const Vector2f & size)
-    {
-        m_size = size;
-    }
-    void VerticalGridStyle::setPadding(const Vector4f & padding)
-    {
-        m_padding = padding;
-    }
-    void VerticalGridStyle::setOverflow(const Style::Property::Overflow overflow)
-    {
-        m_overflow = overflow;
-    }
-
-
+  
     // Vertical grid implementations.
     std::shared_ptr<VerticalGrid> VerticalGrid::create(std::shared_ptr<Canvas> & canvas)
     {
@@ -150,7 +51,7 @@ namespace Guise
         const bool childsUpdate = pollUpdateForced();
         if (canvasBound != m_renderBounds || childsUpdate)
         {
-            Bounds2f renderBounds = calcRenderBounds(canvasBound, m_position, m_size, m_overflow);
+            Bounds2f renderBounds = calcRenderBounds(canvasBound, getPosition(), getSize(), getOverflow());
             if (renderBounds != m_renderBounds || childsUpdate)
             {
                 m_renderBounds = renderBounds;
@@ -202,13 +103,13 @@ namespace Guise
         return m_renderBounds;
     }
 
-    VerticalGridStyle & VerticalGrid::getSlotStyle()
+    Style::ParentRectStyle & VerticalGrid::getSlotStyle()
     {
         return m_slotStyle;
     }
 
     VerticalGrid::VerticalGrid(std::shared_ptr<Canvas> & canvas) :      
-        VerticalGridStyle(canvas->getStyleSheet()->getSelector("vertical-grid")),
+        Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("vertical-grid")),
         ControlContainerList(*canvas),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_slotStyle(canvas->getStyleSheet()->getSelector("vertical-grid-slot"))

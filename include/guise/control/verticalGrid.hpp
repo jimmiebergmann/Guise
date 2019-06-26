@@ -31,36 +31,7 @@
 namespace Guise
 {
 
-    class GUISE_API VerticalGridStyle
-    {
-
-    public:
-
-        VerticalGridStyle();
-        VerticalGridStyle(const std::shared_ptr<Style::Selector> & selector);
-
-        const Vector2f & getPosition() const;
-        const Vector2f & getSize() const;
-        const Vector4f & getPadding() const;
-        const Vector2f getPaddingLow() const;
-        const Vector2f getPaddingHigh() const;
-        Style::Property::Overflow getOverflow() const;
-
-        void setPosition(const Vector2f & position);
-        void setSize(const Vector2f & size);
-        void setPadding(const Vector4f & padding);
-        void setOverflow(const Style::Property::Overflow overflow);
-
-    protected:
-
-        Vector2f m_position;
-        Vector2f m_size;
-        Vector4f m_padding;
-        Style::Property::Overflow m_overflow;
-
-    };
-
-    class GUISE_API VerticalGrid : public VerticalGridStyle, public ControlContainerList
+    class GUISE_API VerticalGrid : public ControlContainerList, Style::ParentRectStyle
     {
 
     public:
@@ -77,7 +48,7 @@ namespace Guise
 
         virtual Bounds2f getSelectBounds() const;
 
-        VerticalGridStyle & getSlotStyle();
+        Style::ParentRectStyle & getSlotStyle();
 
     private:
 
@@ -86,7 +57,7 @@ namespace Guise
 
         Bounds2f                m_renderBounds;
         std::vector<Bounds2f>   m_childsBounds;
-        VerticalGridStyle       m_slotStyle;
+        Style::ParentRectStyle        m_slotStyle;
 
     };
 

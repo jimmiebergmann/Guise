@@ -164,24 +164,24 @@ namespace Guise
         return false;
     }
 
-    ButtonStyle & Button::getActiveStyle()
+    Style::ParentPaintRectStyle & Button::getActiveStyle()
     {
         return m_activeStyle;
     }
 
-    ButtonStyle & Button::getDisabledStyle()
+    Style::ParentPaintRectStyle & Button::getDisabledStyle()
     {
         return m_disabledStyle;
     }
 
-    ButtonStyle & Button::getHoverStyle()
+    Style::ParentPaintRectStyle & Button::getHoverStyle()
     {
         return m_hoverStyle;
     }
 
     Button::Button(std::shared_ptr<Canvas> & canvas) :
         ControlContainerSingle(*canvas),
-        ButtonStyle(canvas->getStyleSheet()->getSelector("button")),        
+        Style::ParentPaintRectStyle(canvas->getStyleSheet()->getSelector("button")),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_childBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_activeStyle(*this),
