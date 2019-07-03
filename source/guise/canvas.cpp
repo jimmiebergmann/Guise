@@ -101,7 +101,10 @@ namespace Guise
 
             if (m_hoveredControl && mouseHit.control != m_hoveredControl)
             {
-                m_hoveredControl->handleInputEvent(e);
+                if (e.type == Input::EventType::MouseMove)
+                {
+                    m_hoveredControl->handleInputEvent(e);
+                }
             }
             m_hoveredControl = mouseHit.control;
         };
@@ -154,7 +157,11 @@ namespace Guise
                             }
                             if (m_hoveredControl && m_hoveredControl != m_activeControl)
                             {
-                                m_hoveredControl->handleInputEvent(e);
+                                if (e.type == Input::EventType::MouseMove)
+                                {
+                                    m_hoveredControl->handleInputEvent(e);
+                                }
+                                
                             }
                         }
                         break;

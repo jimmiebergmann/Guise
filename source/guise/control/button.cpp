@@ -50,28 +50,22 @@ namespace Guise
 
         switch (e.type)
         {   
-            case Input::EventType::MousePress:
             case Input::EventType::MouseMove:          
-            {               
-                if (m_renderBounds.intersects(e.position))
+            {    
+                if (!m_pressed)
                 {
-                    if (m_pressed)
+                    if (m_renderBounds.intersects(e.position))
                     {
-                        m_currentStyle = &m_activeStyle;
+                        m_currentStyle = &m_hoverStyle;
+                        onHover(e.position);
                     }
                     else
                     {
-                        m_currentStyle = &m_hoverStyle;
+                        m_currentStyle = this;
                     }
 
-                    onHover(e.position);
-                }
-                else
-                {
-                    m_currentStyle = this;                   
-                }
-
-                forceUpdate();
+                    forceUpdate();
+                }     
             }
             break;
             case Input::EventType::MouseJustPressed:
@@ -84,16 +78,11 @@ namespace Guise
                 if (m_renderBounds.intersects(e.position))
                 {
                     m_pressed = true;
-                    onPressed(e.position);
+                    m_currentStyle = &m_activeStyle;
 
-                    m_currentStyle = &m_activeStyle;    
-                }
-                else
-                {
-                    m_currentStyle = this;
-                }
-
-                forceUpdate();
+                    onPressed(e.position); 
+                    forceUpdate();
+                }        
             }
             break;
             case Input::EventType::MouseRelease:
@@ -104,9 +93,14 @@ namespace Guise
                 }
 
                 m_pressed = false;
+
                 if (m_renderBounds.intersects(e.position))
                 {
-                    onReleased(e.position);
+                    m_currentStyle = &m_hoverStyle;
+                    onReleased(e.position);   
+                }
+                else
+                {
                     m_currentStyle = this;
                 }
 
