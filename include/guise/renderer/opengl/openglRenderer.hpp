@@ -33,6 +33,7 @@
 #include "guise/renderer/opengl/opengl.hpp"
 #include "guise/renderer.hpp"
 #include <memory>
+#include <stack>
 
 namespace Guise
 {
@@ -54,8 +55,6 @@ namespace Guise
         // Interface functions.
         int32_t getDpi();
 
-        void setCulling(const Vector2f & position, const Vector2f & size);
-
         void drawQuad(const Bounds2f & bounds, const Vector4f & color);
         void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color);
 
@@ -63,6 +62,9 @@ namespace Guise
 
         void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color);
   
+        void pushMask(const Bounds2i32 & bounds);
+        void popMask();
+
         std::shared_ptr<Texture> createTexture();
 
         // Renderer functions.
@@ -106,9 +108,10 @@ namespace Guise
 
         void updateProjectionMatrix();
 
-        Vector4f    m_clearColor;
-        Bounds2i32  m_viewPort;
-        int32_t     m_dpi;
+        Vector4f                m_clearColor;
+        Bounds2i32              m_viewPort;
+        int32_t                 m_dpi;
+        std::stack<Bounds2i32>  m_maskStack;
 
     };
 

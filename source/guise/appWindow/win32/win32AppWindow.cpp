@@ -104,20 +104,19 @@ namespace Guise
         m_renderer->present();
     }
 
+    void Win32AppWindow::setDpi(const int32_t dpi)
+    {
+        m_dpi = dpi;
+    }
+
     Vector2ui32 Win32AppWindow::getSize()
     {
         return m_size;
     }
 
-    Vector2ui32 Win32AppWindow::getDPiAwareSize()
+    Vector2i32 Win32AppWindow::getPosition() const
     {
-        return m_size * GUISE_DEFAULT_DPI / m_dpi;
-    }
-
-
-    void Win32AppWindow::setDpi(const int32_t dpi)
-    {
-        m_dpi = dpi;
+        return m_position;
     }
 
     int32_t Win32AppWindow::getDpi() const
@@ -151,6 +150,7 @@ namespace Guise
         m_dpi(GUISE_DEFAULT_DPI),
         m_input(m_canvas->getInput()),
         m_title(title),
+        m_position(0, 0),
         m_size(size),
         m_windowHandle(NULL),
         m_deviceContextHandle(NULL),
@@ -253,10 +253,17 @@ namespace Guise
         m_deviceContextHandle = GetDC(m_windowHandle);
 
         int32_t systemDPi = getSystemDpi(m_windowHandle, m_deviceContextHandle);
-        if (systemDPi != m_dpi)
+        
+        RECT rect;
+        if (GetWindowRect(m_windowHandle, &rect))
         {
-            RECT rect;
-            if (GetWindowRect(m_windowHandle, &rect))
+            m_position.x = static_cast<int32_t>(rect.left);
+            m_position.y = static_cast<int32_t>(rect.top);
+
+            //RECT rect2;
+            //::GetClientRect(m_windowHandle, &rect2);
+
+            if (systemDPi != m_dpi)
             {
                 m_dpi = systemDPi;
                 m_size = m_size * m_dpi / GUISE_DEFAULT_DPI;
@@ -362,6 +369,11 @@ namespace Guise
                 render();
             }
             break;
+            case WM_MOVE:
+            {
+                m_position = { static_cast<int32_t>(LOWORD(lParam)), static_cast<int32_t>(HIWORD(lParam)) };
+            }
+            break;
             /*case WM_SIZING:
             {
             }
@@ -389,7 +401,7 @@ namespace Guise
         
             // Mouse events.
             case WM_MOUSEMOVE:
-            {
+            { 
                 auto point = MAKEPOINTS(lParam);
                 m_input.pushEvent({ Input::EventType::MouseMove, { static_cast<float>(point.x), static_cast<float>(point.y) } });
             }
@@ -413,6 +425,16 @@ namespace Guise
                 ::SetCapture(m_windowHandle);
                 auto point = MAKEPOINTS(lParam);
                 m_input.pushEvent({ Input::EventType::MousePress, uint8_t(2),{ static_cast<float>(point.x), static_cast<float>(point.y) } });
+
+                /*UINT_PTR ID_CLOSE = MF_STRING;
+                UINT_PTR ID_EXIT = MF_STRING;
+                HMENU hPopupMenu = CreatePopupMenu();
+                InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING, ID_CLOSE, "Exit");
+                InsertMenu(hPopupMenu, 0, MF_BYPOSITION | MF_STRING, ID_EXIT, "Play");
+
+                //SetForegroundWindow();
+                TrackPopupMenu(hPopupMenu, TPM_BOTTOMALIGN | TPM_LEFTALIGN, point.x, point.y, 0, m_windowHandle, NULL);
+                */
             }
             break;
             case WM_LBUTTONUP:

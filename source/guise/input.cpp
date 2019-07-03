@@ -172,9 +172,16 @@ namespace Guise
     bool Input::getKeyState(const Key key) const
     {
     #if defined(GUISE_PLATFORM_WINDOWS)
+        return ::GetKeyState(translateToWin32Key(key)) & 0x8000;
+    #else
+        return false;
+    #endif
+    }
 
-        SHORT state = ::GetKeyState(translateToWin32Key(key));
-        return state & 0x8000;
+    bool Input::getMouseState(const uint8_t button) const
+    {
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        return ::GetKeyState(translateToWin32Button(button)) & 0x8000;
     #else
         return false;
     #endif
@@ -290,105 +297,118 @@ namespace Guise
         return Key::Unkown;
     }
 
-
     WORD Input::translateToWin32Key(const Key key)
     {
         switch (key)
         {
-        case Key::A:            return 'A';
-        case Key::B:            return 'B';
-        case Key::C:            return 'C';
-        case Key::D:            return 'D';
-        case Key::E:            return 'E';
-        case Key::F:            return 'F';
-        case Key::G:            return 'G';
-        case Key::H:            return 'H';
-        case Key::I:            return 'I';
-        case Key::J:            return 'J';
-        case Key::K:            return 'K';
-        case Key::L:            return 'L';
-        case Key::M:            return 'M';
-        case Key::N:            return 'N';
-        case Key::O:            return 'O';
-        case Key::P:            return 'P';
-        case Key::Q:            return 'Q';
-        case Key::R:            return 'R';
-        case Key::S:            return 'S';
-        case Key::T:            return 'T';
-        case Key::U:            return 'U';
-        case Key::V:            return 'V';
-        case Key::W:            return 'W';
-        case Key::X:            return 'X';
-        case Key::Y:            return 'Y';
-        case Key::Z:            return 'Z';
-        case Key::Num0:         return '0';
-        case Key::Num1:         return '1';
-        case Key::Num2:         return '2';
-        case Key::Num3:         return '3';
-        case Key::Num4:         return '4';
-        case Key::Num5:         return '5';
-        case Key::Num6:         return '6';
-        case Key::Num7:         return '7';
-        case Key::Num8:         return '8';
-        case Key::Num9:         return '9';
-        case Key::F1:           return VK_F1;
-        case Key::F2:           return VK_F2;
-        case Key::F3:           return VK_F3;
-        case Key::F4:           return VK_F4;
-        case Key::F5:           return VK_F5;
-        case Key::F6:           return VK_F6;
-        case Key::F7:           return VK_F7;
-        case Key::F8:           return VK_F8;
-        case Key::F9:           return VK_F9;
-        case Key::F10:          return VK_F10;
-        case Key::F11:          return VK_F11;
-        case Key::F12:          return VK_F12;
-        case Key::Down:         return VK_DOWN;
-        case Key::Left:         return VK_LEFT;
-        case Key::Right:        return VK_RIGHT;
-        case Key::Up:           return VK_UP;
-        case Key::AltLeft:      return VK_LMENU;
-        case Key::AltRight:     return  VK_RMENU;
-        case Key::Backspace:    return VK_BACK;
-        //case XK_braceleft:    return Key::Brace_Left;
-        //case XK_braceright:   return Key::Brace_Right;
-        case Key::BracketLeft:  return VK_OEM_4;
-        case Key::BracketRight: return VK_OEM_6;
-        case Key::Break:        return VK_PAUSE;
-        case Key::Capslock:     return VK_CAPITAL;
-        //case XK_colon:        return Key::Colon;
-        case Key::ControlLeft:  return VK_LCONTROL;
-        case Key::ControlRight: return VK_RCONTROL;
-        case Key::Comma:        return VK_OEM_COMMA;
-        case Key::Delete:       return VK_DELETE;
-        case Key::End:          return VK_END;
-        case Key::Escape:       return VK_ESCAPE;
-        //case XK_greater:      return Key::Greater;
-        case Key::Home:         return VK_HOME;
-        case Key::Insert:       return VK_INSERT;
-        //case XK_less:         return Key::Less;
-        case Key::Minus:        return VK_OEM_MINUS;
-        case Key::NumLock:      return VK_NUMLOCK;
-        case Key::PageDown:     return VK_NEXT;
-        case Key::PageUp:       return VK_PRIOR;
-        case Key::Period:       return VK_OEM_PERIOD;
-        case Key::Plus:         return VK_ADD;
-        case Key::Print:        return VK_SNAPSHOT;
-        case Key::Return:       return VK_RETURN;
-        case Key::ScrollLock:   return VK_SCROLL;
-        case Key::SemiColon:    return VK_OEM_1;
-        case Key::ShiftLeft:    return VK_LSHIFT;
-        case Key::ShiftRight:   return VK_RSHIFT;
-        case Key::Space:        return VK_SPACE;
-        case Key::SuperLeft:    return VK_LWIN;
-        case Key::SuperRight:   return VK_RWIN;
-        case Key::Tab:          return VK_TAB;
-        //case XK_underscore:   return Key::Underscore
-        default: break;
+            case Key::A:            return 'A';
+            case Key::B:            return 'B';
+            case Key::C:            return 'C';
+            case Key::D:            return 'D';
+            case Key::E:            return 'E';
+            case Key::F:            return 'F';
+            case Key::G:            return 'G';
+            case Key::H:            return 'H';
+            case Key::I:            return 'I';
+            case Key::J:            return 'J';
+            case Key::K:            return 'K';
+            case Key::L:            return 'L';
+            case Key::M:            return 'M';
+            case Key::N:            return 'N';
+            case Key::O:            return 'O';
+            case Key::P:            return 'P';
+            case Key::Q:            return 'Q';
+            case Key::R:            return 'R';
+            case Key::S:            return 'S';
+            case Key::T:            return 'T';
+            case Key::U:            return 'U';
+            case Key::V:            return 'V';
+            case Key::W:            return 'W';
+            case Key::X:            return 'X';
+            case Key::Y:            return 'Y';
+            case Key::Z:            return 'Z';
+            case Key::Num0:         return '0';
+            case Key::Num1:         return '1';
+            case Key::Num2:         return '2';
+            case Key::Num3:         return '3';
+            case Key::Num4:         return '4';
+            case Key::Num5:         return '5';
+            case Key::Num6:         return '6';
+            case Key::Num7:         return '7';
+            case Key::Num8:         return '8';
+            case Key::Num9:         return '9';
+            case Key::F1:           return VK_F1;
+            case Key::F2:           return VK_F2;
+            case Key::F3:           return VK_F3;
+            case Key::F4:           return VK_F4;
+            case Key::F5:           return VK_F5;
+            case Key::F6:           return VK_F6;
+            case Key::F7:           return VK_F7;
+            case Key::F8:           return VK_F8;
+            case Key::F9:           return VK_F9;
+            case Key::F10:          return VK_F10;
+            case Key::F11:          return VK_F11;
+            case Key::F12:          return VK_F12;
+            case Key::Down:         return VK_DOWN;
+            case Key::Left:         return VK_LEFT;
+            case Key::Right:        return VK_RIGHT;
+            case Key::Up:           return VK_UP;
+            case Key::AltLeft:      return VK_LMENU;
+            case Key::AltRight:     return  VK_RMENU;
+            case Key::Backspace:    return VK_BACK;
+            //case XK_braceleft:    return Key::Brace_Left;
+            //case XK_braceright:   return Key::Brace_Right;
+            case Key::BracketLeft:  return VK_OEM_4;
+            case Key::BracketRight: return VK_OEM_6;
+            case Key::Break:        return VK_PAUSE;
+            case Key::Capslock:     return VK_CAPITAL;
+            //case XK_colon:        return Key::Colon;
+            case Key::ControlLeft:  return VK_LCONTROL;
+            case Key::ControlRight: return VK_RCONTROL;
+            case Key::Comma:        return VK_OEM_COMMA;
+            case Key::Delete:       return VK_DELETE;
+            case Key::End:          return VK_END;
+            case Key::Escape:       return VK_ESCAPE;
+            //case XK_greater:      return Key::Greater;
+            case Key::Home:         return VK_HOME;
+            case Key::Insert:       return VK_INSERT;
+            //case XK_less:         return Key::Less;
+            case Key::Minus:        return VK_OEM_MINUS;
+            case Key::NumLock:      return VK_NUMLOCK;
+            case Key::PageDown:     return VK_NEXT;
+            case Key::PageUp:       return VK_PRIOR;
+            case Key::Period:       return VK_OEM_PERIOD;
+            case Key::Plus:         return VK_ADD;
+            case Key::Print:        return VK_SNAPSHOT;
+            case Key::Return:       return VK_RETURN;
+            case Key::ScrollLock:   return VK_SCROLL;
+            case Key::SemiColon:    return VK_OEM_1;
+            case Key::ShiftLeft:    return VK_LSHIFT;
+            case Key::ShiftRight:   return VK_RSHIFT;
+            case Key::Space:        return VK_SPACE;
+            case Key::SuperLeft:    return VK_LWIN;
+            case Key::SuperRight:   return VK_RWIN;
+            case Key::Tab:          return VK_TAB;
+            //case XK_underscore:   return Key::Underscore
+            default: break;
         }
 
         return 0;
     }
+
+    WORD Input::translateToWin32Button(const uint8_t button)
+    {
+        switch (button)
+        {
+            case 0: return VK_LBUTTON;
+            case 1: return VK_MBUTTON;
+            case 2: return VK_RBUTTON;
+            default: break;
+        }
+        
+        return 0;
+    }
+
 #endif
 
 }

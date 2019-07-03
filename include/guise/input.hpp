@@ -199,6 +199,8 @@ namespace Guise
 
         bool getKeyState(const Key key) const;
 
+        bool getMouseState(const uint8_t button) const;
+
         size_t queueSize() const;
 
         Vector2f getLastMousePosition() const;
@@ -206,6 +208,7 @@ namespace Guise
 #if defined(GUISE_PLATFORM_WINDOWS)
         static Key translateFromWin32Key(const WORD key);
         static WORD translateToWin32Key(const Key key);
+        static WORD translateToWin32Button(const uint8_t button);
 #endif
 
     private:

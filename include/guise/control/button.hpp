@@ -67,6 +67,8 @@ namespace Guise
         Button(std::shared_ptr<Canvas> & canvas);
         Button(const Button &) = delete;
 
+        void onActiveChange(bool active);
+
         Bounds2f m_renderBounds;
         Bounds2f m_childBounds;
 
@@ -75,6 +77,7 @@ namespace Guise
         Style::ParentPaintRectStyle     m_hoverStyle;
         Style::ParentPaintRectStyle *   m_currentStyle;
         bool                            m_pressed;
+        bool                            m_active;
 
     };
 

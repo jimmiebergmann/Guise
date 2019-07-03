@@ -159,6 +159,20 @@ namespace Guise
     { }
 
     template <typename T>
+    template <typename U>
+    inline Bounds<2, T>::Bounds(const Vector<2, U> position, Vector<2, U> size) :
+        position(position),
+        size(size)
+    { }
+
+    template <typename T>
+    template <typename U>
+    inline Bounds<2, T>::Bounds(const Bounds<2, U> & bounds) :
+        position(bounds.position),
+        size(bounds.size)
+    { }
+
+    template <typename T>
     inline Bounds<2, T> & Bounds<2, T>::operator = (const Bounds<2, T> & bounds)
     {
         position = bounds.position;
@@ -190,6 +204,15 @@ namespace Guise
     inline bool Bounds<2, T>::operator != (const Bounds<2, T> & bounds) const
     {
         return position != bounds.position || size != bounds.size;
+    }
+
+    template <typename T>
+    Bounds<2, T> Bounds<2, T>::clamp(const Bounds<2, T> & in, const Bounds<2, T> & bounds)
+    {
+        Vector2f low = Vector2f::clamp(in.position, bounds.position, bounds.position + bounds.size);
+        Vector2f high = Vector2f::clamp(in.position + in.size, bounds.position, bounds.position + bounds.size);
+
+        return { low , high - low };
     }
 
 }

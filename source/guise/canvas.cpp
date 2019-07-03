@@ -78,44 +78,32 @@ namespace Guise
          
         m_input.update();
         
-        struct HitHelper
+        struct MouseIntersector
         {
-            HitHelper() :
+            MouseIntersector() :
                 control(nullptr),
-                isQueried(false),
-                mouseMoved(false)
+                isQueried(false)
             { }
 
             Control * control;
             bool isQueried;
             Vector2f position;
-            bool mouseMoved;
-        } hit;
+        } mouseHit;
 
-        auto mouseMovedFunc = [this, &hit](Input::Event & e)
+        auto mouseEventFunc = [this, &mouseHit](Input::Event & e)
         {         
-            hit.mouseMoved = true;
-
-            if (!hit.isQueried || hit.position != e.position)
+            if (!mouseHit.isQueried || mouseHit.position != e.position)
             {
-                hit.control = queryControlHit(e.position);
-                hit.position = e.position;
-                hit.isQueried = true;
+                mouseHit.control = queryControlHit(e.position);
+                mouseHit.position = e.position;
+                mouseHit.isQueried = true;
             }
 
-            if (hit.control)
+            if (m_hoveredControl && mouseHit.control != m_hoveredControl)
             {
-                hit.control->handleInputEvent(e);
+                m_hoveredControl->handleInputEvent(e);
             }
-
-            if (hit.control != m_hoveredControl)
-            {
-                if (m_hoveredControl)
-                {
-                    m_hoveredControl->handleInputEvent(e);
-                }
-                m_hoveredControl = hit.control;
-            }
+            m_hoveredControl = mouseHit.control;
         };
 
         Input::Event e;
@@ -123,58 +111,75 @@ namespace Guise
         {
             switch (e.type)
             {
-                case Input::EventType::MouseJustPressed:
-                {
-                    if (!hit.isQueried || hit.position != e.position)
-                    {
-                        hit.control = queryControlHit(e.position);
-                        hit.position = e.position;
-                        hit.isQueried = true;
-                    }
-
-                    setActiveControl(hit.control);
-
-                    if (m_activeControl)
-                    {
-                        m_activeControl->handleInputEvent(e);
-                    }
-                }
-                break;
+                // Keyboard events.
                 case Input::EventType::KeyboardJustPressed:
                 case Input::EventType::KeyboardPress:
                 case Input::EventType::KeyboardHolding:
                 case Input::EventType::KeyboardRelease:
                 case Input::EventType::Texting:
-                case Input::EventType::MouseRelease:
                 {
                     if (m_activeControl)
                     {
                         m_activeControl->handleInputEvent(e);
                     }
-
                 }
                 break;
+
+                // Mouse events.
+                case Input::EventType::MouseJustPressed:
+                case Input::EventType::MouseRelease:                
                 case Input::EventType::MousePress:
                 case Input::EventType::MouseDoubleClick:
                 case Input::EventType::MouseMove:
                 {
-                    mouseMovedFunc(e);
+                    mouseEventFunc(e);
+
+                    switch (e.type)
+                    {
+                        case Input::EventType::MouseJustPressed:
+                        {
+                            if (e.button == 0)
+                            {
+                                setActiveControl(mouseHit.control);
+                            }
+                        }
+                        case Input::EventType::MouseRelease:
+                        case Input::EventType::MousePress:
+                        case Input::EventType::MouseDoubleClick:
+                        case Input::EventType::MouseMove:
+                        {
+                            if (m_activeControl)
+                            {
+                                m_activeControl->handleInputEvent(e);
+                            }
+                            if (m_hoveredControl && m_hoveredControl != m_activeControl)
+                            {
+                                m_hoveredControl->handleInputEvent(e);
+                            }
+                        }
+                        break;
+                        default: break;
+                    }
+
+
+                   /* mouseEventFunc(e);
+                    //mouseMovedFunc(e);
 
                     if (m_activeControl)
                     {
                         m_activeControl->handleInputEvent(e);
-                    }
+                    }*/
                 }
                 break;
                 default: break;
             }
         }
 
-        if (!hit.mouseMoved)
+        /*if (!hit.mouseMoved)
         {
             Input::Event moveEvent(Input::EventType::MouseMove, m_input.getLastMousePosition());
             mouseMovedFunc(moveEvent);
-        }
+        }*/
 
         /*
         Input::Event e;
@@ -264,18 +269,21 @@ namespace Guise
 
     void Canvas::setActiveControl(Control * control)
     {
-        if (control != m_activeControl)
+        if (control == m_activeControl)
         {
-            if (m_activeControl)
-            {
-                m_activeControl->onActiveChange(false);
-            }
+            return;
+        }
 
-            if (control)
-            {                
-                control->onActiveChange(true);
-            }
-            m_activeControl = control;
+        if (m_activeControl)
+        {
+            m_activeControl->onActiveChange(false);
+        }
+
+        m_activeControl = control;
+
+        if (m_activeControl)
+        {                
+            m_activeControl->onActiveChange(true);
         }
     }
 

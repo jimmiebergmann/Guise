@@ -39,32 +39,37 @@ namespace Guise
         return m_dpi;
     }
 
-    void OpenGLRenderer::setCulling(const Vector2f &, const Vector2f &)
-    {
-
-    }
-
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const Vector4f & color)
     {
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
 
+        Bounds2f newBounds = bounds;
+        if (m_maskStack.size())
+        {
+            newBounds = Bounds2f::clamp(newBounds, m_maskStack.top());
+        }
+
         glColor4f(color.x, color.y, color.z, color.w);
-        glVertex2f(bounds.position.x, bounds.position.y);
-        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
-        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
-        glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+        glVertex2f(newBounds.position.x, newBounds.position.y);
+        glVertex2f(newBounds.position.x + newBounds.size.x, newBounds.position.y);
+        glVertex2f(newBounds.position.x + newBounds.size.x, newBounds.position.y + newBounds.size.y);
+        glVertex2f(newBounds.position.x, newBounds.position.y + newBounds.size.y);
 
         glEnd();
     }
 
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color)
     {
-        const Bounds2f newBounds =
+        Bounds2f newBounds =
         {
             { std::ceil(bounds.position.x), std::ceil(bounds.position.y) },
             { std::ceil(bounds.size.x), std::ceil(bounds.size.y) }
         };
+        if (m_maskStack.size())
+        {
+            newBounds = Bounds2f::clamp(newBounds, m_maskStack.top());            
+        }
 
         glEnable(GL_TEXTURE_2D);
         texture->bind(0);
@@ -134,6 +139,22 @@ namespace Guise
         glVertex2f(point1.x, point1.y);
         glVertex2f(point2.x, point2.y);
         glEnd();
+    }
+
+    void OpenGLRenderer::pushMask(const Bounds2i32 & bounds)
+    {
+        if (m_maskStack.size() < 255)
+        {
+            m_maskStack.push(bounds);
+        }      
+    }
+
+    void OpenGLRenderer::popMask()
+    {
+        if (m_maskStack.size())
+        {
+            m_maskStack.pop();
+        }
     }
 
     std::shared_ptr<Texture> OpenGLRenderer::createTexture()

@@ -46,12 +46,11 @@ namespace Guise
         if (!m_enabled)
         {
             return false;
-        }
-
-        std::cout << "Event: " << (int)e.type << std::endl;
+        }               
 
         switch (e.type)
-        {           
+        {   
+            case Input::EventType::MousePress:
             case Input::EventType::MouseMove:          
             {               
                 if (m_renderBounds.intersects(e.position))
@@ -77,20 +76,41 @@ namespace Guise
             break;
             case Input::EventType::MouseJustPressed:
             {
+                if (e.button != 0)
+                {
+                    break;
+                }
+
                 if (m_renderBounds.intersects(e.position))
                 {
                     m_pressed = true;
                     onPressed(e.position);
+
+                    m_currentStyle = &m_activeStyle;    
                 }
+                else
+                {
+                    m_currentStyle = this;
+                }
+
+                forceUpdate();
             }
             break;
             case Input::EventType::MouseRelease:
             {
+                if (e.button != 0)
+                {
+                    break;
+                }
+
                 m_pressed = false;
                 if (m_renderBounds.intersects(e.position))
                 {
                     onReleased(e.position);
+                    m_currentStyle = this;
                 }
+
+                forceUpdate();
             }
             break;
             default: break;
@@ -188,7 +208,8 @@ namespace Guise
         m_disabledStyle(*this),
         m_hoverStyle(*this),
         m_currentStyle(this),
-        m_pressed(false)        
+        m_pressed(false)     ,
+        m_active(false)
     {
         if (auto activeStyle = canvas->getStyleSheet()->getSelector("button:active"))
         {
@@ -204,6 +225,11 @@ namespace Guise
         {
             m_hoverStyle = { hoverStyle, this };
         }
+    }
+
+    void Button::onActiveChange(bool active)
+    {
+        m_active = active;
     }
 
 }

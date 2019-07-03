@@ -110,6 +110,13 @@ namespace Guise
         Bounds(const T pX, const T pY, const T sX, const T sY);
         Bounds(const Bounds<2, T> & bounds);
 
+        template <typename U>
+        Bounds(const Vector<2, U> position, Vector<2, U> size);
+
+        template <typename U>
+        Bounds(const Bounds<2, U> & bounds);
+
+
         bool intersects(const Vector<2, T> & point) const;
 
         Bounds<2, T> & operator = (const Bounds<2, T> & bounds);
@@ -119,6 +126,8 @@ namespace Guise
 
         bool operator == (const Bounds<2, T> & bounds) const;
         bool operator != (const Bounds<2, T> & bounds) const;
+
+        static Bounds<2, T> clamp(const Bounds<2, T> & in, const Bounds<2, T> & bounds);
 
         Vector<2, T> position;
         Vector<2, T> size;

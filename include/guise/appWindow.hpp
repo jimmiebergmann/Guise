@@ -73,9 +73,9 @@ namespace Guise
 
         virtual int32_t getDpi() const = 0;
 
-        virtual Vector2ui32 getSize() = 0;
+        virtual Vector2i32 getPosition() const = 0;
 
-        virtual Vector2ui32 getDPiAwareSize() = 0;
+        virtual Vector2ui32 getSize() = 0;
 
     #if defined(GUISE_PLATFORM_WINDOWS)
         virtual ::HDC getWin32HDC() const = 0;

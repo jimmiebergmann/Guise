@@ -58,11 +58,11 @@ namespace Guise
 
         void render();
 
+        void setDpi(const int32_t dpi);
+
         Vector2ui32 getSize();
 
-        Vector2ui32 getDPiAwareSize();
-
-        void setDpi(const int32_t dpi);
+        Vector2i32 getPosition() const;    
 
         int32_t getDpi() const;
 
@@ -86,6 +86,7 @@ namespace Guise
         int32_t                     m_dpi;
         Input &                     m_input;
         std::wstring                m_title; 
+        Vector2ui32                 m_position;
         Vector2ui32                 m_size;
         HWND		                m_windowHandle;
         HDC			                m_deviceContextHandle;

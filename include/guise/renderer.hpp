@@ -49,14 +49,15 @@ namespace Guise
 
         virtual int32_t getDpi() = 0;
 
-        virtual void setCulling(const Vector2f & position, const Vector2f & size) = 0;
-
         virtual void drawQuad(const Bounds2f & bounds, const Vector4f & color) = 0;      
         virtual void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color) = 0;
 
         virtual void drawBorder(const Bounds2f & bounds, const float width, const Vector4f & color) = 0;
 
         virtual void drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color) = 0;
+
+        virtual void pushMask(const Bounds2i32 & bounds) = 0;
+        virtual void popMask() = 0;
 
         virtual std::shared_ptr<Texture> createTexture() = 0;
 

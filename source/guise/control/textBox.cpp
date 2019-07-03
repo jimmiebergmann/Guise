@@ -51,6 +51,11 @@ namespace Guise
         {
             case Input::EventType::MouseJustPressed:
             {
+                if (e.button != 0)
+                {
+                    break;
+                }
+
                 size_t index = 0;
                 if (intersectText(e.position.x, index))
                 {                  
@@ -73,6 +78,11 @@ namespace Guise
             break;
             case Input::EventType::MouseRelease:
             {
+                if (e.button != 0)
+                {
+                    break;
+                }
+
                 m_mousePressed = false;
             }
             break;
@@ -368,7 +378,9 @@ namespace Guise
         const bool isSelected = m_cursorIndex != m_cursorSelectFromIndex;
         m_textBounds = { { m_renderBounds.position.x + getPaddingLow().x, m_renderBounds.position.y }, { 0.0f, 0.0f } };
         if (m_textTexture)
-        {          
+        {     
+            renderer.pushMask(m_renderBounds);
+
             // Render text     
             m_textBounds.size = m_textTexture->getDimensions();
             m_textBounds.position.y += m_renderBounds.size.y - ((m_renderBounds.size.y - m_baseHeight) / 2.0f) + m_baseline - m_textBounds.size.y;
@@ -393,6 +405,8 @@ namespace Guise
 
                 renderer.drawQuad(selectBounds, { 0.0f, 0.45f, 0.85f, 0.7f });
             }
+
+            renderer.popMask();
         }
 
         if (m_active)
