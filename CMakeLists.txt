@@ -24,7 +24,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Threads)
 
 
-# Warnings as errors
+# Force warnings as errors
 if(MSVC)
   # Force to always compile with W4
   if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -44,10 +44,20 @@ endif()
 # OLD CODECOV PROPS ... #  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 # OLD CODECOV PROPS ... #endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
+# Set code coverage flags.
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov")
+  message("Code coverage is enabled.")
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+
+
+# Print general info.
+message("CC compiler = ${CMAKE_C_COMPILER}")
+message("CXX compiler = ${CMAKE_CXX_COMPILER}")
+message("CXX flags = ${CMAKE_CXX_FLAGS}")
+message("CXX linker flags = ${CMAKE_EXE_LINKER_FLAGS}")
+
 
 # Find files
 file(GLOB_RECURSE guise_src "${CMAKE_SOURCE_DIR}/source/*.c" "${CMAKE_SOURCE_DIR}/source/*.cpp")
@@ -65,8 +75,9 @@ add_library(guise SHARED ${guise_files}) # Create shared library
 if(ENABLE_OPENGL_RENDERER)
 	if(WIN32)
 		target_link_libraries(guise "opengl32.lib")
-	elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_link_libraries(guise "GL")
+    message("Linked OpenGL - GL")
   endif()
 else()
 	target_compile_definitions(guise PRIVATE GUISE_DISABLE_OPENGL)
@@ -95,6 +106,12 @@ set_target_properties( guise
 # OLD CODECOV PROPS ... #  set_target_properties(guise PROPERTIES COMPILE_FLAGS "--coverage")
 # OLD CODECOV PROPS ... #endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
+# Print guise info.
+get_target_property(GUISE_INFO_LINK_LIBS guise LINK_LIBRARIES)
+get_target_property(GUISE_INFO_COMP_FLAGS guise COMPILE_FLAGS)
+message("Guise link libs = ${GUISE_INFO_LINK_LIBS}")
+message("Guise compile flags = ${GUISE_INFO_COMP_FLAGS}")
+
 install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install library headers
 
 
@@ -121,6 +138,13 @@ set_target_properties( guise_static
   LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/lib"
   LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/lib"
 )
+
+# Print guise static info.
+get_target_property(GUISE_S_INFO_LINK_LIBS guise_static LINK_LIBRARIES)
+get_target_property(GUISE_S_INFO_COMP_FLAGS guise_static COMPILE_FLAGS)
+message("Guise static link libs = ${GUISE_S_INFO_LINK_LIBS}")
+message("Guise static compile flags = ${GUISE_S_INFO_COMP_FLAGS}")
+
 install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install library headers
 
 
@@ -152,6 +176,11 @@ set_target_properties( guise_tests
 # OLD CODECOV PROPS ... #  set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "--coverage")
 # OLD CODECOV PROPS ... #endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
+get_target_property(GUISE_TEST_INFO_LINK_LIBS guise_tests LINK_LIBRARIES)
+get_target_property(GUISE_TEST_INFO_COMP_FLAGS guise_tests COMPILE_FLAGS)
+message("Guise test link libs = ${GUISE_TEST_INFO_LINK_LIBS}")
+message("Guise test compile flags = ${GUISE_TEST_INFO_COMP_FLAGS}")
+
 target_link_libraries(guise_tests gtest_main guise)
 
 
@@ -174,5 +203,10 @@ set_target_properties( example1
 # OLD CODECOV PROPS ... #if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") ## Code coverage
 # OLD CODECOV PROPS ... #  set_target_properties(example1 PROPERTIES COMPILE_FLAGS "--coverage")
 # OLD CODECOV PROPS ... #endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+
+get_target_property(GUISE_EX_INFO_LINK_LIBS example1 LINK_LIBRARIES)
+get_target_property(GUISE_EX_INFO_COMP_FLAGS example1 COMPILE_FLAGS)
+message("Example1 link libs = ${GUISE_EX_INFO_LINK_LIBS}")
+message("Example1 compile flags = ${GUISE_EX_INFO_COMP_FLAGS}")
 
 target_link_libraries(example1 guise ${CMAKE_THREAD_LIBS_INIT})
