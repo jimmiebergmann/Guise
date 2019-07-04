@@ -31,6 +31,10 @@ install:
 
 
 script:
+  # Checks
+  - g++ --version
+  - gcc --version
+  - gcov --version
   # Build
   - mkdir build
   - cd build
