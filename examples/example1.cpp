@@ -6,6 +6,7 @@
 #include "guise/control/verticalGrid.hpp"
 #include "guise/control/label.hpp"
 #include "guise/control/textBox.hpp"
+#include "guise/control/checkbox.hpp"
 #include "guise/font.hpp"
 #include <thread>
 #include <iostream>
@@ -35,16 +36,20 @@ int main()
 
     auto button2 = Button::create(canvas1);
     button2->setSize({ 300.0f, 80.0f });
-    vertGrid1->add(button2);
+    button2->onPressed = []() { std::cout << "Pressed button 2!" << std::endl; };
+    vertGrid1->add(button2);   
 
     auto button3 = Button::create(canvas1);
     button3->setSize({ 200.0f, 40.0f });
     button3->getActiveStyle().setBorderWidth(5.0f);
+    button3->onReleased = []() { std::cout << "Released button 3!" << std::endl; };
     vertGrid1->add(button3);
 
     auto label1 = Label::create(canvas1, "arial", L"Name");
     label1->setFontSize(10);
     vertGrid1->add(label1);
+
+    vertGrid1->add(Checkbox::create(canvas1));
 
     auto textbox1 = TextBox::create(canvas1);
     vertGrid1->add(textbox1);

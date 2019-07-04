@@ -198,11 +198,11 @@ namespace Guise
         Style::ParentPaintRectStyle(canvas->getStyleSheet()->getSelector("button")),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_childBounds(0.0f, 0.0f, 0.0f, 0.0f),
-        m_activeStyle(*this),
-        m_disabledStyle(*this),
-        m_hoverStyle(*this),
+        m_activeStyle(this),
+        m_disabledStyle(this),
+        m_hoverStyle(this),
         m_currentStyle(this),
-        m_pressed(false)     ,
+        m_pressed(false),
         m_active(false)
     {
         if (auto activeStyle = canvas->getStyleSheet()->getSelector("button:active"))

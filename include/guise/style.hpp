@@ -46,6 +46,33 @@ namespace Guise
         using Properties = std::map<std::string, std::shared_ptr<Property> >;
         using Selectors = std::map<std::string, std::shared_ptr<Selector> >;
 
+
+        class LinearGradient
+        {
+
+        public:
+
+            LinearGradient();
+            LinearGradient(const Vector4f & colorA, const Vector4f & colorB);
+            LinearGradient(const float angle, const Vector4f & colorA, const Vector4f & colorB);
+
+            void setAngle(const float angle);
+            void setColorA(const Vector4f & color);
+            void setColorB(const Vector4f & color);
+
+            float getAngle() const;
+            const Vector4f & getColorA() const;
+            const Vector4f & getColorB() const;
+
+        private:
+
+            float       m_angle;
+            Vector4f    m_colorA;
+            Vector4f    m_colorB;
+
+        };
+
+
         class GUISE_API Property
         {
 
@@ -57,6 +84,7 @@ namespace Guise
                 BorderStyle,
                 Float,
                 Integer,
+                LinearGradient,
                 Overflow,
                 String,
                 Vector2f,
@@ -99,6 +127,7 @@ namespace Guise
             Property(const BorderStyle value);
             Property(const float value);
             Property(const int value);
+            Property(const LinearGradient & value);
             Property(const Overflow value);
             Property(const std::string & value);
             Property(const Vector2f & value);
@@ -115,6 +144,7 @@ namespace Guise
             BorderStyle getBorderStyle() const;
             float getFloat() const;
             int getInteger() const;
+            LinearGradient getLinearGradient() const;
             Overflow getOverflow() const;
             std::string getString() const;
             const Vector2f & getVector2f() const;
@@ -126,7 +156,10 @@ namespace Guise
             void setBool(const bool value);
             void setBorderStyle(const BorderStyle value);
             void setFloat(const float value);
+            void setInteger(const int value);
+            void setLinearGradient(const LinearGradient & value);
             void setOverflow(const Overflow value);
+            void setString(const std::string & value);
             void setVector2f(const Vector2f & value);
             void setVector3f(const Vector3f & value);
             void setVector4f(const Vector4f & value);
@@ -136,7 +169,10 @@ namespace Guise
             Property & operator = (const bool value);
             Property & operator = (const BorderStyle value);
             Property & operator = (const float value);
+            Property & operator = (const int value);
+            Property & operator = (const LinearGradient & value);
             Property & operator = (const Overflow value);
+            Property & operator = (const std::string & value);
             Property & operator = (const Vector2f & value);
             Property & operator = (const Vector3f & value);
             Property & operator = (const Vector4f & value);
@@ -145,21 +181,24 @@ namespace Guise
 
         private:
 
+            void deallocate();
+
             DataType    m_dataType;
 
             union
             {
-                bool            m_valueBoolean;
-                BorderStyle     m_valueBorderStyle;
-                float           m_valueFloat;
-                int             m_valueInteger;
-                Overflow        m_valueOverflow;
-                std::string *   m_valueString;
-                Vector2f        m_valueVector2f;
-                Vector3f        m_valueVector3f;
-                Vector4f        m_valueVector4f;
-                VerticalAlign   m_valueVerticalAlign;
-                HorizontalAlign m_valueHorizontalAlign;
+                bool                m_valueBoolean;
+                BorderStyle         m_valueBorderStyle;
+                float               m_valueFloat;
+                int                 m_valueInteger;
+                Overflow            m_valueOverflow;
+                std::string *       m_valueString;
+                LinearGradient *    m_valueLinearGradient;
+                Vector2f            m_valueVector2f;
+                Vector3f            m_valueVector3f;
+                Vector4f            m_valueVector4f;
+                VerticalAlign       m_valueVerticalAlign;
+                HorizontalAlign     m_valueHorizontalAlign;
             };
 
         };

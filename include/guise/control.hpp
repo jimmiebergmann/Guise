@@ -54,7 +54,9 @@ namespace Guise
     enum class ControlType
     {
         Custom,
+
         Button,
+        Checkbox,
         Label,
         Plane,
         TextBox,

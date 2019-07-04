@@ -86,6 +86,56 @@ namespace Guise
         }*/
 
 
+        // Linear Gradient implementations.
+        LinearGradient::LinearGradient() :
+            m_angle(0.0f),
+            m_colorA(0.0f, 0.0f, 0.0f, 0.0f),
+            m_colorB(0.0f, 0.0f, 0.0f, 0.0f)
+        { }
+
+        LinearGradient::LinearGradient(const Vector4f & colorA, const Vector4f & colorB) :
+            m_angle(0.0f),
+            m_colorA(colorA),
+            m_colorB(colorB)
+        { }
+
+        LinearGradient::LinearGradient(const float angle, const Vector4f & colorA, const Vector4f & colorB) :
+            m_angle(angle),
+            m_colorA(colorA),
+            m_colorB(colorB)
+        { }
+
+        void LinearGradient::setAngle(const float angle)
+        {
+            m_angle = angle;
+        }
+
+        void LinearGradient::setColorA(const Vector4f & color)
+        {
+            m_colorA = color;
+        }
+
+        void LinearGradient::setColorB(const Vector4f & color)
+        {
+            m_colorB = color;
+        }
+
+        float LinearGradient::getAngle() const
+        {
+            return m_angle;
+        }
+
+        const Vector4f & LinearGradient::getColorA() const
+        {
+            return m_colorA;
+        }
+
+        const Vector4f & LinearGradient::getColorB() const
+        {
+            return m_colorB;
+        }
+
+
         // Property implementations.
         Property::Property(const Property & property) :
             m_dataType(property.m_dataType)
@@ -144,6 +194,10 @@ namespace Guise
             m_dataType(DataType::Integer),
             m_valueInteger(value)
         { }
+        Property::Property(const LinearGradient & value) :
+            m_dataType(DataType::LinearGradient),
+            m_valueLinearGradient(new LinearGradient(value))
+        { }
         Property::Property(const Overflow value) :
             m_dataType(DataType::Overflow),
             m_valueOverflow(value)
@@ -175,10 +229,7 @@ namespace Guise
 
         Property::~Property()
         {
-            if (m_dataType == DataType::String)
-            {
-                delete m_valueString;
-            }
+            deallocate();
         }
 
         Property::DataType Property::getDataType() const
@@ -203,6 +254,15 @@ namespace Guise
         int Property::getInteger() const
         {
             return m_valueInteger;
+        }
+
+        LinearGradient Property::getLinearGradient() const
+        {
+            if (m_dataType != DataType::LinearGradient)
+            {
+                return LinearGradient();
+            }
+            return *m_valueLinearGradient;
         }
 
         Property::Overflow Property::getOverflow() const
@@ -245,117 +305,190 @@ namespace Guise
 
         void Property::setBool(const bool value)
         {
-            m_valueBoolean = value;
+            deallocate();
             m_dataType = DataType::Boolean;
+            m_valueBoolean = value;  
         }
 
         void Property::setBorderStyle(const BorderStyle value)
         {
-            m_valueBorderStyle = value;
+            deallocate();
             m_dataType = DataType::BorderStyle;
+            m_valueBorderStyle = value;           
         }
 
         void Property::setFloat(const float value)
         {
-            m_valueFloat = value;
+            deallocate();
             m_dataType = DataType::Float;
+            m_valueFloat = value;           
+        }
+
+        void Property::setInteger(const int value)
+        {
+            deallocate();
+            m_dataType = DataType::Integer;
+            m_valueInteger = value;
+        }
+
+        void Property::setLinearGradient(const LinearGradient & value)
+        {
+            deallocate();
+            m_dataType = DataType::LinearGradient;
+            m_valueLinearGradient = new LinearGradient(value);
         }
 
         void Property::setOverflow(const Overflow value)
         {
-            m_valueOverflow = value;
+            deallocate();
             m_dataType = DataType::Overflow;
+            m_valueOverflow = value;   
+        }
+
+        void Property::setString(const std::string & value)
+        {
+            deallocate();
+            m_dataType = DataType::String;
+            m_valueString = new std::string(value);
         }
 
         void Property::setVector2f(const Vector2f & value)
         {
-            m_valueVector2f = value;
+            deallocate();
             m_dataType = DataType::Vector2f;
+            m_valueVector2f = value;
         }
 
         void Property::setVector3f(const Vector3f & value)
         {
-            m_valueVector3f = value;
+            deallocate();
             m_dataType = DataType::Vector3f;
+            m_valueVector3f = value;
         }
 
         void Property::setVector4f(const Vector4f & value)
         {
-            m_valueVector4f = value;
+            deallocate();
             m_dataType = DataType::Vector4f;
+            m_valueVector4f = value;
         }
 
         void Property::setHorizontalAlign(const HorizontalAlign value)
         {
-            m_valueHorizontalAlign = value;
+            deallocate();
             m_dataType = DataType::HorizontalAlign;
+            m_valueHorizontalAlign = value;
         }
         void Property::setVerticalAlign(const VerticalAlign value)
         {
-            m_valueVerticalAlign = value;
+            deallocate();
             m_dataType = DataType::VerticalAlign;
+            m_valueVerticalAlign = value;         
         }
 
         Property & Property::operator = (const bool value)
         {
-            m_valueBoolean = value;
+            deallocate();
             m_dataType = DataType::Boolean;
+            m_valueBoolean = value;
             return *this;
         }
 
         Property & Property::operator = (const BorderStyle value)
         {
-            m_valueBorderStyle = value;
+            deallocate();
             m_dataType = DataType::BorderStyle;
+            m_valueBorderStyle = value;
             return *this;
         }
 
         Property & Property::operator = (const float value)
         {
-            m_valueFloat = value;
+            deallocate();
             m_dataType = DataType::Float;
+            m_valueFloat = value;
+            return *this;
+        }
+
+        Property & Property::operator = (const int value)
+        {
+            deallocate();
+            m_dataType = DataType::Integer;
+            m_valueInteger = value;
+            return *this;
+        }
+
+        Property & Property::operator = (const LinearGradient & value)
+        {
+            deallocate();
+            m_dataType = DataType::LinearGradient;
+            m_valueLinearGradient = new LinearGradient(value);
             return *this;
         }
 
         Property & Property::operator = (const Overflow value)
         {
-            m_valueOverflow = value;
+            deallocate();
             m_dataType = DataType::Overflow;
+            m_valueOverflow = value;
+            return *this;
+        }
+
+        Property & Property::operator = (const std::string & value)
+        {
+            deallocate();
+            m_dataType = DataType::String;
+            m_valueString = new std::string(value);
             return *this;
         }
 
         Property & Property::operator = (const Vector2f & value)
         {
-            m_valueVector2f = value;
+            deallocate();
             m_dataType = DataType::Vector2f;
+            m_valueVector2f = value;
             return *this;
         }
 
         Property & Property::operator = (const Vector3f & value)
         {
-            m_valueVector3f = value;
+            deallocate();
             m_dataType = DataType::Vector3f;
+            m_valueVector3f = value;
             return *this;
         }
 
         Property & Property::operator = (const Vector4f & value)
         {
-            m_valueVector4f = value;
+            deallocate();
             m_dataType = DataType::Vector4f;
+            m_valueVector4f = value;
             return *this;
         }
 
         Property & Property::operator = (const HorizontalAlign value)
         {
-            m_valueHorizontalAlign = value;
+            deallocate();
             m_dataType = DataType::HorizontalAlign;
+            m_valueHorizontalAlign = value;
             return *this;
         }
         Property & Property::operator = (const VerticalAlign value)
         {
-            m_valueVerticalAlign = value;
+            deallocate();
             m_dataType = DataType::VerticalAlign;
+            m_valueVerticalAlign = value;
             return *this;
+        }
+
+        void Property::deallocate()
+        {
+            switch (m_dataType)
+            {
+                case DataType::String: delete m_valueString; break;
+                case DataType::LinearGradient: delete m_valueLinearGradient; break;
+                default: break;
+            }
         }
 
 
@@ -439,6 +572,12 @@ namespace Guise
                     { "button:disabled", DefaultStyles::buttonDisabled },
                     { "button:hover", DefaultStyles::buttonHover },
                     { "canvas", DefaultStyles::canvas },
+                    { "checkbox", DefaultStyles::checkbox },
+                    { "checkbox:checked", DefaultStyles::checkboxChecked },
+                    { "checkbox:checkedHover", DefaultStyles::checkboxCheckedHover },
+                    { "checkbox:checkedDisabled", DefaultStyles::checkboxCheckedDisabled },
+                    { "checkbox:hover", DefaultStyles::checkboxHover },
+                    { "checkbox:disabled", DefaultStyles::checkboxDisabled },
                     { "label", DefaultStyles::label },
                     { "plane",  DefaultStyles::plane },
                     { "vertical-grid", DefaultStyles::verticalGrid },

@@ -81,6 +81,38 @@ namespace Guise
                 }
             );
 
+            static const Selector checkbox = Selector(
+                {
+                    { "size",               { Vector2f  { 16.0f, 16.0f } } },
+                    { "background-color",   { Vector4f  { 1.0f, 0.0f, 0.0f, 1.0f } } }
+                }
+            );
+            static const Selector checkboxChecked = Selector(
+                {
+                    { "background-color",{ Vector4f{ 1.0f, 0.0f, 1.0f, 1.0f } } }
+                }
+            );
+            static const Selector checkboxCheckedHover = Selector(
+                {
+                    { "background-color",{ Vector4f{ 1.0f, 1.0f, 0.0f, 1.0f } } }
+                }
+            );
+            static const Selector checkboxCheckedDisabled = Selector(
+                {
+                    { "background-color",{ Vector4f{ 0.2f, 0.2f, 0.2f, 1.0f } } }
+                }
+            );
+            static const Selector checkboxHover = Selector(
+                {
+                    { "background-color",{ Vector4f{ 0.0f, 0.0f, 1.0f, 1.0f } } }
+                }
+            );
+            static const Selector checkboxDisabled = Selector(
+                {
+                    { "background-color",{ Vector4f{ 0.4f, 0.4f, 0.4f, 1.0f } } }
+                }
+            );
+
             static const Selector label = Selector(
                 {
                     { "font-color",         { Vector4f  { 0.0f, 0.0f, 0.0f, 1.0f } } },
