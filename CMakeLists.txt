@@ -104,7 +104,8 @@ set_target_properties( guise
 )
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
-  set_target_properties(guise PROPERTIES LINK_FLAGS "-lgcov --coverage")
+  set_target_properties(guise PROPERTIES LINK_FLAGS "--coverage")
+  target_link_libraries(guise gcov)
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 
@@ -208,7 +209,8 @@ set_target_properties( guise_tests
 )
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
-  set_target_properties(guise_tests PROPERTIES LINK_FLAGS "-lgcov --coverage")
+  set_target_properties(guise_tests PROPERTIES LINK_FLAGS "--coverage")
+  target_link_libraries(guise_tests gcov)
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 #if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
