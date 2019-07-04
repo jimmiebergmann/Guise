@@ -60,7 +60,7 @@ namespace Guise
 
         void setDpi(const int32_t dpi);
 
-        Vector2ui32 getSize();
+        Vector2ui32 getSize() const;
 
         Vector2i32 getPosition() const;    
 

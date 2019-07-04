@@ -109,7 +109,7 @@ namespace Guise
         m_dpi = dpi;
     }
 
-    Vector2ui32 Win32AppWindow::getSize()
+    Vector2ui32 Win32AppWindow::getSize() const
     {
         return m_size;
     }

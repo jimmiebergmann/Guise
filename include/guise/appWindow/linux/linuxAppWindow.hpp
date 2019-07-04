@@ -58,11 +58,11 @@ namespace Guise
 
         void render();
 
-        Vector2ui32 getSize();
-
-        Vector2ui32 getDPiAwareSize();
-
         void setDpi(const int32_t dpi);
+
+        Vector2ui32 getSize() const;
+
+        Vector2i32 getPosition() const;    
 
         int32_t getDpi() const;
 

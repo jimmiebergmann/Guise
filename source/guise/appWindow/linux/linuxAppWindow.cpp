@@ -154,21 +154,20 @@ namespace Guise
         m_renderer->present();
     }
 
-    Vector2ui32 LinuxAppWindow::getSize()
-    {
-        return m_size;
-    }
-
-    Vector2ui32 LinuxAppWindow::getDPiAwareSize()
-    {
-        return m_size * GUISE_DEFAULT_DPI / m_dpi;
-    }
-
-
     void LinuxAppWindow::setDpi(const int32_t dpi)
     {
         m_dpi = dpi;
     }
+
+    Vector2ui32 LinuxAppWindow::getSize() const
+    {
+        return m_size;
+    }
+
+    Vector2i32 LinuxAppWindow::getPosition() const
+    {
+        return {0, 0};
+    }   
 
     int32_t LinuxAppWindow::getDpi() const
     {

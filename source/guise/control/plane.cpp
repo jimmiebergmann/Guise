@@ -77,8 +77,8 @@ namespace Guise
     }
 
     Plane::Plane(Canvas & canvas) :       
-        Style::ParentRectStyle(canvas.getStyleSheet()->getSelector("plane")),
         ControlContainerList(canvas),
+        Style::ParentRectStyle(canvas.getStyleSheet()->getSelector("plane")),       
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_childsBounds(0.0f, 0.0f, 0.0f, 0.0f)
     { }
