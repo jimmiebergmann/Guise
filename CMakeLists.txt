@@ -168,7 +168,6 @@ set_target_properties( guise_tests
 )
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lgcov")
   set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "--coverage")
   #set_target_properties(guise_tests PROPERTIES LINK_FLAGS "-lgcov --coverage")
   target_link_libraries(guise_tests "gcov")

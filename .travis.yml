@@ -25,8 +25,11 @@ before_install:
 
 install: 
   # C++14, even C++17
-  - sudo apt-get install -qq g++-7
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
+  - sudo apt-get install -qq gcc-8 g++-8
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 90
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
+  #- sudo apt-get install -qq g++-7
+  #- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
   #- pip install codecov
 
 
