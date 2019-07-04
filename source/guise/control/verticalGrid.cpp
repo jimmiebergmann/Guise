@@ -108,9 +108,9 @@ namespace Guise
         return m_slotStyle;
     }
 
-    VerticalGrid::VerticalGrid(std::shared_ptr<Canvas> & canvas) :      
-        Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("vertical-grid")),
+    VerticalGrid::VerticalGrid(std::shared_ptr<Canvas> & canvas) :             
         ControlContainerList(*canvas),
+        Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("vertical-grid")),       
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_slotStyle(canvas->getStyleSheet()->getSelector("vertical-grid-slot"))
     { }

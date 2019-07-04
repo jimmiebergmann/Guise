@@ -31,8 +31,9 @@
 #if !defined(GUISE_DISABLE_OPENGL)
 
 #include <GL/gl.h>
+#if defined(GUISE_PLATFORM_WINDOWS)
 #include "guise/renderer/opengl/glext.h"
-
+#endif
 #if defined(GUISE_PLATFORM_LINUX)
 #include <GL/glx.h>
 #include <X11/Xlib.h>

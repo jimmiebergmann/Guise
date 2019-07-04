@@ -166,4 +166,9 @@ set_target_properties( example1
   RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin"
   RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin"
 )
+
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") ## Code coverage
+  set_target_properties(example1 PROPERTIES COMPILE_FLAGS "--coverage")
+endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+
 target_link_libraries(example1 guise ${CMAKE_THREAD_LIBS_INIT})
