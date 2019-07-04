@@ -24,7 +24,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Threads)
 
 
-# Warnings as errors
+# Force warnings as errors
 if(MSVC)
   # Force to always compile with W4
   if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -39,10 +39,10 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 
-if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 
 # Find files
@@ -54,19 +54,29 @@ file(GLOB guise_files ${guise_src} ${guise_inc} ${vendor_src} ${vendor_inc})
 file(GLOB_RECURSE test_files "${CMAKE_SOURCE_DIR}/tests/*.cpp" "${CMAKE_SOURCE_DIR}/tests/*.hpp")
 file(GLOB_RECURSE example1_files "${CMAKE_SOURCE_DIR}/examples/example1.cpp")
 
-# Guise dynamic lib
+
+
+# ==============================================================================================================
+#
+#   Guise dynamic lib
+#
+# ==============================================================================================================
 include_directories ("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/vendor") # Include header files
 add_library(guise SHARED ${guise_files}) # Create shared library
 
 if(ENABLE_OPENGL_RENDERER)
 	if(WIN32)
 		target_link_libraries(guise "opengl32.lib")
-	elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_link_libraries(guise "GL")
   endif()
 else()
 	target_compile_definitions(guise PRIVATE GUISE_DISABLE_OPENGL)
 endif(ENABLE_OPENGL_RENDERER)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_link_libraries(guise "X11")
+endif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")    
 
 createSourceGroups("${guise_src}" "${CMAKE_SOURCE_DIR}/source")
 createSourceGroups("${guise_inc}" "${CMAKE_SOURCE_DIR}/include")
@@ -87,15 +97,21 @@ set_target_properties( guise
   RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin"
   RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin"
 )
-if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") ## Code coverage
-  set_target_properties(guise PROPERTIES COMPILE_FLAGS "--coverage")
-endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  set_target_properties(guise PROPERTIES COMPILE_FLAGS "-lgcov --coverage")
+  target_link_libraries(guise "gcov")
+endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install library headers
 
 
 
-# Guise static lib
+# ==============================================================================================================
+#
+#   Guise static lib
+#
+# ==============================================================================================================
 include_directories ("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/vendor")
 add_library(guise_static STATIC ${guise_files}) # Create shared library
 
@@ -117,10 +133,16 @@ set_target_properties( guise_static
   LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/lib"
   LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/lib"
 )
+
 install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install library headers
 
 
-# Test
+
+# ==============================================================================================================
+#
+#   Test
+#
+# ==============================================================================================================
 SET(gtest_force_shared_crt on CACHE BOOL
   "Use shared (DLL) run-time lib even when Google Test is built as static lib.")
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/googletest/googletest
@@ -135,7 +157,7 @@ link_directories("${CMAKE_SOURCE_DIR}/lib")
 add_executable(guise_tests ${test_files})
 
 if(NOT ENABLE_OPENGL_RENDERER)
-	target_compile_definitions(guise_tests PRIVATE GUISE_DISABLE_OPENGL)
+  target_compile_definitions(guise_tests PRIVATE GUISE_DISABLE_OPENGL)
 endif(NOT ENABLE_OPENGL_RENDERER)
 
 set_target_properties( guise_tests
@@ -144,20 +166,28 @@ set_target_properties( guise_tests
   RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin"
   RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin"
 )
-if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") ## Code coverage
+
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
   set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "--coverage")
-endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  #set_target_properties(guise_tests PROPERTIES LINK_FLAGS "-lgcov --coverage")
+  target_link_libraries(guise_tests "gcov")
+endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 target_link_libraries(guise_tests gtest_main guise)
 
 
-# Example 1
+
+# ==============================================================================================================
+#
+#   Example 1
+#
+# ==============================================================================================================
 include_directories ("${CMAKE_SOURCE_DIR}/include")
 link_directories("${CMAKE_SOURCE_DIR}/lib")
 add_executable(example1 ${example1_files})
 
 if(NOT ENABLE_OPENGL_RENDERER)
-	target_compile_definitions(example1 PRIVATE GUISE_DISABLE_OPENGL)
+  target_compile_definitions(example1 PRIVATE GUISE_DISABLE_OPENGL)
 endif(NOT ENABLE_OPENGL_RENDERER)
 
 set_target_properties( example1
@@ -166,4 +196,11 @@ set_target_properties( example1
   RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/bin"
   RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin"
 )
+
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
+  set_target_properties(example1 PROPERTIES COMPILE_FLAGS "--coverage")
+  #set_target_properties(example1 PROPERTIES LINK_FLAGS "-lgcov --coverage")
+  target_link_libraries(example1 "gcov")
+endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+
 target_link_libraries(example1 guise ${CMAKE_THREAD_LIBS_INIT})

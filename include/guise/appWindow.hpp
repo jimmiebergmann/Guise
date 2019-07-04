@@ -75,7 +75,7 @@ namespace Guise
 
         virtual Vector2i32 getPosition() const = 0;
 
-        virtual Vector2ui32 getSize() = 0;
+        virtual Vector2ui32 getSize() const = 0;
 
     #if defined(GUISE_PLATFORM_WINDOWS)
         virtual ::HDC getWin32HDC() const = 0;

@@ -1,6 +1,7 @@
 ignore:
   - "test"
   - "example"
+  - "vendor"
 coverage:
   range: 50..80
   round: down
