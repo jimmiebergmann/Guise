@@ -99,8 +99,8 @@ set_target_properties( guise
 )
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  set_target_properties(guise PROPERTIES LINK_FLAGS "-lgcov --coverage")
-  #target_link_libraries(guise_tests gcov)
+  set_target_properties(guise PROPERTIES COMPILE_FLAGS "-lgcov --coverage")
+  target_link_libraries(guise "gcov")
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install library headers
@@ -168,9 +168,9 @@ set_target_properties( guise_tests
 )
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
-  #set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "--coverage")
-  set_target_properties(guise_tests PROPERTIES LINK_FLAGS "-lgcov --coverage")
-  #target_link_libraries(guise_tests gcov)
+  set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "--coverage")
+  #set_target_properties(guise_tests PROPERTIES LINK_FLAGS "-lgcov --coverage")
+  target_link_libraries(guise_tests "gcov")
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 target_link_libraries(guise_tests gtest_main guise)
@@ -198,9 +198,9 @@ set_target_properties( example1
 )
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
-  #set_target_properties(example1 PROPERTIES COMPILE_FLAGS "--coverage")
-  set_target_properties(example1 PROPERTIES LINK_FLAGS "-lgcov --coverage")
-  #target_link_libraries(example1 gcov)
+  set_target_properties(example1 PROPERTIES COMPILE_FLAGS "--coverage")
+  #set_target_properties(example1 PROPERTIES LINK_FLAGS "-lgcov --coverage")
+  target_link_libraries(example1 "gcov")
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 target_link_libraries(example1 guise ${CMAKE_THREAD_LIBS_INIT})
