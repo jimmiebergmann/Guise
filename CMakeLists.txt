@@ -68,6 +68,8 @@ file(GLOB guise_files ${guise_src} ${guise_inc} ${vendor_src} ${vendor_inc})
 file(GLOB_RECURSE test_files "${CMAKE_SOURCE_DIR}/tests/*.cpp" "${CMAKE_SOURCE_DIR}/tests/*.hpp")
 file(GLOB_RECURSE example1_files "${CMAKE_SOURCE_DIR}/examples/example1.cpp")
 
+
+if(FALSE)
 # Guise dynamic lib
 include_directories ("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/vendor") # Include header files
 add_library(guise SHARED ${guise_files}) # Create shared library
@@ -133,10 +135,7 @@ message("Guise link flags = ${GUISE_INFO_LINK_FLAGS}")
 message("Guise compile flags = ${GUISE_INFO_COMP_FLAGS}")
 
 install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install library headers
-
-
-
-
+endif(FALSE)
 
 if(FALSE)
 # Guise static lib
@@ -162,10 +161,11 @@ set_target_properties( guise_static
   LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/lib"
 )
 
-if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  set_target_properties(guise_static PROPERTIES COMPILE_FLAGS "-fprofile-arcs -ftest-coverage")
-  message("Code coverage enabled for Guise Static.")
-endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+#if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
+#  set_target_properties(guise PROPERTIES LINK_FLAGS "--coverage")
+#  target_link_libraries(guise gcov)
+#endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+
 
 # Print guise static info.
 get_target_property(GUISE_S_INFO_LINK_LIBS guise_static LINK_LIBRARIES)
@@ -174,11 +174,7 @@ message("Guise static link libs = ${GUISE_S_INFO_LINK_LIBS}")
 message("Guise static compile flags = ${GUISE_S_INFO_COMP_FLAGS}")
 
 install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install library headers
-
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-
 endif(FALSE)
-
 
 
 
@@ -193,13 +189,27 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
   include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-include_directories ("${CMAKE_SOURCE_DIR}/include")
+#include_directories ("${CMAKE_SOURCE_DIR}/include")
+include_directories ("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/vendor") # Include header files
 link_directories("${CMAKE_SOURCE_DIR}/lib")
-add_executable(guise_tests ${test_files})
+add_executable(guise_tests ${test_files} ${guise_files})
 
-if(NOT ENABLE_OPENGL_RENDERER)
-	target_compile_definitions(guise_tests PRIVATE GUISE_DISABLE_OPENGL)
-endif(NOT ENABLE_OPENGL_RENDERER)
+
+if(ENABLE_OPENGL_RENDERER)
+  if(WIN32)
+    target_link_libraries(guise_tests "opengl32.lib")
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_link_libraries(guise_tests "GL")
+    message("Linked OpenGL - GL")
+  endif()
+else()
+  target_compile_definitions(guise_tests PRIVATE GUISE_DISABLE_OPENGL)
+endif(ENABLE_OPENGL_RENDERER)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_link_libraries(guise_tests "X11")
+    message("Linked X11")
+endif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
 set_target_properties( guise_tests
   PROPERTIES
@@ -213,29 +223,8 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
   target_link_libraries(guise_tests gcov)
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
-#if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-#  set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "-fprofile-arcs -ftest-coverage")
-#  set_target_properties(guise_tests PROPERTIES LINK_FLAGS "--coverage")
-#  message("Code coverage enabled for Guise Tests.")
-#endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 
-# OLD CODECOV PROPS ... #if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang") ## Code coverage
-# OLD CODECOV PROPS ... #  set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "--coverage")
-# OLD CODECOV PROPS ... #endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-
-#if(CODE_COVERAGE)
- # set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "-fprofile-arcs -ftest-coverage")
-  #set_target_properties(guise_tests PROPERTIES LINK_FLAGS "-lgcov --coverage")
-#  target_link_libraries(guise_tests gcov)
-#  message("Code coverage enabled for Guise tests.")
-#endif(CODE_COVERAGE)
-
-target_link_libraries(guise_tests gtest_main guise)
-
-#if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-#  target_link_libraries(guise_tests gcov)
-#  message("Code coverage linked for guise_tests.")
-#endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+target_link_libraries(guise_tests gtest_main)
 
 get_target_property(GUISE_TEST_INFO_LINK_LIBS guise_tests LINK_LIBRARIES)
 get_target_property(GUISE_TEST_INFO_COMP_FLAGS guise_tests COMPILE_FLAGS)
