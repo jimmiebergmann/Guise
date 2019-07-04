@@ -99,7 +99,7 @@ set_target_properties( guise
 )
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  set_target_properties(guise PROPERTIES LINK_FLAGS "--coverage")
+  set_target_properties(guise PROPERTIES COMPILE_FLAGS "--coverage")
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 install(FILES ${guise_inc} DESTINATION "${CMAKE_SOURCE_DIR}/include") # Install library headers
@@ -167,27 +167,25 @@ set_target_properties( guise_tests
 )
 
 if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
-  set_target_properties(guise_tests PROPERTIES LINK_FLAGS "--coverage")
+  set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "--coverage")
+  #target_link_libraries(guise_tests gcov)
 endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 target_link_libraries(guise_tests gtest_main guise)
 
 
 
-
-
-
-
-
-if(FALSE)
-
-# Example 1
+# ==============================================================================================================
+#
+#   Example 1
+#
+# ==============================================================================================================
 include_directories ("${CMAKE_SOURCE_DIR}/include")
 link_directories("${CMAKE_SOURCE_DIR}/lib")
 add_executable(example1 ${example1_files})
 
 if(NOT ENABLE_OPENGL_RENDERER)
-	target_compile_definitions(example1 PRIVATE GUISE_DISABLE_OPENGL)
+  target_compile_definitions(example1 PRIVATE GUISE_DISABLE_OPENGL)
 endif(NOT ENABLE_OPENGL_RENDERER)
 
 set_target_properties( example1
@@ -197,26 +195,9 @@ set_target_properties( example1
   RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/bin"
 )
 
-if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  set_target_properties(example1 PROPERTIES COMPILE_FLAGS "-fprofile-arcs -ftest-coverage")
-  message("Code coverage enabled for Example 1.")
-endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU") ## Code coverage
+  set_target_properties(guise_tests PROPERTIES COMPILE_FLAGS "--coverage")
+  #target_link_libraries(guise_tests gcov)
+endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 
 target_link_libraries(example1 guise ${CMAKE_THREAD_LIBS_INIT})
-
-if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-  target_link_libraries(example1 gcov)
-  message("Code coverage linked for example1.")
-endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-
-get_target_property(GUISE_EX_INFO_LINK_LIBS example1 LINK_LIBRARIES)
-get_target_property(GUISE_EX_INFO_COMP_FLAGS example1 COMPILE_FLAGS)
-message("Example1 link libs = ${GUISE_EX_INFO_LINK_LIBS}")
-message("Example1 compile flags = ${GUISE_EX_INFO_COMP_FLAGS}")
-
-endif(FALSE)
-
-#if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-#  target_link_libraries(example1 gcov)
-#  message("Code coverage linked for example1.")
-##endif(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
