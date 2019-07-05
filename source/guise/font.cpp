@@ -51,6 +51,33 @@ namespace Guise
         return static_cast<uint32_t>((index >> 32) & uint64_t(0xFFFFFFFFUL));
     }
 
+
+    struct Glyph
+    {
+
+        Glyph(const FT_UInt index, FT_BitmapGlyph bitmapGlyph, const FT_Pos baseline, const FT_Pos horiAdvance, const FT_Pos horiBearingX, const FT_Pos horiBearingY) :
+            index(index),
+            bitmapGlyph(bitmapGlyph),
+            baseline(baseline),
+            horiAdvance(horiAdvance),
+            horiBearingX(horiBearingX),
+            horiBearingY(horiBearingY)
+        { }
+
+        ~Glyph()
+        {
+            FT_Done_Glyph(reinterpret_cast<FT_Glyph>(bitmapGlyph));
+        }
+
+        FT_UInt         index;
+        FT_BitmapGlyph  bitmapGlyph;
+        FT_Pos          baseline;
+        FT_Pos          horiAdvance;
+        FT_Pos          horiBearingX;
+        FT_Pos          horiBearingY;
+
+    };
+
     // Font implementations.
     struct Font::Impl
     {
@@ -69,34 +96,6 @@ namespace Guise
                 FT_Done_FreeType(library);
             }
         }
-
-
-        struct Glyph
-        {
-
-            Glyph(const FT_UInt index, FT_BitmapGlyph bitmapGlyph, const FT_Pos baseline, const FT_Pos horiAdvance, const FT_Pos horiBearingX, const FT_Pos horiBearingY) :
-                index(index),
-                bitmapGlyph(bitmapGlyph),               
-                baseline(baseline),
-                horiAdvance(horiAdvance),
-                horiBearingX(horiBearingX),
-                horiBearingY(horiBearingY)
-            { }
-
-            ~Glyph()
-            {
-                FT_Done_Glyph(reinterpret_cast<FT_Glyph>(bitmapGlyph));
-            }
-
-            FT_UInt         index;
-            FT_BitmapGlyph  bitmapGlyph;
-            FT_Pos          baseline;
-            FT_Pos          horiAdvance;
-            FT_Pos          horiBearingX;
-            FT_Pos          horiBearingY;
-
-        };
-
 
         Glyph * getGlypth(const wchar_t character, const uint32_t height)
         {
@@ -149,8 +148,6 @@ namespace Guise
         uint32_t                                    currentFontSize;
     };
 
-
-
     std::shared_ptr<Font> Font::create(const std::string & font)
     {
         return std::shared_ptr<Font>(new Font(font));
@@ -166,7 +163,7 @@ namespace Guise
 
     bool Font::createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi,
                             std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline,
-                            std::vector<int32_t> * glyphPositions)
+                            std::vector<int32_t> * glyphPositions, const size_t * reachWidth)
     {
         if (!m_isValid || !text.size())
         {
@@ -187,7 +184,7 @@ namespace Guise
             m_impl->currentFontSize = fontSize;
         }
 
-        std::vector<Impl::Glyph*> glyphs;
+        std::vector<Glyph*> glyphs;
 
         Vector2<FT_Pos> size(0, 0);
 
@@ -252,6 +249,11 @@ namespace Guise
                 }
 
                 penPos += glyph->horiAdvance;
+
+                if (reachWidth && penPos >= static_cast<FT_Pos>(*reachWidth))
+                {
+                    break;
+                }
             }
         }
 
@@ -397,6 +399,214 @@ namespace Guise
     #elif defined(GUISE_PLATFORM_LINUX)
         return "";
     #endif
+    }
+
+
+
+    // Glyph sequence implementations.
+    struct FontSequence::Impl
+    {
+
+        Impl() :
+            size(0, 0)
+        { }
+
+        Impl(std::shared_ptr<Font> & font) :
+            font(font),
+            size(0, 0),
+            baseline(0)
+        { }
+
+        struct GlyphData
+        {
+            Bounds1i32 bounds;
+            Glyph * glyph;
+        };
+
+        std::shared_ptr<Font>   font;
+        std::vector<GlyphData>  sequence;
+        Vector2<size_t>         size;
+        Vector2<FT_Pos>         lowDim;
+        Vector2<FT_Pos>         highDim;
+        size_t                  baseline;
+
+    };
+
+    FontSequence::FontSequence()
+    { }
+
+    FontSequence::FontSequence(std::shared_ptr<Font> & font) :
+        m_impl(std::make_shared<Impl>(font))
+    { }
+
+    bool FontSequence::createSequence(const std::wstring & text, const uint32_t height, const uint32_t dpi)
+    {
+        m_impl->sequence.clear();
+        m_impl->size = {0, 0};
+        m_impl->lowDim = { std::numeric_limits<FT_Pos>::max(), std::numeric_limits<FT_Pos>::max() };
+        m_impl->highDim = { std::numeric_limits<FT_Pos>::min(), std::numeric_limits<FT_Pos>::min() };
+
+        const uint32_t fontSize = height * dpi / GUISE_DEFAULT_DPI;
+
+        if (!text.size() || !fontSize || !m_impl->font || !m_impl->font->isValid())
+        {
+            return false;
+        }
+
+        const auto fontImpl = m_impl->font->m_impl;
+        FT_Error error = 0;
+
+        if (fontSize != fontImpl->currentFontSize)
+        {
+            if ((error = FT_Set_Char_Size(fontImpl->face, 0, height * 64, dpi, dpi)) != 0)
+            {
+                //  "Can not setup the font size, FreeType error: %i\n", FTError);
+                return false;
+            }
+
+            fontImpl->currentFontSize = fontSize;
+        }
+      
+        
+        FT_Pos penPos = 0;
+        FT_Pos prevPenPos = 0;
+        const bool hasKerning = FT_HAS_KERNING(fontImpl->face);
+        FT_UInt prevIndex = 0;
+
+
+        // Calcualte text bounding box and pen start position.
+        for (size_t i = 0; i < text.size(); i++)
+        {
+            auto glyph = fontImpl->getGlypth(text[i], fontSize);
+            if (glyph)
+            {
+                //glyphs.push_back(glyph);
+                auto & bitmap = glyph->bitmapGlyph->bitmap;
+
+                // Move pen if font has kerning.
+                if (hasKerning && prevIndex)
+                {
+                    FT_Vector  delta;
+                    FT_Get_Kerning(fontImpl->face, prevIndex, glyph->index, FT_KERNING_DEFAULT, &delta);
+
+                    prevPenPos += delta.x >> 6;
+                    penPos = prevPenPos;
+                }
+                prevIndex = glyph->index;
+
+
+                // Calc X dimensions.
+                FT_Pos lowX = penPos + glyph->horiBearingX;
+
+                if (lowX < m_impl->lowDim.x)
+                {
+                    m_impl->lowDim.x = lowX;
+                }
+
+                FT_Pos highX = penPos + glyph->horiBearingX + bitmap.width;
+                if (highX > m_impl->highDim.x)
+                {
+                    m_impl->highDim.x = highX;
+                }
+
+                // Calc Y dimensions.
+                FT_Pos lowY = glyph->horiBearingY - bitmap.rows;
+                if (lowY < m_impl->lowDim.y)
+                {
+                    m_impl->lowDim.y = lowY;
+                }
+
+                FT_Pos highY = glyph->horiBearingY;
+                if (highY > m_impl->highDim.y)
+                {
+                    m_impl->highDim.y = highY;
+                }
+
+                penPos += glyph->horiAdvance;
+
+                m_impl->sequence.push_back({ {prevPenPos, penPos - prevPenPos }, glyph });
+
+                prevPenPos = penPos;
+            }
+        }
+
+        if (m_impl->lowDim.x > m_impl->highDim.x || m_impl->lowDim.y > m_impl->highDim.y)
+        {
+            m_impl->sequence.clear();
+            return false;
+        }
+
+        m_impl->baseline = m_impl->lowDim.y > 0 ? 0 : static_cast<size_t>(std::abs(m_impl->lowDim.y));
+
+        m_impl->size.x = static_cast<size_t>(m_impl->highDim.x - m_impl->lowDim.x);
+        m_impl->size.y = static_cast<size_t>(m_impl->highDim.y - m_impl->lowDim.y);
+
+        return true;
+    }
+
+    bool FontSequence::createBitmapRgba(std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions)
+    {
+        const auto fontImpl = m_impl->font->m_impl;
+        const size_t bufferSize = m_impl->size.x * m_impl->size.y * 4;
+
+        if (!bufferSize)
+        {
+            return false;
+        }
+
+        dimensions = m_impl->size;
+        buffer = std::make_unique<uint8_t[]>(bufferSize);
+        uint8_t * glyphBuffer = buffer.get();
+        memset(glyphBuffer, 0, bufferSize);
+
+        // Render glyphs.
+        for (auto it = m_impl->sequence.begin(); it != m_impl->sequence.end(); it++)
+        {
+            auto currSeq = (*it);
+            auto glyph = currSeq.glyph;
+            auto & bitmap = glyph->bitmapGlyph->bitmap;
+            auto bitmapBuffer = bitmap.buffer;
+
+            auto penPos = currSeq.bounds.position - m_impl->lowDim.x;
+
+            for (int y = 0; y < bitmap.rows; y++)
+            {
+                int intY = bitmap.rows - 1 - y;
+
+                for (int x = 0; x < bitmap.width; x++)
+                {
+                    const int glyphIndex = ((y - (glyph->baseline + m_impl->lowDim.y)) * m_impl->size.x * 4) + ((x + penPos + glyph->horiBearingX) * 4);
+                    const int bitmapIndex = (intY * bitmap.width) + x;
+
+                    glyphBuffer[glyphIndex] = 255;
+                    glyphBuffer[glyphIndex + 1] = 255;
+                    glyphBuffer[glyphIndex + 2] = 255;
+                    glyphBuffer[glyphIndex + 3] = std::max(bitmapBuffer[bitmapIndex], glyphBuffer[glyphIndex + 3]);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    size_t FontSequence::getBaseline() const
+    {
+        return m_impl->baseline;
+    }
+
+    Bounds1i32 FontSequence::getBounds(const size_t index) const
+    {
+        return m_impl->sequence[index].bounds;
+    }
+
+    size_t FontSequence::getCount() const
+    {
+        return m_impl->sequence.size();
+    }
+
+    size_t FontSequence::intersect(const Vector2f & /*point*/) const
+    {
+        return 0;
     }
 
 

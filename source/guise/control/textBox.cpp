@@ -120,7 +120,7 @@ namespace Guise
                     m_cursorIndex++;
                     m_cursorSelectFromIndex = m_cursorIndex;
 
-                    m_changed = true;
+                    m_changedText = true;
                     onChange(m_text);
                     m_cursorBlinkTimer = std::chrono::system_clock::now();
                 }
@@ -170,7 +170,7 @@ namespace Guise
                     {
                         if (eraseSelected())
                         {
-                            m_changed = true;
+                            m_changedText = true;
                             m_cursorBlinkTimer = std::chrono::system_clock::now();
                         }
                         else if (m_cursorIndex && m_text.size())
@@ -179,7 +179,7 @@ namespace Guise
                             m_cursorIndex--;
                             m_cursorSelectFromIndex = m_cursorIndex;
 
-                            m_changed = true;
+                            m_changedText = true;
                             onChange(m_text);
                             m_cursorBlinkTimer = std::chrono::system_clock::now();
                         }
@@ -189,14 +189,14 @@ namespace Guise
                     {
                         if (eraseSelected())
                         {
-                            m_changed = true;
+                            m_changedText = true;
                             m_cursorBlinkTimer = std::chrono::system_clock::now();
                         }
                         else if (m_text.size() && m_cursorIndex < m_text.size())
                         {
                             m_text.erase(m_text.begin() + m_cursorIndex);
 
-                            m_changed = true;
+                            m_changedText = true;
                             onChange(m_text);
                             m_cursorBlinkTimer = std::chrono::system_clock::now();
                         }
@@ -210,7 +210,7 @@ namespace Guise
                             if (cutText.size() && Platform::setClipboardText(cutText))
                             {
                                 eraseSelected();
-                                m_changed = true;
+                                m_changedText = true;
                                 onChange(m_text);
                                 m_cursorBlinkTimer = std::chrono::system_clock::now();
                             }
@@ -241,7 +241,7 @@ namespace Guise
                                 m_text.insert(m_text.begin() + m_cursorIndex, clipboard.begin(), clipboard.end());
                                 m_cursorIndex += clipboard.size();
                                 m_cursorSelectFromIndex = m_cursorIndex;
-                                m_changed = true;
+                                m_changedText = true;
                                 onChange(m_text);
                                 m_cursorBlinkTimer = std::chrono::system_clock::now();
                             }
@@ -323,7 +323,12 @@ namespace Guise
 
     void TextBox::update(const Bounds2f & canvasBound)
     {
-        m_renderBounds = calcRenderBounds(canvasBound, getPosition(), getSize(), getOverflow());
+        auto renderBounds = calcRenderBounds(canvasBound, getPosition(), getSize(), getOverflow());
+        if (renderBounds != m_renderBounds)
+        {
+            m_renderBounds = renderBounds;
+            m_changed = true;
+        }
         getCanvas().queueControlRendering(this);
     }
 
@@ -331,38 +336,37 @@ namespace Guise
     {
         const float scale = m_canvas.getScale();
 
+        if (m_changedText)
+        {
+            m_changedText = false;
+            m_fontSequence.createSequence(m_text, m_textStyle.getFontSize(), m_dpi);
+            m_changed = true;
+        }
+
         if (m_changed)
         {
             m_changed = false;
 
-            if (!m_text.size())
+            std::unique_ptr<uint8_t[]> data;
+            Vector2<size_t> dimensions = { 0, 0 };
+
+            if (m_fontSequence.createBitmapRgba(data, dimensions))
             {
-                m_cursorIndex = 0;
-                m_cursorSelectFromIndex = 0;
-                m_textTexture.reset();
+                m_baseline = static_cast<float>(m_fontSequence.getBaseline());
+                m_baseHeight = static_cast<float>(m_textStyle.getFontSize()) * scale;
+
+                if (!m_textTexture)
+                {
+                    m_textTexture = renderer.createTexture();
+                }
+
+                m_textTexture->load(data.get(), Texture::PixelFormat::RGBA8, dimensions);
             }
             else
             {
-                if (m_font)
-                {
-                    std::unique_ptr<uint8_t[]> data;
-                    Vector2<size_t> dimensions = { 0, 0 };
-
-                    size_t baseline = 0;
-                    m_charPositions.clear();
-                    if (m_font->createBitmap(m_text, m_textStyle.getFontSize(), m_dpi, data, dimensions, baseline, &m_charPositions))
-                    {
-                        m_baseline = static_cast<float>(baseline);
-                        m_baseHeight = static_cast<float>(m_textStyle.getFontSize()) * scale;
-
-                        if (!m_textTexture)
-                        {
-                            m_textTexture = renderer.createTexture();
-                        }
-
-                        m_textTexture->load(data.get(), Texture::PixelFormat::RGBA8, dimensions);
-                    }
-                }
+                //m_cursorIndex = 0;
+                //m_cursorSelectFromIndex = 0;
+                m_textTexture.reset();
             }
         }
 
@@ -414,16 +418,16 @@ namespace Guise
             auto endTime = std::chrono::system_clock::now();
             std::chrono::duration<double> duration = endTime - m_cursorBlinkTimer;
 
-            bool showCursor = (static_cast<int>(duration.count() * 1000.0f) % 1000) < 500;          
+           // bool showCursor = (static_cast<int>(duration.count() * 1000.0f) % 1000) < 500;          
 
-            if (!isSelected && showCursor)
+            /*if (!isSelected && showCursor)
             {
                 float cursorPosition = static_cast<float>(m_charPositions.size()) ? static_cast<float>(m_charPositions[m_cursorIndex]) : 0.0f;
                 cursorPosition += m_textBounds.position.x;
 
                 Bounds2f cursorBounds = { { cursorPosition, m_renderBounds.position.y },{ 1.0f, m_renderBounds.size.y } };
                 renderer.drawQuad(cursorBounds, m_textStyle.getFontColor());
-            }         
+            }     */    
         }   
     }
 
@@ -436,15 +440,30 @@ namespace Guise
     {
         return m_renderBounds;
     }
+    
+    TextBox::~TextBox()
+    {
+        getCanvas().unregisterDpiSensitive(this);
+    }
 
     Style::FontStyle & TextBox::getTextStyle()
     {
         return m_textStyle;
     }
 
-    TextBox::~TextBox()
+    const std::wstring & TextBox::getText() const
     {
-        getCanvas().unregisterDpiSensitive(this);
+        return m_text;
+    }
+
+    void TextBox::setText(const std::wstring & text)
+    {
+        if (text != m_text)
+        {
+            m_text = text;
+            m_changedText = true;
+            onChange(m_text);
+        }
     }
 
     TextBox::TextBox(std::shared_ptr<Canvas> & canvas) :       
@@ -455,6 +474,7 @@ namespace Guise
         m_baseline(0.0f),
         m_baseHeight(0.0f),
         m_changed(true),
+        m_changedText(false),
         m_cursorIndex(0),
         m_cursorSelectFromIndex(0),
         m_dpi(canvas->getDpi()),
@@ -467,6 +487,7 @@ namespace Guise
         {
             m_textStyle = { textStyle };
             m_font = FontLibrary::get(m_textStyle.getFontFamily());
+            m_fontSequence = FontSequence(m_font);
         }
     }
 

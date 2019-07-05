@@ -56,11 +56,15 @@ namespace Guise
 
         virtual Bounds2f getSelectBounds() const;
 
+        ~TextBox();
+
         Signal<const std::wstring &> onChange;
 
         Style::FontStyle & getTextStyle();
 
-        ~TextBox();
+        const std::wstring & getText() const;
+
+        void setText(const std::wstring & text);
 
     private:
 
@@ -80,7 +84,8 @@ namespace Guise
         bool                                    m_active;
         float                                   m_baseline;
         float                                   m_baseHeight;
-        bool                                    m_changed; 
+        bool                                    m_changed;
+        bool                                    m_changedText;
         std::chrono::system_clock::time_point   m_cursorBlinkTimer;
         size_t                                  m_cursorIndex;
         size_t                                  m_cursorSelectFromIndex;
@@ -88,6 +93,7 @@ namespace Guise
         bool                                    m_mousePressed;
         int32_t                                 m_dpi;
         std::shared_ptr<Font>                   m_font;
+        FontSequence                            m_fontSequence;
         Bounds2f                                m_renderBounds;
         Bounds2f                                m_textBounds;
         std::wstring                            m_text;

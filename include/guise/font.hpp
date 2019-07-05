@@ -27,12 +27,15 @@
 #define GUISE_FONT_HPP
 
 #include "guise/build.hpp"
+#include "guise/math/bounds.hpp"
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace Guise
 {
+
+    class FontSequence;
 
     class GUISE_API Font
     {
@@ -51,7 +54,7 @@ namespace Guise
 
         bool createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi,
             std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline,
-            std::vector<int32_t> * glyphPositions = nullptr);
+            std::vector<int32_t> * glyphPositions = nullptr, const size_t * reachWidth = nullptr);
 
     private:
 
@@ -62,11 +65,38 @@ namespace Guise
 
         std::string getFontPath(const std::string & font) const;
 
-        struct Impl;
+        friend class FontSequence;
 
         bool                    m_isValid;
+        struct Impl;
         std::shared_ptr<Impl>   m_impl;
 
+    };
+
+    class GUISE_API FontSequence
+    {
+
+    public:
+
+        FontSequence();
+        FontSequence(std::shared_ptr<Font> & font);
+
+        bool createSequence(const std::wstring & text, const uint32_t height, const uint32_t dpi);
+
+        bool createBitmapRgba(std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions);
+
+        size_t getBaseline() const;
+
+        Bounds1i32 getBounds(const size_t index) const;
+
+        size_t getCount() const;
+
+        size_t intersect(const Vector2f & point) const;
+
+    private:
+
+        struct Impl;
+        std::shared_ptr<Impl>   m_impl;
 
     };
 

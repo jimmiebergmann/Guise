@@ -61,15 +61,32 @@ namespace Guise
 
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color)
     {
-        Bounds2f newBounds =
+        Bounds2f newCoordBounds =
         {
             { std::ceil(bounds.position.x), std::ceil(bounds.position.y) },
             { std::ceil(bounds.size.x), std::ceil(bounds.size.y) }
         };
+
+        Vector2f newTexCoords[2] = { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
+
         if (m_maskStack.size())
         {
-            newBounds = Bounds2f::clamp(newBounds, m_maskStack.top());            
+            Vector2f boundsVec[2] =
+            {
+                newCoordBounds.position, newCoordBounds.position + newCoordBounds.size
+            };
+
+            newCoordBounds = Bounds2f::clamp(newCoordBounds, m_maskStack.top());   
+
+            Vector2f maskVec[2] =
+            {
+                newCoordBounds.position, newCoordBounds.position + newCoordBounds.size
+            };
+
+            newTexCoords[0] = Vector2f::max((maskVec[0] - boundsVec[0]) / (boundsVec[1] - boundsVec[0]), { 0.0f, 0.0f });           
+            newTexCoords[1] = Vector2f::min((maskVec[1] - boundsVec[0]) / (boundsVec[1] - boundsVec[0]), { 1.0f, 1.0f });
         }
+
 
         glEnable(GL_TEXTURE_2D);
         texture->bind(0);
@@ -77,17 +94,17 @@ namespace Guise
         glBegin(GL_QUADS);
         glColor4f(color.x, color.y, color.z, color.w);
 
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex2f(newBounds.position.x, newBounds.position.y);
+        glTexCoord2f(newTexCoords[0].x, newTexCoords[1].y);
+        glVertex2f(newCoordBounds.position.x, newCoordBounds.position.y);
 
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex2f(newBounds.position.x + newBounds.size.x, newBounds.position.y);
+        glTexCoord2f(newTexCoords[1].x, newTexCoords[1].y);
+        glVertex2f(newCoordBounds.position.x + newCoordBounds.size.x, newCoordBounds.position.y);
 
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex2f(newBounds.position.x + newBounds.size.x, newBounds.position.y + newBounds.size.y);
+        glTexCoord2f(newTexCoords[1].x, newTexCoords[0].y);
+        glVertex2f(newCoordBounds.position.x + newCoordBounds.size.x, newCoordBounds.position.y + newCoordBounds.size.y);
 
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex2f(newBounds.position.x, newBounds.position.y + newBounds.size.y);
+        glTexCoord2f(newTexCoords[0].x, newTexCoords[0].y);
+        glVertex2f(newCoordBounds.position.x, newCoordBounds.position.y + newCoordBounds.size.y);
 
         glEnd();
 
@@ -96,8 +113,6 @@ namespace Guise
 
     void OpenGLRenderer::drawBorder(const Bounds2f & bounds, const float width, const Vector4f & color)
     {
-        glDisable(GL_TEXTURE_2D);
-
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
 
