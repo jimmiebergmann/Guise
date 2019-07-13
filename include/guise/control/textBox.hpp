@@ -77,19 +77,19 @@ namespace Guise
 
         bool eraseSelected();
 
-        std::wstring getSelected();
+        std::wstring getSelected() const;
+
+        float getCursorPosition(const size_t index) const;
 
         bool intersectText(const float point, size_t & index);
+        bool intersectTextInterpolated(const float point, size_t & index);
 
         bool                                    m_active;
-        float                                   m_baseline;
-        float                                   m_baseHeight;
         bool                                    m_changed;
         bool                                    m_changedText;
         std::chrono::system_clock::time_point   m_cursorBlinkTimer;
         size_t                                  m_cursorIndex;
-        size_t                                  m_cursorSelectFromIndex;
-        std::vector<int32_t>                    m_charPositions;
+        size_t                                  m_cursorSelectIndex;
         bool                                    m_mousePressed;
         int32_t                                 m_dpi;
         std::shared_ptr<Font>                   m_font;

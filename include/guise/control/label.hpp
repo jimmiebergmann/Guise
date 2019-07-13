@@ -72,8 +72,10 @@ namespace Guise
         void onNewDpi(const int32_t dpi);
 
         bool                        m_changed;
+        bool                        m_changedText;
         int32_t                     m_dpi;
         std::shared_ptr<Font>       m_font;
+        FontSequence                m_fontSequence;
         std::unique_ptr<uint8_t[]>  m_loadData;
         Vector2<size_t>             m_loadDimensions;
         Bounds2f                    m_renderBounds;

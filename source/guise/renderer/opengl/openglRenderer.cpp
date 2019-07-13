@@ -29,7 +29,6 @@
 
 #include "guise/renderer/opengl/openglTexture.hpp"
 #include "guise/appWindow.hpp"
-#include <iostream>
 
 namespace Guise
 {
@@ -337,7 +336,6 @@ namespace Guise
 
         int fbElements = 0;
         ::GLXFBConfig *fbc = glXChooseFBConfig(display, screen, 0, &fbElements);
-        std::cout << fbc << std::endl;
 
         ::XVisualInfo * visualInfo = NULL;
         if( (visualInfo = glXChooseVisual(m_display, 0, attribs) ) == NULL )

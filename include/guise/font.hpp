@@ -52,9 +52,8 @@ namespace Guise
 
         bool isValid() const;
 
-        bool createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi,
-            std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline,
-            std::vector<int32_t> * glyphPositions = nullptr, const size_t * reachWidth = nullptr);
+        float getVerticalMax() const;
+        float getVerticalMin() const;
 
     private:
 
@@ -68,6 +67,8 @@ namespace Guise
         friend class FontSequence;
 
         bool                    m_isValid;
+        float                   m_verticalMax;
+        float                   m_verticalMin;
         struct Impl;
         std::shared_ptr<Impl>   m_impl;
 
@@ -81,19 +82,29 @@ namespace Guise
         FontSequence();
         FontSequence(std::shared_ptr<Font> & font);
 
+        float calcVerticalPosition(const float height) const;
+
         bool createSequence(const std::wstring & text, const uint32_t height, const uint32_t dpi);
 
-        bool createBitmapRgba(std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions);
+        bool createBitmapaAlpha(std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions,
+                                const size_t from = 0, const size_t to = std::numeric_limits<size_t>::max());
+        bool createBitmapRgba(std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions,
+                              const size_t from = 0, const size_t to = std::numeric_limits<size_t>::max());
+
+        bool findIndex(const int32_t width, const size_t from, size_t & to) const;
 
         size_t getBaseline() const;
 
-        Bounds1i32 getBounds(const size_t index) const;
+        Bounds1i32 getHorizontalBounds(const size_t index) const;
 
         size_t getCount() const;
 
         size_t intersect(const Vector2f & point) const;
 
+
     private:
+
+       
 
         struct Impl;
         std::shared_ptr<Impl>   m_impl;

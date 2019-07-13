@@ -29,7 +29,6 @@
 
 #include <shellscalingapi.h>
 #include <algorithm>
-#include <iostream>
 
 namespace Guise
 {
@@ -390,13 +389,13 @@ namespace Guise
                 m_input.pushEvent({Input::EventType::Texting, static_cast<wchar_t>(wParam)});
                 break;        
             /*case WM_ACTIVATE:
-                std::cout << "Active." << std::endl;
+                
                 break;
             case WM_SETFOCUS:
-                std::cout << "Set focus." << std::endl;
+                
                 break;
             case WM_KILLFOCUS:
-                std::cout << "Kill focus." << std::endl;
+                
                 break;*/
         
             // Mouse events.

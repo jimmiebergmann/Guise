@@ -28,7 +28,6 @@
 #if defined(GUISE_PLATFORM_LINUX)
 
 #include <algorithm>
-#include <iostream>
 
 namespace Guise
 {
@@ -115,9 +114,6 @@ namespace Guise
                     break;
                 default: break;
             }
-
-
-            //std::cout << "X11 event: " << e.type << std::endl;
         }
 
         /*MSG message;

@@ -26,7 +26,7 @@
 #include "guise/control/textBox.hpp"
 #include "guise/canvas.hpp"
 #include "guise/platform.hpp"
-#include <iostream>
+#include <locale>
 
 namespace Guise
 {
@@ -45,7 +45,9 @@ namespace Guise
     bool TextBox::handleInputEvent(const Input::Event & e)
     {
         const Input & input = m_canvas.getInput();
-        const bool shiftPressed = input.getKeyState(Input::Key::ShiftLeft) || input.getKeyState(Input::Key::ShiftRight);
+        const bool isShiftPressed = input.getKeyState(Input::Key::ShiftLeft) || input.getKeyState(Input::Key::ShiftRight);
+        const bool isControlPressed = input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight);
+        const bool isSelected = m_cursorIndex != m_cursorSelectIndex;
 
         switch (e.type)
         {
@@ -57,20 +59,20 @@ namespace Guise
                 }
 
                 size_t index = 0;
-                if (intersectText(e.position.x, index))
+                if (intersectTextInterpolated(e.position.x, index))
                 {                  
-                    if (!shiftPressed)
+                    if (!isShiftPressed)
                     {
                         m_cursorIndex = index;
                     }
                      
-                    m_cursorSelectFromIndex = index;                    
+                    m_cursorSelectIndex = index;                    
                     m_cursorBlinkTimer = std::chrono::system_clock::now();
                 }
                 else
                 {
                     m_cursorIndex = 0;
-                    m_cursorSelectFromIndex = 0;
+                    m_cursorSelectIndex = 0;
                 }
 
                 m_mousePressed = true;
@@ -88,24 +90,23 @@ namespace Guise
             break;
             case Input::EventType::MouseMove:
             {
-               // std::cout << "Move: " << e.position.x << " " << e.position.y << std::endl;
                 if (m_mousePressed)
                 {
                     size_t index = 0;
-                    if (intersectText(e.position.x, index))
+                    if (intersectTextInterpolated(e.position.x, index))
                     {
                         /*if (!shiftPressed)
                         {
                             m_cursorIndex = index;
                         }*/
-
-                        m_cursorSelectFromIndex = index;
+                
+                        m_cursorSelectIndex = index;
                         m_cursorBlinkTimer = std::chrono::system_clock::now();
                     }
                     else
                     {
                         m_cursorIndex = 0;
-                        m_cursorSelectFromIndex = 0;
+                        m_cursorSelectIndex = 0;
                     }
                 }
             }
@@ -118,7 +119,7 @@ namespace Guise
 
                     m_text.insert(m_text.begin() + m_cursorIndex, e.character);
                     m_cursorIndex++;
-                    m_cursorSelectFromIndex = m_cursorIndex;
+                    m_cursorSelectIndex = m_cursorIndex;
 
                     m_changedText = true;
                     onChange(m_text);
@@ -132,30 +133,25 @@ namespace Guise
                 {
                     case Input::Key::Home:
                     {
-                        if (m_charPositions.size())
+                        m_cursorIndex = 0;
+                        if (!isShiftPressed)
                         {
-                            m_cursorIndex = 0;
-                            if (!shiftPressed)
-                            {
-                                m_cursorSelectFromIndex = m_cursorIndex;
-                            }
-
-                            m_cursorBlinkTimer = std::chrono::system_clock::now();
+                            m_cursorSelectIndex = m_cursorIndex;
                         }
+
+                        m_cursorBlinkTimer = std::chrono::system_clock::now();
+  
                     }
                     break;
                     case Input::Key::End:
                     {
-                        if (m_charPositions.size())
+                        m_cursorIndex = m_fontSequence.getCount();
+                        if (!isShiftPressed)
                         {
-                            m_cursorIndex = m_charPositions.size() - 1;
-                            if (!shiftPressed)
-                            {
-                                m_cursorSelectFromIndex = m_cursorIndex;
-                            }
-
-                            m_cursorBlinkTimer = std::chrono::system_clock::now();
+                            m_cursorSelectIndex = m_cursorIndex;
                         }
+
+                        m_cursorBlinkTimer = std::chrono::system_clock::now();
                     }
                     break;
                     default: break;
@@ -177,7 +173,7 @@ namespace Guise
                         {
                             m_text.erase(m_text.begin() + (m_cursorIndex - 1));
                             m_cursorIndex--;
-                            m_cursorSelectFromIndex = m_cursorIndex;
+                            m_cursorSelectIndex = m_cursorIndex;
 
                             m_changedText = true;
                             onChange(m_text);
@@ -204,7 +200,7 @@ namespace Guise
                     break;
                     case Input::Key::X:
                     {
-                        if (input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight))
+                        if (isControlPressed)
                         {
                             auto cutText = getSelected();
                             if (cutText.size() && Platform::setClipboardText(cutText))
@@ -214,24 +210,24 @@ namespace Guise
                                 onChange(m_text);
                                 m_cursorBlinkTimer = std::chrono::system_clock::now();
                             }
-                        }                       
+                        }                 
                     }
                     break;
                     case Input::Key::C:
                     {
-                        if (input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight))
+                        if (isControlPressed)
                         {
                             auto copyText = getSelected();
                             if (copyText.size())
                             {
                                 Platform::setClipboardText(copyText);
                             }
-                        }        
+                        }  
                     }
                     break;
                     case Input::Key::V:
                     {
-                        if (input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight))
+                        if (isControlPressed)
                         {
                             eraseSelected();
 
@@ -240,7 +236,7 @@ namespace Guise
                             {
                                 m_text.insert(m_text.begin() + m_cursorIndex, clipboard.begin(), clipboard.end());
                                 m_cursorIndex += clipboard.size();
-                                m_cursorSelectFromIndex = m_cursorIndex;
+                                m_cursorSelectIndex = m_cursorIndex;
                                 m_changedText = true;
                                 onChange(m_text);
                                 m_cursorBlinkTimer = std::chrono::system_clock::now();
@@ -252,10 +248,10 @@ namespace Guise
                     break;
                     case Input::Key::A:
                     {
-                        if (input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight))
+                        if (isControlPressed)
                         {
                             m_cursorIndex = 0;
-                            m_cursorSelectFromIndex = m_charPositions.size() ? m_charPositions.size() - 1 : 0;
+                            m_cursorSelectIndex = m_fontSequence.getCount() ? m_fontSequence.getCount() : 0;
                         }
                     }
                     break;
@@ -263,22 +259,21 @@ namespace Guise
                     {
                         if (m_cursorIndex > 0)
                         {
-                            if (shiftPressed)
+                            if (isShiftPressed)
                             {
                                 m_cursorIndex--;
                             }
                             else
                             {
-                                if (m_cursorSelectFromIndex != m_cursorIndex)
+                                if (isSelected)
                                 {
-                                    m_cursorIndex = std::min(m_cursorIndex, m_cursorSelectFromIndex);
-                                    m_cursorSelectFromIndex = m_cursorIndex;
+                                    m_cursorIndex = std::min(m_cursorIndex, m_cursorSelectIndex);
                                 }
                                 else
                                 {
                                     m_cursorIndex--;
-                                    m_cursorSelectFromIndex = m_cursorIndex;
                                 }
+                                m_cursorSelectIndex = m_cursorIndex;
                             }
 
                             m_cursorBlinkTimer = std::chrono::system_clock::now();
@@ -287,24 +282,24 @@ namespace Guise
                     break;
                     case Input::Key::Right:
                     {
-                        if (m_charPositions.size())
+                        if (m_cursorIndex < m_fontSequence.getCount())
                         {
-                            if (shiftPressed)
+                            if (isShiftPressed)
                             {
-                                m_cursorIndex = std::min(m_cursorIndex + 1, m_charPositions.size() - 1);
+                                m_cursorIndex++;
                             }
                             else
                             {
-                                if (m_cursorSelectFromIndex != m_cursorIndex)
+                                if (isSelected)
                                 {
-                                    m_cursorIndex = std::max(m_cursorIndex, m_cursorSelectFromIndex);
-                                    m_cursorSelectFromIndex = m_cursorIndex;
+                                    m_cursorIndex = std::max(m_cursorIndex, m_cursorSelectIndex);
                                 }
                                 else
                                 {
-                                    m_cursorIndex = std::min(m_cursorIndex + 1, m_charPositions.size() - 1);
-                                    m_cursorSelectFromIndex = m_cursorIndex;
-                                }    
+                                    m_cursorIndex++;
+                                }
+
+                                m_cursorSelectIndex = m_cursorIndex;
                             }
 
                             m_cursorBlinkTimer = std::chrono::system_clock::now();
@@ -350,11 +345,8 @@ namespace Guise
             std::unique_ptr<uint8_t[]> data;
             Vector2<size_t> dimensions = { 0, 0 };
 
-            if (m_fontSequence.createBitmapRgba(data, dimensions))
+            if (m_fontSequence.createBitmapRgba(data, dimensions, 0, m_text.size()))
             {
-                m_baseline = static_cast<float>(m_fontSequence.getBaseline());
-                m_baseHeight = static_cast<float>(m_textStyle.getFontSize()) * scale;
-
                 if (!m_textTexture)
                 {
                     m_textTexture = renderer.createTexture();
@@ -364,8 +356,6 @@ namespace Guise
             }
             else
             {
-                //m_cursorIndex = 0;
-                //m_cursorSelectFromIndex = 0;
                 m_textTexture.reset();
             }
         }
@@ -379,33 +369,31 @@ namespace Guise
             renderer.drawBorder(m_renderBounds, borderWidth, getBorderColor());
         }
 
-        const bool isSelected = m_cursorIndex != m_cursorSelectFromIndex;
         m_textBounds = { { m_renderBounds.position.x + getPaddingLow().x, m_renderBounds.position.y }, { 0.0f, 0.0f } };
         if (m_textTexture)
         {     
             renderer.pushMask(m_renderBounds);
-
+          
             // Render text     
-            m_textBounds.size = m_textTexture->getDimensions();
-            m_textBounds.position.y += m_renderBounds.size.y - ((m_renderBounds.size.y - m_baseHeight) / 2.0f) + m_baseline - m_textBounds.size.y;
+            m_textBounds.size = m_textTexture->getDimensions();         
+            m_textBounds.position.y += m_fontSequence.calcVerticalPosition(m_renderBounds.size.y);
             renderer.drawQuad(m_textBounds, m_textTexture, m_textStyle.getFontColor());
 
-            // Render select background.
-            if (isSelected && m_cursorIndex < m_charPositions.size() && m_cursorSelectFromIndex < m_charPositions.size())
+            const bool isSelected = m_cursorIndex != m_cursorSelectIndex;
+            if (isSelected)
             {
-                size_t index1 = m_cursorIndex;
-                size_t index2 = m_cursorSelectFromIndex;
-                if (index1 > index2)
+                float selectLow = getCursorPosition(m_cursorSelectIndex);
+                float selectHigh = getCursorPosition(m_cursorIndex);
+                if (selectLow > selectHigh)
                 {
-                    std::swap(index1, index2);
+                    std::swap(selectLow, selectHigh);
                 }
 
                 Bounds2f selectBounds =
                 {
-                    { static_cast<float>(m_charPositions[index1]), m_textBounds.position.y },
-                    { static_cast<float>(m_charPositions[index2] - m_charPositions[index1]), m_textBounds.size.y }
+                    { selectLow + m_textBounds.position.x, m_textBounds.position.y },
+                    { selectHigh - selectLow, m_textBounds.size.y }
                 };
-                selectBounds.position.x += m_textBounds.position.x;
 
                 renderer.drawQuad(selectBounds, { 0.0f, 0.45f, 0.85f, 0.7f });
             }
@@ -418,16 +406,15 @@ namespace Guise
             auto endTime = std::chrono::system_clock::now();
             std::chrono::duration<double> duration = endTime - m_cursorBlinkTimer;
 
-           // bool showCursor = (static_cast<int>(duration.count() * 1000.0f) % 1000) < 500;          
-
-            /*if (!isSelected && showCursor)
+            const bool renderCursor = (static_cast<int>(duration.count() * 1000.0f) % 1000) < 500;
+            if (renderCursor)
             {
-                float cursorPosition = static_cast<float>(m_charPositions.size()) ? static_cast<float>(m_charPositions[m_cursorIndex]) : 0.0f;
+                float cursorPosition = getCursorPosition(m_cursorIndex);
                 cursorPosition += m_textBounds.position.x;
 
                 Bounds2f cursorBounds = { { cursorPosition, m_renderBounds.position.y },{ 1.0f, m_renderBounds.size.y } };
                 renderer.drawQuad(cursorBounds, m_textStyle.getFontColor());
-            }     */    
+            }  
         }   
     }
 
@@ -461,6 +448,8 @@ namespace Guise
         if (text != m_text)
         {
             m_text = text;
+            m_cursorIndex = m_text.size();
+            m_cursorSelectIndex = m_cursorIndex;
             m_changedText = true;
             onChange(m_text);
         }
@@ -471,12 +460,10 @@ namespace Guise
         Style::PaintRectStyle(canvas->getStyleSheet()->getSelector("text-box")),
         Style::ParentStyle(canvas->getStyleSheet()->getSelector("text-box")),
         m_active(false),
-        m_baseline(0.0f),
-        m_baseHeight(0.0f),
         m_changed(true),
         m_changedText(false),
         m_cursorIndex(0),
-        m_cursorSelectFromIndex(0),
+        m_cursorSelectIndex(0),
         m_dpi(canvas->getDpi()),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_textBounds(0.0f, 0.0f, 0.0f, 0.0f)
@@ -500,38 +487,22 @@ namespace Guise
     void TextBox::onActiveChange(bool active)
     {
         m_active = active;
-        if (m_active)
-        {
-            if (m_charPositions.size())
-            {
-                m_cursorIndex = m_charPositions.size() - 1;
-                m_cursorSelectFromIndex = m_cursorIndex;
-            }
-            else
-            {
-                m_cursorIndex =  0;
-                m_cursorSelectFromIndex = 0;
-            }    
-        }
-        else
-        {
-            m_cursorIndex = 0;
-            m_cursorSelectFromIndex = 0;
-        }
-
+        m_cursorIndex = 0;
+        m_cursorSelectIndex = 0;
+    
         m_cursorBlinkTimer = std::chrono::system_clock::now();     
     }
 
     bool TextBox::eraseSelected()
     {
         size_t index1 = m_cursorIndex;
-        size_t index2 = m_cursorSelectFromIndex;
+        size_t index2 = m_cursorSelectIndex;
         if (index1 > index2)
         {
             std::swap(index1, index2);
         }
 
-        if (m_cursorIndex == m_cursorSelectFromIndex || index2 > m_text.size())
+        if (index1 == index2 || index2 > m_text.size())
         {
             return false;
         }
@@ -539,20 +510,20 @@ namespace Guise
         m_text.erase(m_text.begin() + index1, m_text.begin() + index2);
 
         m_cursorIndex = index1;
-        m_cursorSelectFromIndex = index1;
+        m_cursorSelectIndex = index1;
         return true;
     }
 
-    std::wstring TextBox::getSelected()
+    std::wstring TextBox::getSelected() const
     {
         size_t index1 = m_cursorIndex;
-        size_t index2 = m_cursorSelectFromIndex;
+        size_t index2 = m_cursorSelectIndex;
         if (index1 > index2)
         {
             std::swap(index1, index2);
         }
 
-        if (m_cursorIndex == m_cursorSelectFromIndex || index2 >= m_charPositions.size())
+        if (index1 == index2 || index2 > m_fontSequence.getCount())
         {
             return L"";
         }
@@ -560,10 +531,36 @@ namespace Guise
         return m_text.substr(index1, index2 - index1);
     }
 
+    float TextBox::getCursorPosition(const size_t index) const
+    {
+        if (!index)
+        {
+            return 0.0f;
+        }
+
+        const bool atEnd = m_fontSequence.getCount() && index >= m_fontSequence.getCount();
+        size_t newIndex = index;
+        if (index && atEnd)
+        {
+            newIndex--;
+        }
+       
+        const auto bounds = m_fontSequence.getHorizontalBounds(newIndex);
+
+        float pos = static_cast<float>(bounds.position);
+        if (atEnd)
+        {
+            pos += bounds.size;
+        }
+
+        return pos;
+    }
+
     bool TextBox::intersectText(const float point, size_t & index)
     {
-        if (!m_textTexture)
-        {
+        index = 0;
+        if (!m_textTexture || !m_fontSequence.getCount())
+        {           
             return false;
         }
 
@@ -574,41 +571,73 @@ namespace Guise
         }
         else if (textPoint > m_textBounds.size.x)
         {
-            index = m_charPositions.size() ? m_charPositions.size() - 1 : 0;
+            index = m_fontSequence.getCount();
         }
         else
         {
-            index = 0;
+            int32_t left = 0;
+            int32_t right = m_fontSequence.getCount();
+            int32_t mid = 0;
+            int32_t prev = -1;
 
-            for (size_t i = 0; i < m_charPositions.size(); i++)
+            while (mid != prev)
             {
-                float pos = static_cast<float>(m_charPositions[i]);
-                if (textPoint <= pos)
+                prev = mid;
+                mid = (left + right) / 2;
+                mid = std::min(mid, static_cast<int32_t>(m_fontSequence.getCount() - 1));
+
+                auto bounds = m_fontSequence.getHorizontalBounds(mid);
+
+                if (static_cast<float>(bounds.position) < textPoint)
                 {
-                    
-                    size_t prevIndex = i ? i - 1 : 0;
-                    size_t nextIndex = i + 1 < m_charPositions.size() ? i + 1 : m_charPositions.size() - 1;
-                    float prev = static_cast<float>(m_charPositions[prevIndex]);
-                    float next = static_cast<float>(m_charPositions[nextIndex]);
-
-                    if (textPoint < pos - ((pos - prev) / 2.0f) )
-                    {
-                        index = prevIndex;
-                    }
-                    else if (textPoint > pos + ((next - pos) / 2.0f))
-                    {
-                        index = nextIndex;
-                    }
-                    else
-                    {
-                        index = i;
-                    }
-
+                    left = mid;
+                }
+                else if (static_cast<float>(bounds.position) > textPoint)
+                {
+                    right = mid;
+                }
+                else
+                {
                     break;
                 }
-                
-                index = i;
-            }            
+            }
+
+            index = mid;     
+        }
+
+        return true;
+    }
+
+    bool TextBox::intersectTextInterpolated(const float point, size_t & index)
+    {
+        if (!intersectText(point, index))
+        {
+            return false;
+        }
+
+        if (index == m_fontSequence.getCount())
+        {
+            return true;
+        }
+
+        size_t prevIndex = index ? index - 1 : 0;
+        size_t nextIndex = index + 1;
+        size_t nextIndexClamp = nextIndex < m_fontSequence.getCount() ? nextIndex : m_fontSequence.getCount() - 1;
+        
+        float pos = static_cast<float>(m_fontSequence.getHorizontalBounds(index).position);
+        float prev = static_cast<float>(m_fontSequence.getHorizontalBounds(prevIndex).position);
+        auto nextBounds = m_fontSequence.getHorizontalBounds(nextIndexClamp);
+        float next = static_cast<float>(nextBounds.position);
+        next += nextIndex == m_fontSequence.getCount() ? static_cast<float>(nextBounds.size) : 0.0f;
+        const float textPoint = point - m_textBounds.position.x;
+
+        if (textPoint < pos - ((pos - prev) / 2.0f))
+        {
+            index = prevIndex;
+        }
+        else if (textPoint > pos + ((next - pos) / 2.0f))
+        {
+            index = nextIndex;
         }
 
         return true;

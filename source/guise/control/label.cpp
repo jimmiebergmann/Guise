@@ -57,32 +57,27 @@ namespace Guise
     {
         m_renderBounds.position = canvasBound.position;
 
-        if (m_changed)
+        if (m_changedText)
         {
-            if (!m_text.size())
-            {
-                return;
-            }
-
-            if (m_font)
-            {
-                m_loadDimensions = { 0, 0 };
-                size_t baseline = 0;
-
-                if (m_font->createBitmap(m_text, getFontSize(), m_dpi, m_loadData, m_loadDimensions, baseline))
-                {
-                    m_renderBounds.size = m_loadDimensions;
-                }
-                else
-                {
-                    m_changed = false;
-                }
-            }
-
+            m_changedText = false;
+            m_fontSequence.createSequence(m_text, getFontSize(), m_dpi);
+            m_changed = true;
         }
 
-        getCanvas().queueControlRendering(this);
-        
+        if (m_changed)
+        {
+            m_loadData.reset();
+            if (m_fontSequence.createBitmapRgba(m_loadData, m_loadDimensions))
+            {
+                m_renderBounds.size = m_loadDimensions;
+            }
+            else
+            {
+                m_changed = false;
+            }
+        }
+
+        getCanvas().queueControlRendering(this);    
     }
 
     void Label::render(RendererInterface & renderer)
@@ -130,8 +125,7 @@ namespace Guise
         if (text != m_text)
         {
             m_text = text;
-            forceUpdate();
-            m_changed = true;
+            m_changedText = true;          
         }
     }
 
@@ -149,8 +143,10 @@ namespace Guise
         Control(*canvas),
         Style::FontStyle(canvas->getStyleSheet()->getSelector("label")),       
         m_changed(true),
+        m_changedText(true),
         m_dpi(canvas->getDpi()),
         m_font(FontLibrary::get(getFontFamily())),
+        m_fontSequence(m_font),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_text(text),
         m_texture(nullptr)
@@ -158,12 +154,14 @@ namespace Guise
         getCanvas().registerDpiSensitive(this);
     }
 
-    Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :       
+    Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :
         Control(*canvas),
-        Style::FontStyle(canvas->getStyleSheet()->getSelector("label")),          
+        Style::FontStyle(canvas->getStyleSheet()->getSelector("label")),
         m_changed(true),
+        m_changedText(true),
         m_dpi(canvas->getDpi()),
         m_font(FontLibrary::get(font)),
+        m_fontSequence(m_font),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_text(text),
         m_texture(nullptr)

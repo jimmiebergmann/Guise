@@ -30,6 +30,7 @@
 #include <fstream>
 #include <limits>
 #include <algorithm>
+#include <iostream>
 #include "freetype/FreeTypeAmalgam.h"
 
 
@@ -161,163 +162,20 @@ namespace Guise
         return m_isValid;
     }
 
-    bool Font::createBitmap(const std::wstring & text, const uint32_t height, const uint32_t dpi,
-                            std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, size_t & baseline,
-                            std::vector<int32_t> * glyphPositions, const size_t * reachWidth)
+    float Font::getVerticalMax() const
     {
-        if (!m_isValid || !text.size())
-        {
-            return false;
-        }
+        return m_verticalMax;
+    }
 
-        FT_Error error = 0;
-
-        const uint32_t fontSize = height * dpi / GUISE_DEFAULT_DPI;
-        if (fontSize != m_impl->currentFontSize)
-        {
-            if ((error = FT_Set_Char_Size(m_impl->face, 0, height * 64, dpi, dpi)) != 0)
-            {
-                //  "Can not setup the font size, FreeType error: %i\n", FTError);
-                return false;
-            }
-
-            m_impl->currentFontSize = fontSize;
-        }
-
-        std::vector<Glyph*> glyphs;
-
-        Vector2<FT_Pos> size(0, 0);
-
-        //FT_Pos startPos;
-        const bool hasKerning = FT_HAS_KERNING(m_impl->face);
-        Vector2<FT_Pos> lowDim = { std::numeric_limits<FT_Pos>::max(), std::numeric_limits<FT_Pos>::max() };
-        Vector2<FT_Pos> highDim = { std::numeric_limits<FT_Pos>::min(), std::numeric_limits<FT_Pos>::min() };
-        FT_Pos penPos = 0;
-        FT_UInt prevIndex = 0;
-
-
-        // Calcualte text bounding box and pen start position.
-        for (size_t i = 0; i < text.size(); i++)
-        {
-            if (glyphPositions)
-            {
-                glyphPositions->push_back(static_cast<int32_t>(penPos));
-            }
-
-            auto glyph = m_impl->getGlypth(text[i], fontSize);
-            if (glyph)
-            {
-                glyphs.push_back(glyph);
-                auto & bitmap = glyph->bitmapGlyph->bitmap;
-
-                // Move pen if font has kerning.
-                if (hasKerning && prevIndex)
-                {
-                    FT_Vector  delta;
-                    FT_Get_Kerning(m_impl->face, prevIndex, glyph->index, FT_KERNING_DEFAULT, &delta);
-
-                    penPos += delta.x >> 6;
-                }
-                prevIndex = glyph->index;
-
-
-                // Calc X dimensions.
-                FT_Pos lowX = penPos + glyph->horiBearingX;
-
-                if (lowX < lowDim.x)
-                {
-                    lowDim.x = lowX;
-                }
-
-                FT_Pos highX = penPos + glyph->horiBearingX + bitmap.width;
-                if (highX > highDim.x)
-                {
-                    highDim.x = highX;
-                }
-
-                // Calc Y dimensions.
-                FT_Pos lowY = glyph->horiBearingY - bitmap.rows;
-                if (lowY < lowDim.y)
-                {
-                    lowDim.y = lowY;
-                }
-
-                FT_Pos highY = glyph->horiBearingY;
-                if (highY > highDim.y)
-                {
-                    highDim.y = highY;
-                }
-
-                penPos += glyph->horiAdvance;
-
-                if (reachWidth && penPos >= static_cast<FT_Pos>(*reachWidth))
-                {
-                    break;
-                }
-            }
-        }
-
-        if (glyphPositions)
-        {
-            glyphPositions->push_back(static_cast<int32_t>(penPos));
-        }
-        
-        penPos = -lowDim.x;
-        prevIndex = 0;
-
-        size.x = highDim.x - lowDim.x;
-        size.y = highDim.y - lowDim.y;
-
-        const size_t bufferSize = size.x * size.y * 4;
-        dimensions = size;
-
-        buffer = std::make_unique<uint8_t[]>(bufferSize);
-        uint8_t * glyphBuffer = buffer.get();
-        memset(glyphBuffer, 0, bufferSize);
-       
-        // Render glyphs.
-        for (auto it = glyphs.begin(); it != glyphs.end(); it++)
-        {
-            auto glyph = (*it);
-            auto & bitmap = glyph->bitmapGlyph->bitmap;
-            auto bitmapBuffer = bitmap.buffer;
-
-            // Move pen if font has kerning.
-            if (hasKerning && prevIndex)
-            {
-                FT_Vector  delta;
-                FT_Get_Kerning(m_impl->face, prevIndex, glyph->index, FT_KERNING_DEFAULT, &delta);
-
-                penPos += delta.x >> 6;
-            }
-            prevIndex = glyph->index;
-
-            for (int y = 0; y < bitmap.rows; y++)
-            {
-                int intY = bitmap.rows - 1 - y;
-
-                for (int x = 0; x < bitmap.width; x++)
-                {
-                    const int glyphIndex = ((y - (glyph->baseline + lowDim.y)) * dimensions.x * 4) + ((x + penPos + glyph->horiBearingX) * 4);
-                    const int bitmapIndex = (intY * bitmap.width) + x;
-
-                    glyphBuffer[glyphIndex] = 255;
-                    glyphBuffer[glyphIndex + 1] = 255;
-                    glyphBuffer[glyphIndex + 2] = 255;
-                    glyphBuffer[glyphIndex + 3] = std::max(bitmapBuffer[bitmapIndex], glyphBuffer[glyphIndex + 3]);
-                }
-            }
-
-            penPos += glyph->horiAdvance;
-        }
-
-        baseline = lowDim.y > 0 ? 0 : static_cast<size_t>(std::abs(lowDim.y));
-
-        return true;
+    float Font::getVerticalMin() const
+    {
+        return m_verticalMin;
     }
     
     Font::Font(const std::string & font) :
         m_isValid(false),
+        m_verticalMax(0.0f),
+        m_verticalMin(0.0f),
         m_impl(std::make_shared<Impl>())
     {
         
@@ -354,6 +212,11 @@ namespace Guise
             //  "Can not select the unicode character map, FreeType error: %i\n", FTError);
             return;
         }
+
+        const auto & bbox = m_impl->face->bbox;
+        const float unitsPerEm = static_cast<float>(m_impl->face->units_per_EM);
+        m_verticalMax = static_cast<float>(bbox.yMax) / unitsPerEm;
+        m_verticalMin = static_cast<float>(bbox.yMin) / unitsPerEm;
 
         m_isValid = true;
     }
@@ -428,7 +291,7 @@ namespace Guise
         Vector2<size_t>         size;
         Vector2<FT_Pos>         lowDim;
         Vector2<FT_Pos>         highDim;
-        size_t                  baseline;
+        int32_t                 baseline;
 
     };
 
@@ -439,12 +302,22 @@ namespace Guise
         m_impl(std::make_shared<Impl>(font))
     { }
 
+    float FontSequence::calcVerticalPosition(const float height) const
+    {
+        const float vMax = m_impl->font->getVerticalMax();
+        const float vMin = m_impl->font->getVerticalMin();
+        const float vNorm =  1.0f - ((-vMin) / (vMax - vMin));
+
+        return (height * vNorm) - static_cast<float>(m_impl->size.y) + static_cast<float>(m_impl->baseline);
+    }
+
     bool FontSequence::createSequence(const std::wstring & text, const uint32_t height, const uint32_t dpi)
     {
         m_impl->sequence.clear();
         m_impl->size = {0, 0};
         m_impl->lowDim = { std::numeric_limits<FT_Pos>::max(), std::numeric_limits<FT_Pos>::max() };
         m_impl->highDim = { std::numeric_limits<FT_Pos>::min(), std::numeric_limits<FT_Pos>::min() };
+        m_impl->baseline = 0;
 
         const uint32_t fontSize = height * dpi / GUISE_DEFAULT_DPI;
 
@@ -466,18 +339,21 @@ namespace Guise
 
             fontImpl->currentFontSize = fontSize;
         }
-      
         
         FT_Pos penPos = 0;
         FT_Pos prevPenPos = 0;
         const bool hasKerning = FT_HAS_KERNING(fontImpl->face);
         FT_UInt prevIndex = 0;
 
-
         // Calcualte text bounding box and pen start position.
         for (size_t i = 0; i < text.size(); i++)
         {
             auto glyph = fontImpl->getGlypth(text[i], fontSize);
+            if (!glyph)
+            {
+                glyph = fontImpl->getGlypth(L' ', fontSize);
+            }
+            
             if (glyph)
             {
                 //glyphs.push_back(glyph);
@@ -494,10 +370,8 @@ namespace Guise
                 }
                 prevIndex = glyph->index;
 
-
                 // Calc X dimensions.
                 FT_Pos lowX = penPos + glyph->horiBearingX;
-
                 if (lowX < m_impl->lowDim.x)
                 {
                     m_impl->lowDim.x = lowX;
@@ -523,10 +397,12 @@ namespace Guise
                 }
 
                 penPos += glyph->horiAdvance;
-
                 m_impl->sequence.push_back({ {prevPenPos, penPos - prevPenPos }, glyph });
-
                 prevPenPos = penPos;
+            }
+            else
+            {
+                m_impl->sequence.push_back({ { prevPenPos, prevPenPos }, nullptr });
             }
         }
 
@@ -536,15 +412,62 @@ namespace Guise
             return false;
         }
 
-        m_impl->baseline = m_impl->lowDim.y > 0 ? 0 : static_cast<size_t>(std::abs(m_impl->lowDim.y));
-
+        m_impl->baseline = -m_impl->lowDim.y;
         m_impl->size.x = static_cast<size_t>(m_impl->highDim.x - m_impl->lowDim.x);
         m_impl->size.y = static_cast<size_t>(m_impl->highDim.y - m_impl->lowDim.y);
 
         return true;
     }
 
-    bool FontSequence::createBitmapRgba(std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions)
+    bool FontSequence::createBitmapaAlpha(std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, const size_t from, const size_t to)
+    {
+        const auto fontImpl = m_impl->font->m_impl;
+        const size_t bufferSize = m_impl->size.x * m_impl->size.y;
+
+        if (!bufferSize)
+        {
+            return false;
+        }
+
+        dimensions = m_impl->size;
+        buffer = std::make_unique<uint8_t[]>(bufferSize);
+        uint8_t * glyphBuffer = buffer.get();
+        memset(glyphBuffer, 0, bufferSize);
+
+        // Render glyphs.
+        const size_t newTo = to < m_impl->sequence.size() ? to : m_impl->sequence.size();
+        for (size_t i = from; i < newTo; i++)
+        {
+            auto & currSeq = m_impl->sequence[i];
+            auto glyph = currSeq.glyph;
+
+            if (!glyph)
+            {
+                continue;
+            }
+
+            auto & bitmap = glyph->bitmapGlyph->bitmap;
+            auto bitmapBuffer = bitmap.buffer;
+            auto penPos = currSeq.bounds.position - m_impl->lowDim.x;
+
+            for (int y = 0; y < bitmap.rows; y++)
+            {
+                int intY = bitmap.rows - 1 - y;
+
+                for (int x = 0; x < bitmap.width; x++)
+                {
+                    const int glyphIndex = ((y - glyph->baseline + m_impl->lowDim.y) * m_impl->size.x) + (x + penPos + glyph->horiBearingX);
+                    const int bitmapIndex = (intY * bitmap.width) + x;
+
+                    glyphBuffer[glyphIndex] = std::max(bitmapBuffer[bitmapIndex], glyphBuffer[glyphIndex]);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    bool FontSequence::createBitmapRgba(std::unique_ptr<uint8_t[]> & buffer, Vector2<size_t> & dimensions, const size_t from, const size_t to)
     {
         const auto fontImpl = m_impl->font->m_impl;
         const size_t bufferSize = m_impl->size.x * m_impl->size.y * 4;
@@ -560,13 +483,19 @@ namespace Guise
         memset(glyphBuffer, 0, bufferSize);
 
         // Render glyphs.
-        for (auto it = m_impl->sequence.begin(); it != m_impl->sequence.end(); it++)
+        const size_t newTo = to < m_impl->sequence.size() ? to : m_impl->sequence.size();
+        for(size_t i = from; i < newTo; i++)
         {
-            auto currSeq = (*it);
+            auto & currSeq = m_impl->sequence[i];
             auto glyph = currSeq.glyph;
+
+            if (!glyph)
+            {
+                continue;
+            }
+
             auto & bitmap = glyph->bitmapGlyph->bitmap;
             auto bitmapBuffer = bitmap.buffer;
-
             auto penPos = currSeq.bounds.position - m_impl->lowDim.x;
 
             for (int y = 0; y < bitmap.rows; y++)
@@ -589,12 +518,53 @@ namespace Guise
         return true;
     }
 
+    bool FontSequence::findIndex(const int32_t width, const size_t from, size_t & to) const
+    {
+        if (from >= m_impl->sequence.size())
+        {
+            return false;
+        }
+
+        if (!width)
+        {
+            to = from;
+            return true;
+        }
+
+        size_t left = from;
+        size_t right = m_impl->sequence.size();
+        size_t mid = left;
+
+        while (left <= right)
+        {
+            mid = left + (right - 1) / 2;
+
+            auto glyphEnd = m_impl->sequence[mid].bounds.position + m_impl->sequence[mid].bounds.size;
+
+            if (glyphEnd == width)
+            {
+                break;
+            }
+            else if (glyphEnd < width) // Ignore left half. 
+            {
+                left = mid + 1;
+            }
+            else // Ignore right half.
+            {
+                right = mid - 1;
+            }      
+        }
+
+        to = mid;
+        return true;
+    }
+
     size_t FontSequence::getBaseline() const
     {
         return m_impl->baseline;
     }
 
-    Bounds1i32 FontSequence::getBounds(const size_t index) const
+    Bounds1i32 FontSequence::getHorizontalBounds(const size_t index) const
     {
         return m_impl->sequence[index].bounds;
     }
@@ -608,7 +578,6 @@ namespace Guise
     {
         return 0;
     }
-
 
     // Font library implementations.
     static std::unordered_map<std::string, std::shared_ptr<Font>> g_fontLibrary;
