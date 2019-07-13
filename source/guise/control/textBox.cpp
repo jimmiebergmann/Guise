@@ -369,15 +369,28 @@ namespace Guise
             renderer.drawBorder(m_renderBounds, borderWidth, getBorderColor());
         }
 
-        m_textBounds = { { m_renderBounds.position.x + getPaddingLow().x, m_renderBounds.position.y }, { 0.0f, 0.0f } };
+        const auto paddingLow = Vector2f::ceil(getPaddingLow() * scale);
+        const auto paddingHigh = Vector2f::ceil(getPaddingHigh() * scale);
+
+        m_textBounds = { { m_renderBounds.position.x + paddingLow.x, m_renderBounds.position.y }, { 0.0f, 0.0f } };
         if (m_textTexture)
         {     
-            renderer.pushMask(m_renderBounds);
-          
+            Bounds2i32 textMask =
+            {
+                Vector2i32::max({ 0, 0 }, { m_textBounds.position.x, m_textBounds.position.y + paddingLow.y }),
+                Vector2i32::max({ 0, 0 }, m_renderBounds.size - paddingLow - paddingLow)
+            };
+            
+            renderer.pushMask(textMask);
+      
             // Render text     
             m_textBounds.size = m_textTexture->getDimensions();         
             m_textBounds.position.y += m_fontSequence.calcVerticalPosition(m_renderBounds.size.y);
             renderer.drawQuad(m_textBounds, m_textTexture, m_textStyle.getFontColor());
+
+            // Render masks
+            //renderer.drawQuad(m_textBounds, { 0.0f, 1.0f, 0.0f, 0.3f });
+            //renderer.drawQuad(textMask, { 1.0f, 0.0f, 0.0f, 0.3f });
 
             const bool isSelected = m_cursorIndex != m_cursorSelectIndex;
             if (isSelected)

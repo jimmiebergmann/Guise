@@ -43,7 +43,11 @@ namespace Guise
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
 
-        Bounds2f newBounds = bounds;
+        Bounds2f newBounds =
+        {
+            Vector2f::ceil(bounds.position), Vector2f::ceil(bounds.size)
+        };
+
         if (m_maskStack.size())
         {
             newBounds = Bounds2f::clamp(newBounds, m_maskStack.top());
@@ -62,8 +66,7 @@ namespace Guise
     {
         Bounds2f newCoordBounds =
         {
-            { std::ceil(bounds.position.x), std::ceil(bounds.position.y) },
-            { std::ceil(bounds.size.x), std::ceil(bounds.size.y) }
+            Vector2f::ceil(bounds.position), Vector2f::ceil(bounds.size)
         };
 
         Vector2f newTexCoords[2] = { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
@@ -81,9 +84,11 @@ namespace Guise
             {
                 newCoordBounds.position, newCoordBounds.position + newCoordBounds.size
             };
-
-            newTexCoords[0] = Vector2f::max((maskVec[0] - boundsVec[0]) / (boundsVec[1] - boundsVec[0]), { 0.0f, 0.0f });           
-            newTexCoords[1] = Vector2f::min((maskVec[1] - boundsVec[0]) / (boundsVec[1] - boundsVec[0]), { 1.0f, 1.0f });
+            
+            newTexCoords[0].x =        ((maskVec[0].x - boundsVec[0].x) / (boundsVec[1].x - boundsVec[0].x));
+            newTexCoords[0].y = 1.0f - ((maskVec[1].y - boundsVec[0].y) / (boundsVec[1].y - boundsVec[0].y));
+            newTexCoords[1].x =        ((maskVec[1].x - boundsVec[0].x) / (boundsVec[1].x - boundsVec[0].x));
+            newTexCoords[1].y = 1.0f - ((maskVec[0].y - boundsVec[0].y) / (boundsVec[1].y - boundsVec[0].y));
         }
 
 

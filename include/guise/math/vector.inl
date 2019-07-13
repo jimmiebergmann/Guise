@@ -224,6 +224,18 @@ namespace Guise
         return { std::max<T>(low.x, high.x) , std::max<T>(low.y, high.y) };
     }
 
+    template <typename T>
+    Vector<2, T> Vector<2, T>::ceil(const Vector<2, T> & vec)
+    {
+        return { std::ceil(vec.x), std::ceil(vec.y) };
+    }
+
+    template <typename T>
+    Vector<2, T> Vector<2, T>::floor(const Vector<2, T> & vec)
+    {
+        return { std::floor(vec.x), std::floor(vec.y) };
+    }
+
 
     // Vector 3 implementations.
     template <typename T>

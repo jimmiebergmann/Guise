@@ -124,6 +124,8 @@ namespace Guise
         static Vector<2, T> clamp(const Vector<2, T> & vector, const Vector<2, T> & low, const Vector<2, T> & high);
         static Vector<2, T> min(const Vector<2, T> & low, const Vector<2, T> & high);
         static Vector<2, T> max(const Vector<2, T> & low, const Vector<2, T> & high);
+        static Vector<2, T> ceil(const Vector<2, T> & vec);
+        static Vector<2, T> floor(const Vector<2, T> & vec);
 
         T x;
         T y;

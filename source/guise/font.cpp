@@ -397,12 +397,13 @@ namespace Guise
                 }
 
                 penPos += glyph->horiAdvance;
-                m_impl->sequence.push_back({ {prevPenPos, penPos - prevPenPos }, glyph });
+                m_impl->sequence.push_back({ {  static_cast<int32_t>(prevPenPos),
+                                                static_cast<int32_t>(penPos - prevPenPos) }, glyph });
                 prevPenPos = penPos;
             }
             else
             {
-                m_impl->sequence.push_back({ { prevPenPos, prevPenPos }, nullptr });
+                m_impl->sequence.push_back({ { static_cast<int32_t>(prevPenPos), static_cast<int32_t>(prevPenPos) }, nullptr });
             }
         }
 
