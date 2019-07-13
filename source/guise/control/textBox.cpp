@@ -494,7 +494,7 @@ namespace Guise
     void TextBox::onNewDpi(const int32_t dpi)
     {
         m_dpi = dpi;
-        m_changed = true;
+        m_changedText = true;
     }
 
     void TextBox::onActiveChange(bool active)

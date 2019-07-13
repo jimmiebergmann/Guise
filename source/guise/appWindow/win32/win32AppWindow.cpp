@@ -145,6 +145,7 @@ namespace Guise
     }
 
     Win32AppWindow::Win32AppWindow(const std::wstring & title, const Vector2ui32 & size) :
+        m_loaded(false),
         m_canvas(Canvas::create(size)),
         m_dpi(GUISE_DEFAULT_DPI),
         m_input(m_canvas->getInput()),
@@ -287,6 +288,8 @@ namespace Guise
 
         m_canvas->setDpi(m_dpi);
 
+        m_loaded = true;
+
         ShowWindow(m_windowHandle, SW_RESTORE);
         SetForegroundWindow(m_windowHandle);
         SetFocus(m_windowHandle);
@@ -359,13 +362,17 @@ namespace Guise
             case WM_SIZE:
             {
                 m_size = { static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)) };
-                if (m_renderer)
+                
+                if (m_loaded)
                 {
-                    m_renderer->setViewportSize({ 0, 0 }, m_size);
-                }           
-                m_canvas->resize(m_size);
-                update();
-                render();
+                    if (m_renderer)
+                    {
+                        m_renderer->setViewportSize({ 0, 0 }, m_size);
+                    }
+                    m_canvas->resize(m_size);
+                    update();
+                    render();
+                }
             }
             break;
             case WM_MOVE:

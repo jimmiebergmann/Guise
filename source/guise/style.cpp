@@ -578,11 +578,13 @@ namespace Guise
                     { "checkbox:checkedDisabled", DefaultStyles::checkboxCheckedDisabled },
                     { "checkbox:hover", DefaultStyles::checkboxHover },
                     { "checkbox:disabled", DefaultStyles::checkboxDisabled },
+                    { "horizontal-grid", DefaultStyles::horizontalGrid },
+                    { "horizontal-grid-slot", DefaultStyles::horizontalGridSlot },
                     { "label", DefaultStyles::label },
                     { "plane",  DefaultStyles::plane },
-                    { "vertical-grid", DefaultStyles::verticalGrid },
                     { "text-box", DefaultStyles::textBox },
                     { "text-box-text", DefaultStyles::textBoxText },
+                    { "vertical-grid", DefaultStyles::verticalGrid },
                     { "vertical-grid-slot", DefaultStyles::verticalGridSlot },
                     { "window", DefaultStyles::window }
                 }

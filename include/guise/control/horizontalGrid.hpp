@@ -23,20 +23,20 @@
 *
 */
 
-#ifndef GUISE_CONTROL_VERTICAL_GRID_HPP
-#define GUISE_CONTROL_VERTICAL_GRID_HPP
+#ifndef GUISE_CONTROL_HORIZONTAL_GRID_HPP
+#define GUISE_CONTROL_HORIZONTAL_GRID_HPP
 
 #include "guise/control.hpp"
 
 namespace Guise
 {
 
-    class GUISE_API VerticalGrid : public ControlContainerList, public  Style::ParentRectStyle
+    class GUISE_API HorizontalGrid : public ControlContainerList, public Style::ParentRectStyle
     {
 
     public:
 
-        static std::shared_ptr<VerticalGrid> create(std::shared_ptr<Canvas> & canvas);
+        static std::shared_ptr<HorizontalGrid> create(std::shared_ptr<Canvas> & canvas);
 
         virtual ControlType getType() const;
 
@@ -52,8 +52,8 @@ namespace Guise
 
     private:
 
-        VerticalGrid(std::shared_ptr<Canvas> & canvas);
-        VerticalGrid(const VerticalGrid &) = delete;
+        HorizontalGrid(std::shared_ptr<Canvas> & canvas);
+        HorizontalGrid(const HorizontalGrid &) = delete;
 
         Bounds2f                m_renderBounds;
         std::vector<Bounds2f>   m_childsBounds;

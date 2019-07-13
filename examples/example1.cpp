@@ -4,6 +4,7 @@
 #include "guise/control/button.hpp"
 #include "guise/control/movable.hpp"
 #include "guise/control/verticalGrid.hpp"
+#include "guise/control/horizontalGrid.hpp"
 #include "guise/control/label.hpp"
 #include "guise/control/textBox.hpp"
 #include "guise/control/checkbox.hpp"
@@ -25,13 +26,15 @@ int main()
     auto vertGrid1 = VerticalGrid::create(canvas1);
     canvas1->add(vertGrid1);
 
-    auto button1 = Button::create(canvas1);
+    /*auto button1 = Button::create(canvas1);
     button1->setSize({ 200.0f, 60.0f });
     button1->getHoverStyle().setPadding(5.0f);
     vertGrid1->add(button1);
     
     auto button1_1 = Button::create(canvas1);
-    //button1_1->add(Label::create(canvas1, /*"/usr/share/fonts/truetype/freefont/freesans.ttf"¨*/"arial", L"The quick brown fox jumps over the lazy dog."));
+    //button1_1->add(Label::create(canvas1, 
+        //"/usr/share/fonts/truetype/freefont/freesans.ttf"¨
+        //"arial", L"The quick brown fox jumps over the lazy dog."));
     button1->add(button1_1);
 
     auto button2 = Button::create(canvas1);
@@ -47,12 +50,18 @@ int main()
 
     auto label1 = Label::create(canvas1, "arial", L"Name");
     label1->setFontSize(10);
-    vertGrid1->add(label1);
+    vertGrid1->add(label1);*/
 
-    vertGrid1->add(Checkbox::create(canvas1));
+    auto horiGrid1 = HorizontalGrid::create(canvas1);
+    vertGrid1->add(horiGrid1);
+    horiGrid1->setSize({ 200.0f, 100.0f });
+    horiGrid1->add(Checkbox::create(canvas1));
+    horiGrid1->add(Checkbox::create(canvas1));
+
 
     auto textbox1 = TextBox::create(canvas1);
     vertGrid1->add(textbox1);
+
     //auto textbox2 = TextBox::create(canvas1);
     //vertGrid1->add(textbox2);
 

@@ -55,7 +55,12 @@ namespace Guise
             if (renderBounds != m_renderBounds || childsUpdate)
             {
                 m_renderBounds = renderBounds;
-                m_childsBounds = Bounds2f(m_renderBounds.position + getPaddingLow(), m_renderBounds.size - getPaddingLow() - getPaddingHigh());
+
+                const float scale = m_canvas.getScale();
+                const auto paddingLow = getPaddingLow() * scale;
+                const auto paddingHigh = getPaddingHigh() * scale;
+
+                m_childsBounds = Bounds2f(m_renderBounds.position + paddingLow, m_renderBounds.size - paddingLow - paddingHigh);
             }
         }
 

@@ -262,15 +262,7 @@ namespace Guise
 
     void Canvas::setScale(const float scale)
     {
-        if (scale < 0.0f)
-        {
-            m_scale = 0.0f;
-        }
-        else
-        {
-            m_scale = scale;
-        }
-        
+        m_scale = std::max(scale, 0.0f);             
         m_dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
     }
 
@@ -332,6 +324,7 @@ namespace Guise
 
     Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet) :
         m_dpi(GUISE_DEFAULT_DPI),
+        m_scale(1.0f),
         m_plane(nullptr),
         m_selectedControl(nullptr),
         m_size(size),

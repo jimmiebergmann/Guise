@@ -113,6 +113,19 @@ namespace Guise
                 }
             );
 
+            static const Selector horizontalGrid = Selector(
+                {
+                    { "padding",                        { 5.0f } }
+                }
+            );
+
+            static const Selector horizontalGridSlot = Selector(
+                {
+                    { "padding",            { Vector4f  { 2.0f, 2.0f, 2.0f, 2.0f } } }
+                }
+            );
+
+
             static const Selector label = Selector(
                 {
                     { "font-color",         { Vector4f  { 0.0f, 0.0f, 0.0f, 1.0f } } },
@@ -141,11 +154,11 @@ namespace Guise
 
             static const Selector textBoxText = Selector(
                 {
-                    { "font-color",{ Vector4f{ 0.0f, 0.0f, 0.0f, 1.0f } } },
-                    { "font-family",{ std::string("Arial") } },
-                    { "font-size",{ 48 } }
+                    { "font-color",         { Vector4f  { 0.0f, 0.0f, 0.0f, 1.0f } } },
+                    { "font-family",                    { std::string("Arial") } },
+                    { "font-size",                      { 48 } }
                 }
-            );
+            );          
 
             static const Selector verticalGrid = Selector(
                 {

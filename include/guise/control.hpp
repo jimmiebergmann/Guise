@@ -57,6 +57,7 @@ namespace Guise
 
         Button,
         Checkbox,
+        HorizontalGrid,
         Label,
         Plane,
         TextBox,

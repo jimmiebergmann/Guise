@@ -81,6 +81,7 @@ namespace Guise
         static LRESULT windowProcStatic(HWND HWND, UINT message, WPARAM wParam, LPARAM lParam);
         LRESULT windowProc(HWND HWND, UINT message, WPARAM wParam, LPARAM lParam);
 
+        bool                        m_loaded;
         std::shared_ptr<Renderer>   m_renderer;
         std::shared_ptr<Canvas>     m_canvas;
         int32_t                     m_dpi;

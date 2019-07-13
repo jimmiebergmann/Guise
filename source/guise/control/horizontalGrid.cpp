@@ -23,29 +23,29 @@
 *
 */
 
-#include "guise/control/verticalGrid.hpp"
+#include "guise/control/horizontalGrid.hpp"
 #include "guise/canvas.hpp"
 
 namespace Guise
 {
   
     // Vertical grid implementations.
-    std::shared_ptr<VerticalGrid> VerticalGrid::create(std::shared_ptr<Canvas> & canvas)
+    std::shared_ptr<HorizontalGrid> HorizontalGrid::create(std::shared_ptr<Canvas> & canvas)
     {
-        return std::shared_ptr<VerticalGrid>(new VerticalGrid(canvas));
+        return std::shared_ptr<HorizontalGrid>(new HorizontalGrid(canvas));
     }
 
-    ControlType VerticalGrid::getType() const
+    ControlType HorizontalGrid::getType() const
     {
-        return ControlType::VerticalGrid;
+        return ControlType::HorizontalGrid;
     }
 
-    bool VerticalGrid::handleInputEvent(const Input::Event &/* event*/)
+    bool HorizontalGrid::handleInputEvent(const Input::Event &/* event*/)
     {
         return false;
     }
 
-    void VerticalGrid::update(const Bounds2f & canvasBound)
+    void HorizontalGrid::update(const Bounds2f & canvasBound)
     {
         bool newChildBounds = false;
         const bool childsUpdate = pollUpdateForced();
@@ -62,24 +62,24 @@ namespace Guise
                 const auto paddingHigh = Vector2f::ceil(getPaddingHigh() * scale);
                 const auto slotPadding = m_slotStyle.getPadding() * scale;
                 Bounds2f childBoundsLeft(m_renderBounds.position + paddingLow, m_renderBounds.size - paddingLow - paddingHigh);
-                childBoundsLeft.position.x  += slotPadding.x;
-                childBoundsLeft.size.x      -= (slotPadding.x + slotPadding.z);
+                childBoundsLeft.position.y += slotPadding.y;
+                childBoundsLeft.size.y -= (slotPadding.x + slotPadding.z);
 
                 m_childsBounds.clear();
 
                 auto childs = getChilds();                
-                for (auto it = childs.begin(); childBoundsLeft.size.y > 0.0f && it != childs.end(); it++)
+                for (auto it = childs.begin(); childBoundsLeft.size.x > 0.0f && it != childs.end(); it++)
                 {
-                    childBoundsLeft.position.y  += slotPadding.y;
-                    childBoundsLeft.size.y      -= (slotPadding.y + slotPadding.w);
+                    childBoundsLeft.position.x  += slotPadding.x;
+                    childBoundsLeft.size.x      -= (slotPadding.x + slotPadding.z);
                     (*it)->update(childBoundsLeft);
                     m_childsBounds.push_back(childBoundsLeft);
 
                     auto childRenderBounds = (*it)->getRenderBounds();
-                    float childHeight = std::max(childRenderBounds.position.y - childBoundsLeft.position.y, 0.0f) + std::max(childRenderBounds.size.y, 0.0f);
+                    float childWidth = std::max(childRenderBounds.position.x - childBoundsLeft.position.x, 0.0f) + std::max(childRenderBounds.size.x, 0.0f);
                     
-                    childBoundsLeft.position.y += childHeight + slotPadding.w;
-                    childBoundsLeft.size.y     -= childHeight;
+                    childBoundsLeft.position.x += childWidth + slotPadding.z;
+                    childBoundsLeft.size.x     -= childWidth;
                 }
             }
         }
@@ -95,26 +95,26 @@ namespace Guise
         
     }
 
-    Bounds2f VerticalGrid::getRenderBounds() const
+    Bounds2f HorizontalGrid::getRenderBounds() const
     {
         return m_renderBounds;
     }
 
-    Bounds2f VerticalGrid::getSelectBounds() const
+    Bounds2f HorizontalGrid::getSelectBounds() const
     {
         return m_renderBounds;
     }
 
-    Style::ParentRectStyle & VerticalGrid::getSlotStyle()
+    Style::ParentRectStyle & HorizontalGrid::getSlotStyle()
     {
         return m_slotStyle;
     }
 
-    VerticalGrid::VerticalGrid(std::shared_ptr<Canvas> & canvas) :             
+    HorizontalGrid::HorizontalGrid(std::shared_ptr<Canvas> & canvas) :
         ControlContainerList(*canvas),
-        Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("vertical-grid")),       
+        Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("horizontal-grid")),       
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
-        m_slotStyle(canvas->getStyleSheet()->getSelector("vertical-grid-slot"))
+        m_slotStyle(canvas->getStyleSheet()->getSelector("horizontal-grid-slot"))
     { }
 
 }
