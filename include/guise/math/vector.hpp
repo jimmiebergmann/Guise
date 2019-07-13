@@ -28,6 +28,7 @@
 
 #include "guise/build.hpp"
 #include <algorithm>
+#include <cmath>
 
 
 namespace Guise
