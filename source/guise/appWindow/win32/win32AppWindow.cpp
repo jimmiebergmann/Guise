@@ -29,7 +29,7 @@
 
 #include <shellscalingapi.h>
 #include <algorithm>
-
+#include <iostream>
 namespace Guise
 {
 
@@ -85,6 +85,26 @@ namespace Guise
     HDC Win32AppWindow::getWin32HDC() const
     {
         return m_deviceContextHandle;
+    }
+
+    bool Win32AppWindow::isFocused() const
+    {
+        return m_focused;
+    }
+
+    bool Win32AppWindow::isMaximized() const
+    {
+        return m_maximized;
+    }
+
+    bool Win32AppWindow::isMinimized() const
+    {
+        return m_minimized;
+    }
+
+    bool Win32AppWindow::isShowing() const
+    {
+        return m_showing;
     }
 
     void Win32AppWindow::maximize()
@@ -201,7 +221,12 @@ namespace Guise
         m_deviceContextHandle(NULL),
         m_win32Style(0),
         m_win32ExtendedStyle(0),
-        m_windowClassName(createClassName())
+        m_windowClassName(createClassName()),
+
+        m_focused(false),
+        m_maximized(false),
+        m_minimized(false),
+        m_showing(false)
     {
         load();
     }
@@ -389,6 +414,14 @@ namespace Guise
             {
                 m_size = { static_cast<uint32_t>(LOWORD(lParam)), static_cast<uint32_t>(HIWORD(lParam)) };
                 
+                switch (wParam)
+                {
+                    case SIZE_MAXIMIZED: m_showing = m_maximized = true; m_minimized = false; break;
+                    case SIZE_MINIMIZED: m_minimized = true; m_showing = m_maximized = false; break;
+                    case SIZE_RESTORED:  m_showing = true; m_maximized = m_minimized = false; break;
+                    default: break;
+                }
+
                 if (m_loaded)
                 {
                     if (m_renderer)
@@ -423,13 +456,13 @@ namespace Guise
                 break;        
             /*case WM_ACTIVATE:
                 
-                break;
+                break;*/
             case WM_SETFOCUS:
-                
+                m_focused = true;
                 break;
             case WM_KILLFOCUS:
-                
-                break;*/
+                m_focused = false;
+                break;
         
             // Mouse events.
             case WM_MOUSEMOVE:

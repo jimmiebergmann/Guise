@@ -121,8 +121,8 @@ namespace Guise
         template<typename U>
         void call(U & callback, T ... params);
 
-        template<typename T>
-        using Callbacks = std::vector<std::pair<T, DependenciesWeak*> >;
+        template<typename U>
+        using Callbacks = std::vector<std::pair<U, DependenciesWeak*> >;
 
         Callbacks<Callback>         m_callbacks;
         Callbacks<CallbackNoParams> m_callbacksNoParams;

@@ -83,6 +83,30 @@ namespace Guise
         return m_window;
     }
 
+    bool LinuxAppWindow::isFocused() const
+    {
+        // IMPLEMENT.
+        return false;
+    }
+
+    bool LinuxAppWindow::isMaximized() const
+    {
+        // IMPLEMENT.
+        return false;
+    }
+
+    bool LinuxAppWindow::isMinimized() const
+    {
+        // IMPLEMENT.
+        return false;
+    }
+
+    bool LinuxAppWindow::isShowing() const
+    {
+        // IMPLEMENT.
+        return false;
+    }
+
     void LinuxAppWindow::maximize()
     {
         // IMPLEMENT

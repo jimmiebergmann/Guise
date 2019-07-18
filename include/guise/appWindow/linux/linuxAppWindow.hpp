@@ -66,6 +66,14 @@ namespace Guise
 
         Vector2ui32 getSize() const;
 
+        bool isFocused() const; // IMPLEMENT
+
+        bool isMaximized() const; // IMPLEMENT
+
+        bool isMinimized() const; // IMPLEMENT
+
+        bool isShowing() const; // IMPLEMENT
+
         void maximize();  // IMPLEMENT
 
         void minimize();  // IMPLEMENT

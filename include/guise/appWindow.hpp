@@ -71,6 +71,14 @@ namespace Guise
 
         virtual Vector2ui32 getSize() const = 0;
 
+        virtual bool isFocused() const = 0;
+
+        virtual bool isMaximized() const = 0;
+
+        virtual bool isMinimized() const = 0;
+
+        virtual bool isShowing() const = 0;
+
         virtual void maximize() = 0;
 
         virtual void minimize() = 0;

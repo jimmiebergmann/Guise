@@ -57,13 +57,16 @@ namespace Guise
             {
                 auto timerStart = std::chrono::system_clock::now();
 
-                DWORD err = GetLastError();
+                //DWORD err = GetLastError();
                 appWindow->update();
 
-                err = GetLastError();
-                appWindow->render();
+                //err = GetLastError();
+                if (appWindow->isShowing())
+                {
+                    appWindow->render();
+                }
 
-                err = GetLastError();
+                // = GetLastError();
 
                 auto timerEnd = std::chrono::system_clock::now();
                 std::chrono::duration<double> deltaTime = timerEnd - timerStart;

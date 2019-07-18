@@ -62,9 +62,17 @@ namespace Guise
 
         ::HDC getWin32HDC() const;
 
-        void maximize(); // IMPLEMENT
+        bool isFocused() const; // IMPLEMENT
 
-        void minimize(); // IMPLEMENT
+        bool isMaximized() const; // IMPLEMENT
+
+        bool isMinimized() const; // IMPLEMENT
+
+        bool isShowing() const; // IMPLEMENT
+
+        void maximize();
+
+        void minimize();
 
         void render();
 
@@ -72,7 +80,7 @@ namespace Guise
 
         void setRenderer(const std::shared_ptr<Renderer> & renderer);
 
-        void show(const bool focus = true); // IMPLEMENT
+        void show(const bool focus = true);
 
         void update();
        
@@ -103,6 +111,11 @@ namespace Guise
         DWORD                       m_win32Style;           ///< Win32 style of window.
         DWORD                       m_win32ExtendedStyle;   ///< Win32 extended style of window.
         std::string                 m_windowClassName;
+
+        bool m_focused;
+        bool m_maximized;
+        bool m_minimized;
+        bool m_showing;
 
     };
 

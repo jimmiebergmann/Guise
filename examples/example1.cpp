@@ -93,7 +93,12 @@ int main()
     button3->onReleased = { { appWindow1 }, [&appWindow1]()
     {
         appWindow1->minimize();
-    } }; 
+    } };
+
+    button2->onReleased = { { appWindow1 }, [&appWindow1]()
+    {
+        appWindow1->maximize();
+    } };
     
   
 
