@@ -37,11 +37,6 @@ namespace Guise
         return std::shared_ptr<TextBox>(new TextBox(canvas));
     }
 
-    ControlType TextBox::getType() const
-    {
-        return ControlType::TextBox;
-    }
-
     bool TextBox::handleInputEvent(const Input::Event & e)
     {
         const Input & input = m_canvas.getInput();
@@ -316,17 +311,6 @@ namespace Guise
         return true;
     }
 
-    void TextBox::update(const Bounds2f & canvasBound)
-    {
-        auto renderBounds = calcRenderBounds(canvasBound, getPosition(), getSize(), getOverflow());
-        if (renderBounds != m_renderBounds)
-        {
-            m_renderBounds = renderBounds;
-            m_changed = true;
-        }
-        getCanvas().queueControlRendering(this);
-    }
-
     void TextBox::render(RendererInterface & renderer)
     {
         const float scale = m_canvas.getScale();
@@ -440,10 +424,26 @@ namespace Guise
     {
         return m_renderBounds;
     }
+
+    ControlType TextBox::getType() const
+    {
+        return ControlType::TextBox;
+    }
+
+    void TextBox::update()
+    {
+        m_canvas.updateControlRendering(this);
+        auto renderBounds = calcRenderBounds(*this);
+        if (renderBounds != m_renderBounds)
+        {
+            m_renderBounds = renderBounds;
+            m_changed = true;
+        }
+    }
     
     TextBox::~TextBox()
     {
-        getCanvas().unregisterDpiSensitive(this);
+        //getCanvas().unregisterDpiSensitive(this);
     }
 
     Style::FontStyle & TextBox::getTextStyle()
@@ -470,8 +470,7 @@ namespace Guise
 
     TextBox::TextBox(std::shared_ptr<Canvas> & canvas) :       
         Control(*canvas),
-        Style::PaintRectStyle(canvas->getStyleSheet()->getSelector("text-box")),
-        Style::ParentStyle(canvas->getStyleSheet()->getSelector("text-box")),
+        Style::ParentPaintRectStyle(canvas->getStyleSheet()->getSelector("text-box")),
         m_active(false),
         m_changed(true),
         m_changedText(false),
@@ -481,7 +480,7 @@ namespace Guise
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_textBounds(0.0f, 0.0f, 0.0f, 0.0f)
     {
-        getCanvas().registerDpiSensitive(this);
+        //getCanvas().registerDpiSensitive(this);
 
         if (auto textStyle = canvas->getStyleSheet()->getSelector("text-box-text"))
         {
@@ -491,11 +490,11 @@ namespace Guise
         }
     }
 
-    void TextBox::onNewDpi(const int32_t dpi)
+    /*void TextBox::onNewDpi(const int32_t dpi)
     {
         m_dpi = dpi;
         m_changedText = true;
-    }
+    }*/
 
     void TextBox::onActiveChange(bool active)
     {

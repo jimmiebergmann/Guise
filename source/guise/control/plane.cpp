@@ -31,44 +31,9 @@ namespace Guise
 {
 
     // Plane implementations.
-    std::shared_ptr<Plane> Plane::create(Canvas & canvas)
+    std::shared_ptr<Plane> Plane::create(std::shared_ptr<Canvas> & canvas)
     {
         return std::shared_ptr<Plane>(new Plane(canvas));
-    }
-
-    ControlType Plane::getType() const
-    {
-        return ControlType::Plane;
-    }
-
-    bool Plane::handleInputEvent(const Input::Event & /*e*/)
-    {
-        return false;
-    }
-
-    void Plane::update(const Bounds2f & canvasBound)
-    {
-        const bool childsUpdate = pollUpdateForced();
-        if (canvasBound != m_renderBounds || childsUpdate)
-        {
-            Bounds2f renderBounds = calcRenderBounds(canvasBound, getPosition(), getSize(), getOverflow());
-            if (renderBounds != m_renderBounds || childsUpdate)
-            {
-                m_renderBounds = renderBounds;
-
-                const float scale = m_canvas.getScale();
-                const auto paddingLow = getPaddingLow() * scale;
-                const auto paddingHigh = getPaddingHigh() * scale;
-
-                m_childsBounds = Bounds2f(m_renderBounds.position + paddingLow, m_renderBounds.size - paddingLow - paddingHigh);
-            }
-        }
-
-        auto childs = getChilds();
-        for (auto it = childs.begin(); it != childs.end(); it++)
-        {
-            (*it)->update(m_childsBounds);
-        }
     }
 
     Bounds2f Plane::getRenderBounds() const
@@ -81,11 +46,36 @@ namespace Guise
         return m_renderBounds;
     }
 
-    Plane::Plane(Canvas & canvas) :       
-        ControlContainerList(canvas),
-        Style::ParentRectStyle(canvas.getStyleSheet()->getSelector("plane")),       
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
-        m_childsBounds(0.0f, 0.0f, 0.0f, 0.0f)
+    ControlType Plane::getType() const
+    {
+        return ControlType::Plane;
+    }
+
+    void Plane::update()
+    {
+        Bounds2f renderBounds = calcRenderBounds(*this);
+        if (renderBounds != m_renderBounds || isUpdateForced())
+        {
+            m_renderBounds = renderBounds;
+
+            Bounds2f childsBounds = calcChildRenderBounds(*this);
+            if (childsBounds != m_childsBounds || isUpdateForced())
+            {
+                m_childsBounds = childsBounds;
+
+                for (auto & child : getChilds())
+                {
+                    child->update(m_childsBounds);
+                }
+            }
+        }
+    }
+
+    Plane::Plane(std::shared_ptr<Canvas> & canvas) :
+        ControlContainerList(*canvas),
+        Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("plane")),    
+        m_childsBounds(0.0f, 0.0f, 0.0f, 0.0f),
+        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f)      
     { }
 
 }

@@ -36,11 +36,6 @@ namespace Guise
         return std::shared_ptr<Checkbox>(new Checkbox(canvas));
     }
 
-    ControlType Checkbox::getType() const
-    {
-        return ControlType::Checkbox;
-    }
-
     bool Checkbox::handleInputEvent(const Input::Event & e)
     {
         if (!m_enabled)
@@ -81,17 +76,6 @@ namespace Guise
         return true;
     }
 
-    void Checkbox::update(const Bounds2f & canvasBound)
-    {
-        Bounds2f renderBounds = calcRenderBounds(canvasBound, m_currentStyle->getPosition(), m_currentStyle->getSize(), m_currentStyle->getOverflow());
-        if (renderBounds != m_renderBounds)
-        {
-            m_renderBounds = { renderBounds.position , renderBounds.size };
-        }
-
-        getCanvas().queueControlRendering(this);
-    }
-
     void Checkbox::render(RendererInterface & renderer)
     {
         renderer.drawQuad(m_renderBounds, m_currentStyle->getBackgroundColor());
@@ -105,6 +89,22 @@ namespace Guise
     Bounds2f Checkbox::getSelectBounds() const
     {
         return m_renderBounds;
+    }
+
+    ControlType Checkbox::getType() const
+    {
+        return ControlType::Checkbox;
+    }
+
+    void Checkbox::update()
+    {
+        Bounds2f renderBounds = calcRenderBounds(*m_currentStyle);
+        if (renderBounds != m_renderBounds || isUpdateForced())
+        {
+            m_renderBounds = { renderBounds.position , renderBounds.size };
+
+            m_canvas.updateControlRendering(this);
+        }
     }
 
     Style::PaintRectStyle & Checkbox::getChekedStyle()
@@ -135,14 +135,14 @@ namespace Guise
     Checkbox::Checkbox(std::shared_ptr<Canvas> & canvas) :
         Control(*canvas),
         Style::PaintRectStyle(canvas->getStyleSheet()->getSelector("checkbox")),
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
+        m_checked(false),
         m_checkedStyle(*this),
         m_checkedHoverStyle(*this),
         m_checkedDisabledStyle(*this),
         m_disabledStyle(*this),
         m_hoverStyle(*this),
         m_currentStyle(this),
-        m_checked(false)
+        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f)
     {
         if (auto checkedStyle = canvas->getStyleSheet()->getSelector("checkbox:checked"))
         {

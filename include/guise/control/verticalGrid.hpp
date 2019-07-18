@@ -38,25 +38,23 @@ namespace Guise
 
         static std::shared_ptr<VerticalGrid> create(std::shared_ptr<Canvas> & canvas);
 
-        virtual ControlType getType() const;
-
-        virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void update(const Bounds2f & canvasBound);
-
         virtual Bounds2f getRenderBounds() const;
 
         virtual Bounds2f getSelectBounds() const;
 
         Style::ParentRectStyle & getSlotStyle();
+        const Style::ParentRectStyle & getSlotStyle() const;
+
+        virtual ControlType getType() const;
+
+        virtual void update();
 
     private:
 
         VerticalGrid(std::shared_ptr<Canvas> & canvas);
         VerticalGrid(const VerticalGrid &) = delete;
 
-        Bounds2f                m_renderBounds;
-        std::vector<Bounds2f>   m_childsBounds;
+        Bounds2f                m_renderBounds;        
         Style::ParentRectStyle  m_slotStyle;
 
     };

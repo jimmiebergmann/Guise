@@ -40,11 +40,9 @@ namespace Guise
 
         static std::shared_ptr<Button> create(std::shared_ptr<Canvas> & canvas);
 
-        virtual ControlType getType() const;
+        virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
 
         virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void update(const Bounds2f & canvasBound);
 
         virtual void render(RendererInterface & rendererInterface);
 
@@ -52,7 +50,9 @@ namespace Guise
 
         virtual Bounds2f getSelectBounds() const;
 
-        virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        virtual ControlType getType() const;
+
+        virtual void update();
 
         Style::ParentPaintRectStyle & getActiveStyle();
         Style::ParentPaintRectStyle & getDisabledStyle();
@@ -67,17 +67,14 @@ namespace Guise
         Button(std::shared_ptr<Canvas> & canvas);
         Button(const Button &) = delete;
 
-        void onActiveChange(bool active);
-
-        Bounds2f m_renderBounds;
         Bounds2f m_childBounds;
+        Bounds2f m_renderBounds;
 
+        Style::ParentPaintRectStyle *   m_currentStyle;
         Style::ParentPaintRectStyle     m_activeStyle;
         Style::ParentPaintRectStyle     m_disabledStyle;
-        Style::ParentPaintRectStyle     m_hoverStyle;
-        Style::ParentPaintRectStyle *   m_currentStyle;
+        Style::ParentPaintRectStyle     m_hoverStyle;    
         bool                            m_pressed;
-        bool                            m_active;
 
     };
 

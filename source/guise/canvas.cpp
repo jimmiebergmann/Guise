@@ -40,7 +40,7 @@ namespace Guise
         for (auto it = properties.begin(); it != properties.end(); it++)
         {
             if (it->first == "background-color")
-            {
+            { 
                 m_backgroundColor = it->second->getVector4f();
             }
         }
@@ -56,6 +56,7 @@ namespace Guise
         m_backgroundColor = color;
     }
 
+
     // Canvas implementations.
     std::shared_ptr<Canvas> Canvas::create(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet)
     {
@@ -65,17 +66,27 @@ namespace Guise
     Canvas::~Canvas()
     { }
 
-    bool Canvas::add(const std::shared_ptr<Control> & control, const size_t index)
+    bool Canvas::add(const std::shared_ptr<Control> & control, const size_t)
     {
-        m_plane->add(control, index);
-
+        m_childs.push_back(control);
+        control->setLevel(1);
         return true;
     }
 
     void Canvas::update()
     {
-        m_plane->update({ { 0.0f, 0.0f }, m_size });
+        for (auto & child : m_childs)
+        {
+            child->update({ {0.0f, 0.0f}, m_size });
+        }
          
+        for (auto * control : m_updateControls)
+        {
+            control->update();
+            control->pollUpdateForced();
+        }
+        m_updateControls.clear();
+
         m_input.update();
         
         struct MouseIntersector
@@ -167,60 +178,22 @@ namespace Guise
                         break;
                         default: break;
                     }
-
-
-                   /* mouseEventFunc(e);
-                    //mouseMovedFunc(e);
-
-                    if (m_activeControl)
-                    {
-                        m_activeControl->handleInputEvent(e);
-                    }*/
                 }
                 break;
                 default: break;
             }
         }
-
-        /*if (!hit.mouseMoved)
-        {
-            Input::Event moveEvent(Input::EventType::MouseMove, m_input.getLastMousePosition());
-            mouseMovedFunc(moveEvent);
-        }*/
-
-        /*
-        Input::Event e;
-        while (m_input.pollEvent(e))
-        {
-            switch (e.type)
-            {
-            case Input::EventType::MouseJustPressed:    std::cout << "MouseJustPressed:"    << (int)e.button << std::endl; break;
-            case Input::EventType::MouseDoubleClick:    std::cout << "MouseDoubleClick:"    << (int)e.button << std::endl; break;
-            case Input::EventType::MouseMove:           std::cout << "MouseMove:"           << e.position.x << ", " << e.position.y << std::endl; break;
-            case Input::EventType::MousePress:          std::cout << "MousePress:"          << (int)e.button << std::endl; break;
-            case Input::EventType::MouseRelease:        std::cout << "MouseRelease:"        << (int)e.button << std::endl; break;
-            case Input::EventType::MouseScroll:         std::cout << "MouseScroll:"         << e.distance << std::endl; break;
-            case Input::EventType::KeyboardJustPressed: std::cout << "KeyboardJustPressed:" << (int)e.key << std::endl; break;
-            case Input::EventType::KeyboardPress:       std::cout << "KeyboardPress:"       << (int)e.key << std::endl; break;
-            case Input::EventType::KeyboardRelease:     std::cout << "KeyboardRelease:"     << (int)e.key << std::endl; break;
-            //case Input::EventType::Texting:             std::cout << "Texting:"             << (int)e.character << std::endl; break;
-            default: break;//                                    std::cout << "None event" << std::endl; break;
-            }
-        }*/
-
     }
 
     void Canvas::render(RendererInterface & renderInterface)
     {
-        for (auto levelIt = m_renderControls.begin(); levelIt != m_renderControls.end(); levelIt++)
+        for (auto levelIt = m_renderControlLevels.begin(); levelIt != m_renderControlLevels.end(); levelIt++)
         {
             for (auto controlIt = levelIt->second.begin(); controlIt != levelIt->second.end(); controlIt++)
             {
                 (*controlIt)->render(renderInterface);
             }
         }
-
-        m_renderControls.clear();
     }
 
     const Input & Canvas::getInput() const
@@ -252,18 +225,19 @@ namespace Guise
         if (dpi != m_dpi)
         {
             m_dpi = dpi;
-            m_scale = static_cast<float>(m_dpi) / GUISE_DEFAULT_DPI;
-            for (auto it = m_dpiSensitiveObjects.begin(); it != m_dpiSensitiveObjects.end(); it++)
-            {
-                (*it)->onNewDpi(m_dpi);
-            }
+            m_scale = static_cast<float>(m_dpi) / GUISE_DEFAULT_DPI;            
+            onDpiChanged(m_dpi);
         }   
     }
 
     void Canvas::setScale(const float scale)
     {
         m_scale = std::max(scale, 0.0f);             
-        m_dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
+        uint32_t dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
+        if (dpi != m_dpi)
+        {
+            onDpiChanged(m_dpi);
+        }
     }
 
     void Canvas::setActiveControl(Control * control)
@@ -301,37 +275,121 @@ namespace Guise
         return m_activeControl;
     }
 
-    void Canvas::queueControlRendering(Control * control)
-    {
-        auto itLevel = m_renderControls.find(control->getLevel());
-        if (itLevel == m_renderControls.end())
+    void Canvas::updateControlRendering(Control * control)
+    {   
+        if (control == nullptr)
         {
-            itLevel = m_renderControls.insert({ control->getLevel(),{} }).first;
+            return;
         }
 
-        itLevel->second.push_back(control);
+        auto itControl = m_renderControls.find(control);
+
+        // Add new.
+        if (itControl == m_renderControls.end())
+        {
+            if (!control->getRenderBounds().intersects(Bounds2f{ { 0.0f, 0.0f }, m_size }))
+            {
+                return;
+            }
+
+            const size_t level = control->getLevel();
+            auto itLevel = m_renderControlLevels.find(level);
+            if (itLevel == m_renderControlLevels.end())
+            {
+                itLevel = m_renderControlLevels.insert({ level, {} }).first;
+            }
+
+            itLevel->second.push_back(control);
+            m_renderControls.insert({ control, level });           
+        }
+        // Update existing.
+        else
+        {
+            // Not inside canvas anymore, remove it.
+            if (!control->getRenderBounds().intersects(Bounds2f{ { 0.0f, 0.0f }, m_size }))
+            {
+                auto itLevel = m_renderControlLevels.find(itControl->second);
+                auto itControl2 = std::find(itLevel->second.begin(), itLevel->second.end(), control);
+
+                itLevel->second.erase(itControl2);
+                m_renderControls.erase(control);
+
+                if (control == m_selectedControl)
+                {
+                    m_selectedControl = nullptr;
+                }
+                if (control == m_activeControl)
+                {
+                    m_activeControl = nullptr;
+                }
+                if (control == m_hoveredControl)
+                {
+                    m_hoveredControl = nullptr;
+                }
+            }
+            else
+            {
+                const size_t level = itControl->second;
+                const size_t controlLevel = control->getLevel();
+
+                // Level has been changed.
+                if (level != controlLevel)
+                {
+                    // IMPLEMENT THIS!
+                }
+            }
+        }
     }
 
-    void Canvas::registerDpiSensitive(DpiSensitive * object)
+    void Canvas::removeControlRendering(Control * control)
     {
-        m_dpiSensitiveObjects.insert(object);
+        auto itLevel = m_renderControlLevels.find(control->getLevel());
+        if (itLevel == m_renderControlLevels.end())
+        {
+            return;
+        }
+
+        auto itControl = std::find(itLevel->second.begin(), itLevel->second.end(), control);
+        if (itControl == itLevel->second.end())
+        {
+            return;
+        }
+
+        itLevel->second.erase(itControl);
+        m_renderControls.erase(control);
+
+        if (control == m_selectedControl)
+        {
+            m_selectedControl = nullptr;
+        }
+        if (control == m_activeControl)
+        {
+            m_activeControl = nullptr;
+        }
+        if (control == m_hoveredControl)
+        {
+            m_hoveredControl = nullptr;
+        }
     }
 
-    void Canvas::unregisterDpiSensitive(DpiSensitive * object)
+    void Canvas::forceControlUpdate(Control * control)
     {
-        m_dpiSensitiveObjects.erase(object);
+        m_updateControls.insert(control);
+    }
+
+    void Canvas::unforceControlUpdate(Control * control)
+    {
+        m_updateControls.erase(control);
     }
 
     Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet) :
         m_dpi(GUISE_DEFAULT_DPI),
         m_scale(1.0f),
-        m_plane(nullptr),
         m_selectedControl(nullptr),
         m_size(size),
         m_activeControl(nullptr),
         m_hoveredControl(nullptr)
     {
-        
         if (styleSheet != nullptr)
         {
             m_styleSheet = *styleSheet;
@@ -342,14 +400,11 @@ namespace Guise
         }
 
         CanvasStyle::operator=(*m_styleSheet->getSelector("canvas"));
-
-        m_plane = Plane::create(*this);
-        m_plane->setLevel(1);
     }
 
     Control * Canvas::queryControlHit(const Vector2f & point) const
     {
-        for (auto levelIt = m_renderControls.rbegin(); levelIt != m_renderControls.rend(); levelIt++)
+        for (auto levelIt = m_renderControlLevels.rbegin(); levelIt != m_renderControlLevels.rend(); levelIt++)
         {
             for (auto controlIt = levelIt->second.rbegin(); controlIt != levelIt->second.rend(); controlIt++)
             {

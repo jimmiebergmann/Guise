@@ -50,25 +50,35 @@ namespace Guise
 
         ~LinuxAppWindow();
        
+        void close();  // IMPLEMENT
+
         std::shared_ptr<Canvas> getCanvas();
 
-        void setRenderer(const std::shared_ptr<Renderer> & renderer);
+        int32_t getDpi() const;
 
-        void update();
+        ::Display * getLinuxDisplay() const;
+
+        int getLinuxScreen() const;
+
+        ::Window getLinuxWindow() const;
+
+        Vector2i32 getPosition() const;
+
+        Vector2ui32 getSize() const;
+
+        void maximize();  // IMPLEMENT
+
+        void minimize();  // IMPLEMENT
 
         void render();
 
         void setDpi(const int32_t dpi);
 
-        Vector2ui32 getSize() const;
+        void setRenderer(const std::shared_ptr<Renderer> & renderer);
 
-        Vector2i32 getPosition() const;    
+        void show(const bool focus = true);  // IMPLEMENT
 
-        int32_t getDpi() const;
-
-        ::Display * getLinuxDisplay() const;
-        ::Window getLinuxWindow() const;
-        int getLinuxScreen() const;
+        void update();       
        
     private:
 

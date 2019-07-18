@@ -36,10 +36,17 @@ namespace Guise
         return std::shared_ptr<Button>(new Button(canvas));
     }
 
-    ControlType Button::getType() const
+    bool Button::add(const std::shared_ptr<Control> & control, const size_t)
     {
-        return ControlType::Button;
+        if (ControlContainerSingle::add(control))
+        {
+            control->disableInput();
+            return true;
+        }
+
+        return false;
     }
+
 
     bool Button::handleInputEvent(const Input::Event & e)
     {
@@ -113,37 +120,6 @@ namespace Guise
         return true;
     }
 
-    void Button::update(const Bounds2f & canvasBound)
-    {
-        if (!m_enabled && m_currentStyle != &m_disabledStyle)
-        {
-            m_currentStyle = &m_disabledStyle;
-            forceUpdate();
-        }
-
-        const bool childsUpdate = pollUpdateForced();
-        if (canvasBound != m_renderBounds || childsUpdate)
-        {
-            Bounds2f renderBounds = calcRenderBounds(canvasBound, m_currentStyle->getPosition(), m_currentStyle->getSize(), m_currentStyle->getOverflow());
-            if (renderBounds != m_renderBounds || childsUpdate)
-            {
-                m_renderBounds = { renderBounds.position , renderBounds.size };
-
-                const float scale = m_canvas.getScale();
-                const auto paddingLow = m_currentStyle->getPaddingLow() * scale;
-                const auto paddingHigh = m_currentStyle->getPaddingHigh() * scale;
-                m_childBounds = Bounds2f(m_renderBounds.position + paddingLow, m_renderBounds.size - paddingLow - paddingHigh);
-            }
-        }
-
-        getCanvas().queueControlRendering(this);
-
-        if (auto child = getChilds()[0])
-        {
-            child->update(m_childBounds);
-        }
-    }
-
     void Button::render(RendererInterface & renderer)
     {
         renderer.drawQuad(m_renderBounds, m_currentStyle->getBackgroundColor());
@@ -167,17 +143,33 @@ namespace Guise
         return m_renderBounds;
     }
 
-    bool Button::add(const std::shared_ptr<Control> & control, const size_t)
+    ControlType Button::getType() const
     {
-        if (ControlContainerSingle::add(control))
-        {
-            control->disableInput();
-            return true;
-        }
-
-        return false;
+        return ControlType::Button;
     }
 
+    void Button::update()
+    {
+        if (!m_enabled && m_currentStyle != &m_disabledStyle)
+        {
+            m_currentStyle = &m_disabledStyle;
+        }
+
+        Bounds2f renderBounds = calcRenderBounds(*m_currentStyle);
+        if (renderBounds != m_renderBounds || isUpdateForced())
+        {
+            m_renderBounds = { renderBounds.position, renderBounds.size };
+            m_childBounds = calcChildRenderBounds(*m_currentStyle);
+
+            if (auto child = getChilds()[0])
+            {
+                child->update(m_childBounds);
+            }
+        }
+
+        m_canvas.updateControlRendering(this);
+    }
+   
     Style::ParentPaintRectStyle & Button::getActiveStyle()
     {
         return m_activeStyle;
@@ -196,14 +188,13 @@ namespace Guise
     Button::Button(std::shared_ptr<Canvas> & canvas) :
         ControlContainerSingle(*canvas),
         Style::ParentPaintRectStyle(canvas->getStyleSheet()->getSelector("button")),
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_childBounds(0.0f, 0.0f, 0.0f, 0.0f),
+        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),     
+        m_currentStyle(this),
         m_activeStyle(this),
         m_disabledStyle(this),
-        m_hoverStyle(this),
-        m_currentStyle(this),
-        m_pressed(false),
-        m_active(false)
+        m_hoverStyle(this),      
+        m_pressed(false)
     {
         if (auto activeStyle = canvas->getStyleSheet()->getSelector("button:active"))
         {
@@ -220,10 +211,4 @@ namespace Guise
             m_hoverStyle = { hoverStyle, this };
         }
     }
-
-    void Button::onActiveChange(bool active)
-    {
-        m_active = active;
-    }
-
 }

@@ -43,41 +43,9 @@ namespace Guise
         return std::shared_ptr<Label>(new Label(canvas, font, text));
     }
 
-    ControlType Label::getType() const
-    {
-        return ControlType::Label;
-    }
-
     bool Label::handleInputEvent(const Input::Event &)
     {
         return false;
-    }
-
-    void Label::update(const Bounds2f & canvasBound)
-    {
-        m_renderBounds.position = canvasBound.position;
-
-        if (m_changedText)
-        {
-            m_changedText = false;
-            m_fontSequence.createSequence(m_text, getFontSize(), m_dpi);
-            m_changed = true;
-        }
-
-        if (m_changed)
-        {
-            m_loadData.reset();
-            if (m_fontSequence.createBitmapRgba(m_loadData, m_loadDimensions))
-            {
-                m_renderBounds.size = m_loadDimensions;
-            }
-            else
-            {
-                m_changed = false;
-            }
-        }
-
-        getCanvas().queueControlRendering(this);    
     }
 
     void Label::render(RendererInterface & renderer)
@@ -115,9 +83,42 @@ namespace Guise
         return m_renderBounds;
     }
 
+    ControlType Label::getType() const
+    {
+        return ControlType::Label;
+    }
+
+    void Label::update()
+    {
+        m_renderBounds.position = getCanvasBounds().position;
+
+        if (m_changedText)
+        {
+            m_changedText = false;
+            m_fontSequence.createSequence(m_text, getFontSize(), m_dpi);
+            m_changed = true;
+        }
+
+        if (m_changed)
+        {
+            m_loadData.reset();
+            if (m_fontSequence.createBitmapRgba(m_loadData, m_loadDimensions))
+            {
+                m_renderBounds.size = m_loadDimensions;
+
+                m_canvas.updateControlRendering(this);
+            }
+            else
+            {
+                m_changed = false;
+            }
+        }
+    }
+
     Label::~Label()
     {
-        getCanvas().unregisterDpiSensitive(this);
+        //getCanvas().unregisterDpiSensitive(this);
+        /// REMOVE SIGNAL TO m_canvas.onDpiChanged
     }
 
     void Label::setText(const std::wstring & text)
@@ -151,7 +152,12 @@ namespace Guise
         m_text(text),
         m_texture(nullptr)
     {
-        getCanvas().registerDpiSensitive(this);
+        /*m_canvas.onDpiChanged = [this](uint32_t dpi)
+        {
+            m_dpi = dpi;
+            m_changedText = true;
+            forceUpdate();
+        };*/
     }
 
     Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :
@@ -166,14 +172,13 @@ namespace Guise
         m_text(text),
         m_texture(nullptr)
     {
-        getCanvas().registerDpiSensitive(this);
+        /*m_canvas.onDpiChanged = [this](uint32_t dpi)
+        {
+            m_dpi = dpi;
+            m_changedText = true;
+            forceUpdate();
+        };*/
     }
 
-    void Label::onNewDpi(const int32_t dpi)
-    {
-        m_dpi = dpi;
-        m_changedText = true;
-        forceUpdate();
-    }
 
 }

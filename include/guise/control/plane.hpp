@@ -36,25 +36,23 @@ namespace Guise
 
     public:
 
-        static std::shared_ptr<Plane> create(Canvas & canvas);
-
-        virtual ControlType getType() const;
-
-        virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void update(const Bounds2f & canvasBound);
+        static std::shared_ptr<Plane> create(std::shared_ptr<Canvas> & canvas);
 
         virtual Bounds2f getRenderBounds() const;
 
         virtual Bounds2f getSelectBounds() const;
 
+        virtual ControlType getType() const;
+
+        virtual void update();
+
     private:
 
-        Plane(Canvas & canvas);
-        Plane(const Plane &) = delete;
+        Plane(std::shared_ptr<Canvas> & canvas);
+        Plane(const Plane &) = delete;   
 
-        Bounds2f m_renderBounds;
         Bounds2f m_childsBounds;
+        Bounds2f m_renderBounds;  
 
     };
 

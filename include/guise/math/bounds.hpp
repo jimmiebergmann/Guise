@@ -118,6 +118,7 @@ namespace Guise
 
 
         bool intersects(const Vector<2, T> & point) const;
+        bool intersects(const Bounds<2, T> & bounds) const;
 
         Bounds<2, T> & operator = (const Bounds<2, T> & bounds);
 

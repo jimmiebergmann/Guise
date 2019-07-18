@@ -28,7 +28,6 @@
 
 #include "guise/control.hpp"
 #include "guise/signal.hpp"
-#include "guise/control/dpiSensitive.hpp"
 #include "guise/font.hpp"
 #include <functional>
 #include <string>
@@ -37,24 +36,24 @@
 namespace Guise
 {
 
-    class GUISE_API TextBox : public Control, public Style::PaintRectStyle, public Style::ParentStyle, public DpiSensitive
+    class GUISE_API TextBox : public Control, public Style::ParentPaintRectStyle
     {
 
     public:
 
         static std::shared_ptr<TextBox> create(std::shared_ptr<Canvas> & canvas);
 
-        virtual ControlType getType() const;
-
         virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void update(const Bounds2f & canvasBound);
 
         virtual void render(RendererInterface & rendererInterface);
 
         virtual Bounds2f getRenderBounds() const;
 
         virtual Bounds2f getSelectBounds() const;
+
+        virtual ControlType getType() const;
+
+        virtual void update();
 
         ~TextBox();
 
@@ -70,8 +69,6 @@ namespace Guise
 
         TextBox(std::shared_ptr<Canvas> & canvas);
         TextBox(const TextBox &) = delete;
-
-        void onNewDpi(const int32_t dpi);
 
         void onActiveChange(bool active);
 

@@ -31,47 +31,21 @@
 
 namespace Guise
 {
-    /*static bool enableDpiAware(HWND windowHandle)
+   
+    // Win32 Applicaiton window implementations.
+    std::shared_ptr<LinuxAppWindow> LinuxAppWindow::create(const std::wstring & title, const Vector2ui32 & size)
     {
-    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
-        SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-        linuxAppWindow.hpp
-        if (!EnableNonClientDpiScaling(windowHandle))
-        {
-            return false;
-        }
-    #elif GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_VISTA
-        if (!SetProcessDPIAware())
-        {
-            return false;
-        }
-    #endif
-
-        return true;
-    }*/
-
-    /*#if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
-    static int getSystemDpi(HWND windowHandle, HDC )
-    {
-        return static_cast<int>(GetDpiForWindow(windowHandle));
+        return std::shared_ptr<LinuxAppWindow>(new LinuxAppWindow(title, size));
     }
-    #else
-    static int getSystemDpi(HWND, HDC deviceContextHandle)
-    {
-        return GetDeviceCaps(deviceContextHandle, LOGPIXELSX);
-    }
-
-    #endif*/
-
 
     LinuxAppWindow::~LinuxAppWindow()
     {
         destroyWindow();
     }
 
-    std::shared_ptr<LinuxAppWindow> LinuxAppWindow::create(const std::wstring & title, const Vector2ui32 & size)
+    void LinuxAppWindow::close()
     {
-        return std::shared_ptr<LinuxAppWindow>(new LinuxAppWindow(title, size));
+        // IMPLEMENT
     }
 
     std::shared_ptr<Canvas> LinuxAppWindow::getCanvas()
@@ -79,9 +53,73 @@ namespace Guise
         return m_canvas;
     }
 
+    int32_t LinuxAppWindow::getDpi() const
+    {
+        return m_dpi;
+    }
+
+    Vector2i32 LinuxAppWindow::getPosition() const
+    {
+        return { 0, 0 };
+    }
+
+    Vector2ui32 LinuxAppWindow::getSize() const
+    {
+        return m_size;
+    }
+  
+    ::Display * LinuxAppWindow::getLinuxDisplay() const
+    {
+        return m_display;
+    }
+
+    int LinuxAppWindow::getLinuxScreen() const
+    {
+        return m_screen;
+    }
+
+    ::Window LinuxAppWindow::getLinuxWindow() const
+    {
+        return m_window;
+    }
+
+    void LinuxAppWindow::maximize()
+    {
+        // IMPLEMENT
+    }
+
+    void LinuxAppWindow::minimize()
+    {
+        // IMPLEMENT
+    }
+
+    void LinuxAppWindow::render()
+    {
+        if (!m_renderer)
+        {
+            return;
+        }
+
+        auto backgroundColor = m_canvas->getBackgroundColor();
+        m_renderer->setClearColor(backgroundColor);
+        m_renderer->clearColor();
+        m_canvas->render(*m_renderer.get());
+        m_renderer->present();
+    }
+
+    void LinuxAppWindow::setDpi(const int32_t dpi)
+    {
+        m_dpi = dpi;
+    }
+
     void LinuxAppWindow::setRenderer(const std::shared_ptr<Renderer> & renderer)
     {
         m_renderer = renderer;
+    }
+
+    void LinuxAppWindow::show(const bool /*focus*/)
+    {
+        // IMPLEMENT
     }
 
     void LinuxAppWindow::update()
@@ -134,55 +172,6 @@ namespace Guise
         }*/
 
         m_canvas->update();
-    }
-
-    void LinuxAppWindow::render()
-    {
-        if (!m_renderer)
-        {
-            return;
-        }
-
-        auto backgroundColor = m_canvas->getBackgroundColor();
-        m_renderer->setClearColor(backgroundColor);
-        m_renderer->clearColor();
-        m_canvas->render(*m_renderer.get());
-        m_renderer->present();
-    }
-
-    void LinuxAppWindow::setDpi(const int32_t dpi)
-    {
-        m_dpi = dpi;
-    }
-
-    Vector2ui32 LinuxAppWindow::getSize() const
-    {
-        return m_size;
-    }
-
-    Vector2i32 LinuxAppWindow::getPosition() const
-    {
-        return {0, 0};
-    }   
-
-    int32_t LinuxAppWindow::getDpi() const
-    {
-        return m_dpi;
-    }
-
-    ::Display * LinuxAppWindow::getLinuxDisplay() const
-    {
-        return m_display;
-    }
-
-    ::Window LinuxAppWindow::getLinuxWindow() const
-    {
-        return m_window;
-    }
-
-    int LinuxAppWindow::getLinuxScreen() const
-    {
-        return m_screen;
     }
 
     LinuxAppWindow::LinuxAppWindow(const std::wstring & title, const Vector2ui32 & size) :

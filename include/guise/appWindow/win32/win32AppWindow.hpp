@@ -50,35 +50,44 @@ namespace Guise
 
         ~Win32AppWindow();
        
+        void close(); // IMPLEMENT
+
         std::shared_ptr<Canvas> getCanvas();
 
-        void setRenderer(const std::shared_ptr<Renderer> & renderer);
+        int32_t getDpi() const;
 
-        void update();
+        Vector2i32 getPosition() const;
+
+        Vector2ui32 getSize() const;
+
+        ::HDC getWin32HDC() const;
+
+        void maximize(); // IMPLEMENT
+
+        void minimize(); // IMPLEMENT
 
         void render();
 
         void setDpi(const int32_t dpi);
 
-        Vector2ui32 getSize() const;
+        void setRenderer(const std::shared_ptr<Renderer> & renderer);
 
-        Vector2i32 getPosition() const;    
+        void show(const bool focus = true); // IMPLEMENT
 
-        int32_t getDpi() const;
-
-        HDC getWin32HDC() const;
+        void update();
        
     private:
 
         static std::string createClassName();
 
-        Win32AppWindow(const std::wstring & title, const Vector2ui32 & size);
+        static LRESULT windowProcStatic(HWND HWND, UINT message, WPARAM wParam, LPARAM lParam);
 
-        void load();
+        Win32AppWindow(const std::wstring & title, const Vector2ui32 & size);
 
         void destroyWindow();
 
-        static LRESULT windowProcStatic(HWND HWND, UINT message, WPARAM wParam, LPARAM lParam);
+        void load();
+        
         LRESULT windowProc(HWND HWND, UINT message, WPARAM wParam, LPARAM lParam);
 
         bool                        m_loaded;

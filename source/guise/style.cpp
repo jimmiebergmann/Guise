@@ -36,6 +36,10 @@ namespace Guise
 
         static const std::string g_emptyString = "";
 
+        // External definitions.
+        float const FitParent = -1.0f;
+        float const FitContent = 0.0f;
+
         // Helper functions and data
         /*static const std::string g_emptyString = "";
 
@@ -136,6 +140,38 @@ namespace Guise
         }
 
 
+        // Size implementations.
+        Size::Size() :
+            Vector2f(0.0f, 0.0f),
+            fit(NoFit, NoFit)
+        { }
+
+        Size::Size(const float x, const float y) :
+            Vector2f(x, y),
+            fit(NoFit, NoFit)
+        { }
+
+        Size::Size(const float x, const Fit yFit) :
+            Vector2f(x, 0.0f),
+            fit(NoFit, yFit)
+        { }
+
+        Size::Size(const Fit xFit, const float y) :
+            Vector2f(0.0f, y),
+            fit(xFit, NoFit)
+        { }
+
+        Size::Size(const Fit xFit, const Fit yFit) :
+            Vector2f(0.0f, 0.0f),
+            fit(xFit, yFit)
+        { }
+
+        Size::Size(const Vector2f & vector) :
+            Vector2f(vector),
+            fit(NoFit, NoFit)
+        { }
+
+
         // Property implementations.
         Property::Property(const Property & property) :
             m_dataType(property.m_dataType)
@@ -201,6 +237,10 @@ namespace Guise
         Property::Property(const Overflow value) :
             m_dataType(DataType::Overflow),
             m_valueOverflow(value)
+        { }
+        Property::Property(const Size & value) :
+            m_dataType(DataType::Size),
+            m_valueSize(value)
         { }
         Property::Property(const std::string & value) :
             m_dataType(DataType::String),
@@ -268,6 +308,11 @@ namespace Guise
         Property::Overflow Property::getOverflow() const
         {
             return m_valueOverflow;
+        }
+
+        const Size & Property::getSize() const
+        {
+            return m_valueSize;
         }
 
         std::string Property::getString() const
@@ -343,6 +388,13 @@ namespace Guise
             deallocate();
             m_dataType = DataType::Overflow;
             m_valueOverflow = value;   
+        }
+
+        void Property::setSize(const Size & value)
+        {
+            deallocate();
+            m_dataType = DataType::Size;
+            m_valueSize = value;
         }
 
         void Property::setString(const std::string & value)
@@ -824,9 +876,23 @@ namespace Guise
                 m_position = position->getVector2f();
             }
             auto size = selector->getProperty("size");
-            if (size && size->getDataType() == Property::DataType::Vector2f)
+            if (size)
             {
-                m_size = size->getVector2f();
+                switch (size->getDataType())
+                {
+                    case Property::DataType::Size:
+                    {
+                        m_size = size->getSize();
+                    }
+                    break;
+                    case Property::DataType::Vector2f:
+                    {
+                        m_size = size->getVector2f();
+                    }
+                    break;
+                    default: break;
+                }
+                
             }
         }
 
@@ -850,9 +916,9 @@ namespace Guise
         {
             return m_position.has_value() ? m_position.value() : (m_parent ? m_parent->getPosition() : Vector2f{ 0.0f, 0.0f });
         }
-        const Vector2f RectStyle::getSize() const
+        const Size RectStyle::getSize() const
         {
-            return m_size.has_value() ? m_size.value() : (m_parent ? m_parent->getSize() : Vector2f{ 0.0f, 0.0f });
+            return m_size.has_value() ? m_size.value() : (m_parent ? m_parent->getSize() : Size{ 0.0f, 0.0f });
         }
 
         void RectStyle::setMargin(const Vector4f & margin)
@@ -895,7 +961,7 @@ namespace Guise
         {
             m_position = position;
         }
-        void RectStyle::setSize(const Vector2f & size)
+        void RectStyle::setSize(const Size & size)
         {
             m_size = size;
         }

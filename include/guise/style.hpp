@@ -46,8 +46,10 @@ namespace Guise
         using Properties = std::map<std::string, std::shared_ptr<Property> >;
         using Selectors = std::map<std::string, std::shared_ptr<Selector> >;
 
+        GUISE_API extern const float FitParent;
+        GUISE_API extern const float FitContent;
 
-        class LinearGradient
+        class GUISE_API LinearGradient
         {
 
         public:
@@ -72,6 +74,30 @@ namespace Guise
 
         };
 
+        class GUISE_API Size : public Vector2f
+        {
+
+        public:
+
+            enum Fit
+            {              
+                NoFit,
+                FitParent,
+                FitContent,
+                FitContentAndParent
+            };
+
+            Size();
+            Size(const float x, const float y);
+            Size(const float x, const Fit yFit);
+            Size(const Fit xFit, const float y);
+            Size(const Fit xFit, const Fit yFit);
+            Size(const Vector2f & vector);
+
+            Vector2<Fit> fit;
+
+        };
+
 
         class GUISE_API Property
         {
@@ -86,6 +112,7 @@ namespace Guise
                 Integer,
                 LinearGradient,
                 Overflow,
+                Size,
                 String,
                 Vector2f,
                 Vector3f,
@@ -129,6 +156,7 @@ namespace Guise
             Property(const int value);
             Property(const LinearGradient & value);
             Property(const Overflow value);
+            Property(const Size & value);
             Property(const std::string & value);
             Property(const Vector2f & value);
             Property(const Vector3f & value);
@@ -146,6 +174,7 @@ namespace Guise
             int getInteger() const;
             LinearGradient getLinearGradient() const;
             Overflow getOverflow() const;
+            const Size & getSize() const;
             std::string getString() const;
             const Vector2f & getVector2f() const;
             const Vector3f & getVector3f() const;
@@ -159,6 +188,7 @@ namespace Guise
             void setInteger(const int value);
             void setLinearGradient(const LinearGradient & value);
             void setOverflow(const Overflow value);
+            void setSize(const Size & size);
             void setString(const std::string & value);
             void setVector2f(const Vector2f & value);
             void setVector3f(const Vector3f & value);
@@ -192,6 +222,7 @@ namespace Guise
                 float               m_valueFloat;
                 int                 m_valueInteger;
                 Overflow            m_valueOverflow;
+                Size                m_valueSize;
                 std::string *       m_valueString;
                 LinearGradient *    m_valueLinearGradient;
                 Vector2f            m_valueVector2f;
@@ -328,7 +359,7 @@ namespace Guise
             Vector2f getMarginLow() const;
             Vector2f getMarginHigh() const;
             const Vector2f getPosition() const;
-            const Vector2f getSize() const;
+            const Size getSize() const;
            
             void setMargin(const Vector4f & margin);
             void setMargin(const Vector2f & margin);
@@ -337,7 +368,7 @@ namespace Guise
             void setMarginHigh(const Vector2f & marginHigh);
             void setOverflow(const Property::Overflow overflow);
             void setPosition(const Vector2f & position);
-            void setSize(const Vector2f & size);
+            void setSize(const Size & size);
             
         protected:
 
@@ -346,7 +377,7 @@ namespace Guise
             std::optional<Vector4f>                     m_margin;
             std::optional<Style::Property::Overflow>    m_overflow;
             std::optional<Vector2f>                     m_position;
-            std::optional<Vector2f>                     m_size;
+            std::optional<Size>                         m_size;
 
         };
 

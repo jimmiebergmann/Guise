@@ -61,15 +61,9 @@ namespace Guise
 
         virtual ~AppWindow();
 
+        virtual void close() = 0;
+
         virtual std::shared_ptr<Canvas> getCanvas() = 0;
-
-        virtual void setRenderer(const std::shared_ptr<Renderer> & renderer) = 0;
-
-        virtual void update() = 0;
-
-        virtual void render() = 0;
-
-        virtual void setDpi(const int32_t dpi) = 0;
 
         virtual int32_t getDpi() const = 0;
 
@@ -77,6 +71,20 @@ namespace Guise
 
         virtual Vector2ui32 getSize() const = 0;
 
+        virtual void maximize() = 0;
+
+        virtual void minimize() = 0;
+
+        virtual void render() = 0;
+
+        virtual void setDpi(const int32_t dpi) = 0;
+
+        virtual void setRenderer(const std::shared_ptr<Renderer> & renderer) = 0;
+
+        virtual void show(const bool focus = true) = 0;
+
+        virtual void update() = 0;
+      
     #if defined(GUISE_PLATFORM_WINDOWS)
         virtual ::HDC getWin32HDC() const = 0;
     #endif

@@ -40,17 +40,17 @@ namespace Guise
 
         static std::shared_ptr<Checkbox> create(std::shared_ptr<Canvas> & canvas);
 
-        virtual ControlType getType() const;
-
         virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void update(const Bounds2f & canvasBound);
 
         virtual void render(RendererInterface & rendererInterface);
 
         virtual Bounds2f getRenderBounds() const;
 
         virtual Bounds2f getSelectBounds() const;
+
+        virtual ControlType getType() const;
+
+        virtual void update();
 
         Style::PaintRectStyle & getChekedStyle();
         Style::PaintRectStyle & getChekedHoverStyle();
@@ -68,16 +68,14 @@ namespace Guise
         Checkbox(std::shared_ptr<Canvas> & canvas);
         Checkbox(const Checkbox &) = delete;
 
-        Bounds2f m_renderBounds;
-
+        bool                    m_checked;
         Style::PaintRectStyle   m_checkedStyle;
         Style::PaintRectStyle   m_checkedHoverStyle;
         Style::PaintRectStyle   m_checkedDisabledStyle;
         Style::PaintRectStyle   m_disabledStyle;
         Style::PaintRectStyle   m_hoverStyle;
         Style::PaintRectStyle * m_currentStyle;
-        bool                    m_checked;
-
+        Bounds2f                m_renderBounds;
     };
 
 }

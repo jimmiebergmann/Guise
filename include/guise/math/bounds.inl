@@ -153,6 +153,15 @@ namespace Guise
     }
 
     template <typename T>
+    inline bool Bounds<2, T>::intersects(const Bounds<2, T> & bounds) const
+    {
+        return position.x <= bounds.position.x + bounds.size.x &&
+               position.x + size.x >= bounds.position.x &&
+               position.y <= bounds.position.y + bounds.size.y &&
+               position.y + size.y >= bounds.position.y;
+    }
+
+    template <typename T>
     inline Bounds<2, T>::Bounds(const Bounds<2, T> & bounds) :
         position(bounds.position),
         size(bounds.size)

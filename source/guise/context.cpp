@@ -51,36 +51,19 @@ namespace Guise
             renderer->setViewportSize({0, 0}, appWindow->getSize());
             renderer->setDpi(appWindow->getDpi());
 
-            /*auto windowSize = appWindow->getSize();
-            auto windowDpi = appWindow->getDpi();
-            Matrix4x4f orthoMat;
-            orthoMat.loadOrthographic(0.0f, (float)windowSize.x, (float)windowSize.y, 0.0f, 0.0f, 1.0f);
-            float scale = static_cast<float>(windowDpi) / static_cast<float>(GUISE_DEFAULT_DPI);
-            orthoMat.scale(scale, scale, scale);
-            renderer->setProjectionMatrix(orthoMat);*/
-
             windowIsCreated.notifyOne();
 
             while (1)
             {
                 auto timerStart = std::chrono::system_clock::now();
 
+                DWORD err = GetLastError();
                 appWindow->update();
 
-                /*auto currentDpi = appWindowData->appWindow->getDpi();
-                auto currentSize = appWindow->getSize();
-                if (currentSize != windowSize || currentDpi != windowDpi)
-                {
-                    windowSize = currentSize;
-                    windowDpi = currentDpi;
-
-                    scale = static_cast<float>(windowDpi) / static_cast<float>(GUISE_DEFAULT_DPI);
-                    orthoMat.loadOrthographic(0.0f, (float)windowSize.x, (float)windowSize.y, 0.0f, 0.0f, 1.0f);
-                    orthoMat.scale(scale, scale, scale);
-                    renderer->setProjectionMatrix(orthoMat);
-                }*/
-
+                err = GetLastError();
                 appWindow->render();
+
+                err = GetLastError();
 
                 auto timerEnd = std::chrono::system_clock::now();
                 std::chrono::duration<double> deltaTime = timerEnd - timerStart;
@@ -109,16 +92,8 @@ namespace Guise
 
     bool Context::setDpiAware()
     {
-    #if defined(GUISE_PLATFORM_WINDOWS)
-        #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10_1703
-            #if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-                return SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-            #else
-                return false;
-            #endif
-        #else
-            return false;
-        #endif
+    #if defined(GUISE_PLATFORM_WINDOWS) && GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10_1703 && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+        return SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     #else
         return false;
     #endif

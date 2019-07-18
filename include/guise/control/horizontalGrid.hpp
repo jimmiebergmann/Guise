@@ -42,7 +42,7 @@ namespace Guise
 
         virtual bool handleInputEvent(const Input::Event & event);
 
-        virtual void update(const Bounds2f & canvasBound);
+        virtual void update(const Bounds2f & canvasBounds);
 
         virtual Bounds2f getRenderBounds() const;
 

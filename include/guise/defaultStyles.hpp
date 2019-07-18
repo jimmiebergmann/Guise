@@ -39,77 +39,73 @@ namespace Guise
 
             static const Selector button = Selector(
                 {
-                    { "padding",                        { 15.0f } },
-                    { "background-color",   { Vector4f  { 0.25f, 0.25f, 0.25f, 1.0 } } },
+                    { "background-color",   { Vector4f  { 0.25f, 0.25f, 0.25f, 1.0f } } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } },
                     { "border-style",                   { Property::BorderStyle::Solid } },
                     { "border-width",                   { 1.0f } },
-                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                    { "overflow",                       { Property::Overflow::Hidden } },
+                    { "padding",                        { 3.0f } },
+                    { "size",               { Size      { Size::FitContentAndParent, Size::FitContentAndParent } } },
                 }
             );
 
             static const Selector buttonActive = Selector(
                 {
-                    { "background-color",   { Vector4f  { 1.00f, 0.20f, 0.20f, 1.0 } } },
-                    { "border-style",                   { Property::BorderStyle::Solid } },
-                    { "border-width",                   { 1.0f } },
+                    { "background-color",   { Vector4f  { 1.00f, 0.20f, 0.20f, 1.0f } } },
                     { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
                 }
             );
 
             static const Selector buttonDisabled = Selector(
                 {
-                    { "background-color",   { Vector4f  { 0.20f, 1.00f, 0.20f, 1.0 } } },
-                    { "border-style",                   { Property::BorderStyle::Solid } },
-                    { "border-width",                   { 1.0f } },
+                    { "background-color",   { Vector4f  { 0.20f, 1.00f, 0.20f, 1.0f } } },
                     { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
                 }
             );
 
             static const Selector buttonHover = Selector(
                 {
-                    { "background-color",   { Vector4f  { 0.20f, 0.20f, 1.00f, 1.0 } } },
-                    { "border-style",                   { Property::BorderStyle::Solid } },
-                    { "border-width",                   { 1.0f } },
-                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 0.20f, 0.20f, 1.00f, 1.0f } } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }                  
                 }
             );
 
             static const Selector canvas = Selector(
                 {
-                    { "padding",                        { 0.0f }  },
-                    { "background-color",   { Vector4f  { 0.9f, 0.9f, 0.9f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 0.9f, 0.9f, 0.9f, 1.0f } } },
+                    { "padding",                        { 0.0f } },
                 }
             );
 
             static const Selector checkbox = Selector(
                 {
-                    { "size",               { Vector2f  { 16.0f, 16.0f } } },
-                    { "background-color",   { Vector4f  { 1.0f, 0.0f, 0.0f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 1.0f, 0.0f, 0.0f, 1.0f } } },
+                    { "size",               { Vector2f  { 16.0f, 16.0f } } }
                 }
             );
             static const Selector checkboxChecked = Selector(
                 {
-                    { "background-color",{ Vector4f{ 1.0f, 0.0f, 1.0f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 1.0f, 0.0f, 1.0f, 1.0f } } }
                 }
             );
             static const Selector checkboxCheckedHover = Selector(
                 {
-                    { "background-color",{ Vector4f{ 1.0f, 1.0f, 0.0f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 1.0f, 1.0f, 0.0f, 1.0f } } }
                 }
             );
             static const Selector checkboxCheckedDisabled = Selector(
                 {
-                    { "background-color",{ Vector4f{ 0.2f, 0.2f, 0.2f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 0.2f, 0.2f, 0.2f, 1.0f } } }
                 }
             );
             static const Selector checkboxHover = Selector(
                 {
-                    { "background-color",{ Vector4f{ 0.0f, 0.0f, 1.0f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 0.0f, 0.0f, 1.0f, 1.0f } } }
                 }
             );
             static const Selector checkboxDisabled = Selector(
                 {
-                    { "background-color",{ Vector4f{ 0.4f, 0.4f, 0.4f, 1.0f } } }
+                    { "background-color",   { Vector4f  { 0.4f, 0.4f, 0.4f, 1.0f } } }
                 }
             );
 
@@ -137,7 +133,8 @@ namespace Guise
 
             static const Selector plane = Selector(
                 {
-                    { "padding",                        { 0.0f } }
+                    { "padding",                        { 0.0f } },
+                    { "size",               { Size      { Size::FitParent, Size::FitParent } } }
                 }
             );
 
@@ -145,7 +142,7 @@ namespace Guise
                 {
                     { "size",               { Vector2f  { 0.0f, 80.0f } } },
                     { "padding",                        { 3.0f } },
-                    { "background-color",   { Vector4f  { 0.8f, 0.8f, 0.8f, 1.0 } } },
+                    { "background-color",   { Vector4f  { 0.8f, 0.8f, 0.8f, 1.0f } } },
                     { "border-style",                   { Property::BorderStyle::Solid } },
                     { "border-width",                   { 1.0f } },
                     { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } },

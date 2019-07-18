@@ -33,28 +33,33 @@
 namespace Guise
 {
 
-    #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
+#if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
     static int getSystemDpi(HWND windowHandle, HDC )
     {
         return static_cast<int>(GetDpiForWindow(windowHandle));
     }
-    #else
+#else
     static int getSystemDpi(HWND, HDC deviceContextHandle)
     {
         return GetDeviceCaps(deviceContextHandle, LOGPIXELSX);
     }
-
-    #endif
+#endif
     
+
+    // Win32 Applicaiton window implementations.
+    std::shared_ptr<Win32AppWindow> Win32AppWindow::create(const std::wstring & title, const Vector2ui32 & size)
+    {
+        return std::shared_ptr<Win32AppWindow>(new Win32AppWindow(title, size));
+    }
 
     Win32AppWindow::~Win32AppWindow()
     {
         destroyWindow();
     }
 
-    std::shared_ptr<Win32AppWindow> Win32AppWindow::create(const std::wstring & title, const Vector2ui32 & size)
+    void Win32AppWindow::close()
     {
-        return std::shared_ptr<Win32AppWindow>(new Win32AppWindow(title, size));
+        // IMPLEMENT
     }
 
     std::shared_ptr<Canvas> Win32AppWindow::getCanvas()
@@ -62,9 +67,69 @@ namespace Guise
         return m_canvas;
     }
 
+    int32_t Win32AppWindow::getDpi() const
+    {
+        return m_dpi;
+    }
+
+    Vector2i32 Win32AppWindow::getPosition() const
+    {
+        return m_position;
+    }
+
+    Vector2ui32 Win32AppWindow::getSize() const
+    {
+        return m_size;
+    }
+
+    HDC Win32AppWindow::getWin32HDC() const
+    {
+        return m_deviceContextHandle;
+    }
+
+    void Win32AppWindow::maximize()
+    {
+        ShowWindow(m_windowHandle, SW_SHOWMAXIMIZED);
+    }
+
+    void Win32AppWindow::minimize()
+    {
+        ShowWindow(m_windowHandle, SW_SHOWMINIMIZED);
+    }
+
+    void Win32AppWindow::render()
+    {
+        if (!m_renderer)
+        {
+            return;
+        }
+
+        auto backgroundColor = m_canvas->getBackgroundColor();
+        m_renderer->setClearColor(backgroundColor);
+        m_renderer->clearColor();
+        m_canvas->render(*m_renderer.get());
+        m_renderer->present();
+    }
+
+    void Win32AppWindow::setDpi(const int32_t dpi)
+    {
+        m_dpi = dpi;
+    }
+
     void Win32AppWindow::setRenderer(const std::shared_ptr<Renderer> & renderer)
     {
         m_renderer = renderer;
+    }
+
+    void Win32AppWindow::show(const bool focus)
+    {
+        ShowWindow(m_windowHandle, SW_RESTORE);
+
+        if (focus)
+        {
+            SetForegroundWindow(m_windowHandle);
+            SetFocus(m_windowHandle);
+        }
     }
 
     void Win32AppWindow::update()
@@ -89,45 +154,6 @@ namespace Guise
         m_canvas->update();
     }
 
-    void Win32AppWindow::render()
-    {
-        if (!m_renderer)
-        {
-            return;
-        }
-
-        auto backgroundColor = m_canvas->getBackgroundColor();
-        m_renderer->setClearColor(backgroundColor);
-        m_renderer->clearColor();
-        m_canvas->render(*m_renderer.get());
-        m_renderer->present();
-    }
-
-    void Win32AppWindow::setDpi(const int32_t dpi)
-    {
-        m_dpi = dpi;
-    }
-
-    Vector2ui32 Win32AppWindow::getSize() const
-    {
-        return m_size;
-    }
-
-    Vector2i32 Win32AppWindow::getPosition() const
-    {
-        return m_position;
-    }
-
-    int32_t Win32AppWindow::getDpi() const
-    {
-        return m_dpi;
-    }
-
-    HDC Win32AppWindow::getWin32HDC() const
-    {
-        return m_deviceContextHandle;
-    }
-
     std::string Win32AppWindow::createClassName()
     {
         static int classCount = 0;
@@ -142,6 +168,25 @@ namespace Guise
         StringFromGUID2(guid, guidArray, guidArraySize);
         std::wstring className = L"guier_" + std::wstring(guidArray);
         */
+    }
+
+    LRESULT Win32AppWindow::windowProcStatic(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+        if (message == WM_NCCREATE)
+        {
+            SetWindowLongPtr(hWND, GWLP_USERDATA, (LONG_PTR)((LPCREATESTRUCT)lParam)->lpCreateParams);
+        }
+        else
+        {
+            Win32AppWindow * window = (Win32AppWindow*)GetWindowLongPtr(hWND, GWLP_USERDATA);
+
+            if (window != NULL)
+            {
+                return window->windowProc(hWND, message, wParam, lParam);
+            }
+        }
+
+        return DefWindowProc(hWND, message, wParam, lParam);
     }
 
     Win32AppWindow::Win32AppWindow(const std::wstring & title, const Vector2ui32 & size) :
@@ -159,6 +204,36 @@ namespace Guise
         m_windowClassName(createClassName())
     {
         load();
+    }
+
+    void Win32AppWindow::destroyWindow()
+    {
+        HINSTANCE Hinstance = GetModuleHandle(NULL);
+
+        // Destroy the window
+        if (m_windowHandle)
+        {
+            // Release the device context
+            if (m_deviceContextHandle)
+            {
+                ReleaseDC(m_windowHandle, m_deviceContextHandle);
+            }
+
+            DestroyWindow(m_windowHandle);
+        }
+
+        // Unregister the window class
+        if (m_windowClassName.size())
+        {
+            // Convert class name if needed.
+#ifdef UNICODE
+            std::wstring tempClassName(m_windowClassName.length(), L' ');
+            std::copy(m_windowClassName.begin(), m_windowClassName.end(), tempClassName.begin());
+            UnregisterClass(tempClassName.c_str(), Hinstance);
+#else
+            UnregisterClass(m_windowClassName.c_str(), Hinstance);
+#endif
+        }
     }
 
     void Win32AppWindow::load()
@@ -290,58 +365,9 @@ namespace Guise
 
         m_loaded = true;
 
-        ShowWindow(m_windowHandle, SW_RESTORE);
+        /*ShowWindow(m_windowHandle, SW_RESTORE);
         SetForegroundWindow(m_windowHandle);
-        SetFocus(m_windowHandle);
-    }
-
-    void Win32AppWindow::destroyWindow()
-    {
-        HINSTANCE Hinstance = GetModuleHandle(NULL);
-
-        // Destroy the window
-        if (m_windowHandle)
-        {
-            // Release the device context
-            if (m_deviceContextHandle)
-            {
-                ReleaseDC(m_windowHandle, m_deviceContextHandle);
-            }
-
-            DestroyWindow(m_windowHandle);
-        }
-
-        // Unregister the window class
-        if (m_windowClassName.size())
-        {
-            // Convert class name if needed.
-            #ifdef UNICODE
-                std::wstring tempClassName(m_windowClassName.length(), L' ');
-                std::copy(m_windowClassName.begin(), m_windowClassName.end(), tempClassName.begin());
-                UnregisterClass(tempClassName.c_str(), Hinstance);
-            #else
-                UnregisterClass(m_windowClassName.c_str(), Hinstance);
-            #endif
-        }
-    }
-
-    LRESULT Win32AppWindow::windowProcStatic(HWND hWND, UINT message, WPARAM wParam, LPARAM lParam)
-    {
-        if (message == WM_NCCREATE)
-        {
-            SetWindowLongPtr(hWND, GWLP_USERDATA, (LONG_PTR)((LPCREATESTRUCT)lParam)->lpCreateParams);
-        }
-        else
-        {
-            Win32AppWindow * window = (Win32AppWindow*)GetWindowLongPtr(hWND, GWLP_USERDATA);
-
-            if (window != NULL)
-            {
-                return window->windowProc(hWND, message, wParam, lParam);
-            }
-        }
-
-        return DefWindowProc(hWND, message, wParam, lParam);
+        SetFocus(m_windowHandle);*/
     }
 
     LRESULT Win32AppWindow::windowProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)

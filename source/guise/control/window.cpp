@@ -28,43 +28,43 @@
 
 namespace Guise
 {
-    std::shared_ptr<Window> Window::create(Canvas & canvas)
-    {
-        return std::shared_ptr<Window>(new Window(canvas));
-    }
+    //std::shared_ptr<Window> Window::create(Canvas & canvas)
+    //{
+    //    return std::shared_ptr<Window>(new Window(canvas));
+    //}
 
-    ControlType Window::getType() const
-    {
-        return ControlType::Window;
-    }
+    //ControlType Window::getType() const
+    //{
+    //    return ControlType::Window;
+    //}
 
-    bool Window::handleInputEvent(const Input::Event &/* event*/)
-    {
-        return false;
-    }
+    //bool Window::handleInputEvent(const Input::Event &/* event*/)
+    //{
+    //    return false;
+    //}
 
-    void Window::update(const Bounds2f & /*canvasBound*/)
-    {
+    //void Window::update(const Bounds2f & /*canvasBound*/)
+    //{
 
-    }
+    //}
 
-    void Window::render(RendererInterface & /*renderer*/)
-    {
-    }
+    //void Window::render(RendererInterface & /*renderer*/)
+    //{
+    //}
 
-    Bounds2f Window::getRenderBounds() const
-    {
-        return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
-    }
+    //Bounds2f Window::getRenderBounds() const
+    //{
+    //    return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
+    //}
 
-    Bounds2f Window::getSelectBounds() const
-    {
-        return { {0.0f, 0.0f}, {0.0f, 0.0f} };
-    }
+    //bounds2f window::getselectbounds() const
+    //{
+    //    return { {0.0f, 0.0f}, {0.0f, 0.0f} };
+    //}
 
-    Window::Window(Canvas & canvas) :
-        ControlContainerSingle(canvas)//,
-        //Style::Selector(canvas.getStyleSheet()->getSelector(Style::Selector::Type::Window))
-    { }
+    //window::window(canvas & canvas) :
+    //    controlcontainersingle(canvas)//,
+    //    //style::selector(canvas.getstylesheet()->getselector(style::selector::type::window))
+    //{ }
 
 }

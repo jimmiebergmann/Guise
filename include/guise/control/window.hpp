@@ -31,8 +31,8 @@
 namespace Guise
 {
 
-    class GUISE_API Window :/* public Style::Selector,*/ public ControlContainerSingle
-    {
+    //class GUISE_API Window :/* public Style::Selector,*/ public ControlContainerSingle
+    /*{
 
     public:
 
@@ -55,7 +55,7 @@ namespace Guise
         Window(Canvas & canvas);
         Window(const Window &) = delete;
 
-    };
+    };*/
 
 }
 

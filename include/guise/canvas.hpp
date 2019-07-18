@@ -27,12 +27,11 @@
 #define GUISE_CANVAS_HPP
 
 #include "guise/build.hpp"
+#include "guise/signal.hpp"
 #include "guise/control.hpp"
-#include "guise/control/dpiSensitive.hpp"
 #include "guise/renderer.hpp"
 #include "guise/style.hpp"
 #include "guise/input.hpp"
-#include "guise/control/plane.hpp"
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -41,9 +40,8 @@
 
 namespace Guise
 {
-
-
-    class GUISE_API CanvasStyle
+    
+    class GUISE_API CanvasStyle  /// REMOVE ????
     {
 
     public:
@@ -59,14 +57,15 @@ namespace Guise
 
         Vector4f m_backgroundColor;
 
-    };
+    }; /// REMOVE ????
+
 
     /**
     * Canvas class.
     *
     *
     */
-    class GUISE_API Canvas : public CanvasStyle
+    class GUISE_API Canvas : public CanvasStyle, public std::enable_shared_from_this<Canvas>
     {
 
     public:
@@ -102,11 +101,13 @@ namespace Guise
 
         Control * getActiveControl();
 
-        void queueControlRendering(Control * control);
+        Signal<uint32_t> onDpiChanged;
 
-        void registerDpiSensitive(DpiSensitive * object);
+        void updateControlRendering(Control * control);
+        void removeControlRendering(Control * control);
 
-        void unregisterDpiSensitive(DpiSensitive * object);
+        void forceControlUpdate(Control * control);
+        void unforceControlUpdate(Control * control);
 
     private:
 
@@ -114,18 +115,19 @@ namespace Guise
 
         Control * queryControlHit(const Vector2f & point) const;
 
-        uint32_t                        m_dpi;
-        float                           m_scale;
-        Input                           m_input;
-        std::shared_ptr<Plane>          m_plane;
-        Control *                       m_selectedControl;
-        Vector2ui32                     m_size;
-        std::shared_ptr<Style::Sheet>   m_styleSheet;
-        Control *                       m_activeControl;
-        Control *                       m_hoveredControl;
+        uint32_t                                    m_dpi;
+        float                                       m_scale;
+        Input                                       m_input;
+        std::vector<std::shared_ptr<Control> >      m_childs;
+        Control *                                   m_selectedControl;
+        Vector2ui32                                 m_size;
+        std::shared_ptr<Style::Sheet>               m_styleSheet;
+        Control *                                   m_activeControl;
+        Control *                                   m_hoveredControl;
 
-        std::map<size_t, std::vector<Control *> > m_renderControls;
-        std::set<DpiSensitive*>                   m_dpiSensitiveObjects;
+        std::map<Control *, size_t>                 m_renderControls;
+        std::map<size_t, std::vector<Control *> >   m_renderControlLevels; 
+        std::set<Control * >                        m_updateControls;
 
     };
 

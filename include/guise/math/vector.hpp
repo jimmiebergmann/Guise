@@ -30,7 +30,6 @@
 #include <algorithm>
 #include <cmath>
 
-
 namespace Guise
 {
 

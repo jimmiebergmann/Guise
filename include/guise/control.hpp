@@ -82,16 +82,19 @@ namespace Guise
         Canvas & getCanvas();
         const Canvas & getCanvas() const;
 
-        virtual ControlType getType() const = 0;
+        virtual void update();
+
+        void update(const Bounds2f & canvasBounds);
 
         virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void update(const Bounds2f & canvasBounds);
 
         virtual void render(RendererInterface & rendererInterface);
 
         virtual Bounds2f getRenderBounds() const;
+
         virtual Bounds2f getSelectBounds() const;        
+
+        virtual ControlType getType() const = 0;
 
         virtual void enable();
         virtual void disable();
@@ -128,23 +131,31 @@ namespace Guise
 
         virtual void onActiveChange(bool active);
 
-    protected:
+    protected:        
 
         /*
         * Returning DPI converted coordinates of rendering bounds by given parameters.
         *
         */
-        Bounds2f calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const;
+       // Bounds2f calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const;
+
+        Bounds2f calcRenderBounds(const Style::RectStyle & style) const;
+        Bounds2f calcChildRenderBounds(const Style::ParentStyle & style) const;
+
+        Bounds2f getCanvasBounds() const;
+
+        float getCanvasScale() const;
 
         Canvas &    m_canvas;
-        bool        m_enabled;
-        bool        m_inputEnabled;       
-        bool        m_visible;
+        bool        m_enabled;        // NOT IN USE???   
+        bool        m_inputEnabled;   // NOT IN USE???    
+        bool        m_visible;        // NOT IN USE???   
 
     private:
 
         friend class ControlContainer;
         
+        Bounds2f                m_canvasBounds;
         bool                    m_forceUpdate;        
         size_t                  m_level;
         std::weak_ptr<Control>  m_parent;

@@ -45,14 +45,14 @@ namespace Guise
         return false;
     }
 
-    void HorizontalGrid::update(const Bounds2f & canvasBound)
+    void HorizontalGrid::update(const Bounds2f & canvasBounds)
     {
         bool newChildBounds = false;
-        const bool childsUpdate = pollUpdateForced();
-        if (canvasBound != m_renderBounds || childsUpdate)
+        const bool forceUpdate = pollUpdateForced();
+        if (forceUpdate)
         {
-            Bounds2f renderBounds = calcRenderBounds(canvasBound, getPosition(), getSize(), getOverflow());
-            if (renderBounds != m_renderBounds || childsUpdate)
+            Bounds2f renderBounds = calcRenderBounds(canvasBounds, *this);
+            if (renderBounds != m_renderBounds || forceUpdate)
             {
                 m_renderBounds = renderBounds;
                 newChildBounds = true;
@@ -115,6 +115,8 @@ namespace Guise
         Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("horizontal-grid")),       
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_slotStyle(canvas->getStyleSheet()->getSelector("horizontal-grid-slot"))
-    { }
+    {
+        forceUpdate();
+    }
 
 }

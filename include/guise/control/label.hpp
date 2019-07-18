@@ -27,7 +27,6 @@
 #define GUISE_CONTROL_LABEL_HPP
 
 #include "guise/control.hpp"
-#include "guise/control/dpiSensitive.hpp"
 #include "guise/font.hpp"
 
 namespace Guise
@@ -35,7 +34,7 @@ namespace Guise
 
     class Texture;
 
-    class GUISE_API Label : public Control, public Style::FontStyle, public DpiSensitive
+    class GUISE_API Label : public Control, public Style::FontStyle
     {
 
     public:
@@ -43,17 +42,17 @@ namespace Guise
         static std::shared_ptr<Label> create(std::shared_ptr<Canvas> & canvas, const std::wstring & text = L"");
         static std::shared_ptr<Label> create(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text = L"");
 
-        virtual ControlType getType() const;
-
         virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void update(const Bounds2f & canvasBound);
 
         virtual void render(RendererInterface & rendererInterface);
 
         virtual Bounds2f getRenderBounds() const;
 
         virtual Bounds2f getSelectBounds() const;
+
+        virtual ControlType getType() const;
+
+        virtual void update();
 
         ~Label();
 

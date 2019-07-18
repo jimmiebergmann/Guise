@@ -41,13 +41,20 @@ namespace Guise
         m_canvas(canvas),
         m_enabled(true),
         m_inputEnabled(true),
-        m_visible(true),       
+        m_visible(true),
+        m_canvasBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_forceUpdate(false),
         m_level(0)     
     { }
 
     Control::~Control()
-    { }
+    {
+        if (m_forceUpdate)
+        {
+            m_canvas.unforceControlUpdate(this);
+        }
+        m_canvas.removeControlRendering(this);
+    }
 
     Canvas & Control::getCanvas()
     {
@@ -59,13 +66,25 @@ namespace Guise
         return m_canvas;
     }
 
+    void Control::update()
+    {
+    }
+
+    void Control::update(const Bounds2f & canvasBounds)
+    {
+        m_canvasBounds = canvasBounds;
+        update();
+
+        if (m_forceUpdate)
+        {
+            m_forceUpdate = false;
+            m_canvas.unforceControlUpdate(this);
+        }
+    }
+
     bool Control::handleInputEvent(const Input::Event &)
     {
         return false;
-    }
-
-    void Control::update(const Bounds2f &)
-    {
     }
 
     void Control::render(RendererInterface &)
@@ -138,14 +157,7 @@ namespace Guise
     void Control::forceUpdate()
     {
         m_forceUpdate = true;
-
-        if (auto parent = getParent().lock())
-        {
-            if (!parent->isUpdateForced())
-            {
-                parent->forceUpdate();
-            }           
-        }
+        m_canvas.forceControlUpdate(this);
     }
 
     bool Control::isUpdateForced()
@@ -159,7 +171,6 @@ namespace Guise
         m_forceUpdate = false;
         return forced;
     }
-
 
     bool Control::intersects(const Vector2f & point) const
     {
@@ -237,22 +248,23 @@ namespace Guise
     {
     }
 
-    Bounds2f Control::calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const
+    Bounds2f Control::calcRenderBounds(const Style::RectStyle & style) const
     {
         const float scale = m_canvas.getScale();
-        const Vector2f newPos = position * scale;
-        const Vector2f newSize = size * scale;
+        const Vector2f newPos = style.getPosition() * scale;
+        const Vector2f newSize = style.getSize() * scale;
 
-        const bool clamp = overflow == Style::Property::Overflow::Hidden;     
-        Bounds2f bounds = { canvasBound.position + newPos, newSize };
+        const bool clamp = style.getOverflow() == Style::Property::Overflow::Hidden;
+        Bounds2f bounds = { m_canvasBounds.position + newPos, newSize };
 
         if (clamp)
         {
-            bounds.position = Vector2f::clamp(bounds.position, canvasBound.position, Vector2f::max(canvasBound.position, canvasBound.position + canvasBound.size));
+            bounds.position = Vector2f::clamp(bounds.position, m_canvasBounds.position,
+                                              Vector2f::max(m_canvasBounds.position, m_canvasBounds.position + m_canvasBounds.size));
         }
 
         Vector2f lower = bounds.position;
-        Vector2f higherCanvas = canvasBound.position + canvasBound.size;
+        Vector2f higherCanvas = m_canvasBounds.position + m_canvasBounds.size;
         Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, newSize);
 
         if ((clamp && higherThis.x > higherCanvas.x) || newSize.x <= 0.0f)
@@ -275,6 +287,23 @@ namespace Guise
         return bounds;
     }
 
+    Bounds2f Control::calcChildRenderBounds(const Style::ParentStyle & style) const
+    {
+        const auto paddingLow = style.getPaddingLow() * getCanvasScale();
+        const auto paddingHigh = style.getPaddingHigh() * getCanvasScale();
+        return Bounds2f(m_canvasBounds.position + paddingLow, m_canvasBounds.size - paddingLow - paddingHigh);
+    }
+
+    Bounds2f Control::getCanvasBounds() const
+    {
+        return m_canvasBounds;
+    }
+
+    float Control::getCanvasScale() const
+    {
+        return m_canvas.getScale();
+    }
+
 
     // ControlContainer implementations.
     ControlContainer::ControlContainer(Canvas & canvas) :
@@ -292,6 +321,7 @@ namespace Guise
 
     void ControlContainer::releaseControl(Control & control)
     {
+        m_canvas.removeControlRendering(&control);
         control.m_parent.reset();
     }
 
@@ -499,7 +529,6 @@ namespace Guise
             if (it->get() == &control)
             {
                 releaseControl(*it->get());
-                (*it)->setLevel(0);
                 m_childs.erase(it);
                 forceUpdate();
                 return true;

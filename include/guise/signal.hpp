@@ -27,8 +27,10 @@
 #define GUISE_SIGNAL_HPP
 
 #include "guise/build.hpp"
+#include "guise/control.hpp"
 #include <functional>
 #include <vector>
+#include <memory>
 
 namespace Guise
 {
@@ -42,62 +44,33 @@ namespace Guise
 
     public:
 
-        using Callback = std::function<void()>;
+        using Callback          = std::function<void()>;
+        using Dependencies      = std::vector<std::shared_ptr<void> >;
+        using DependenciesWeak  = std::vector<std::weak_ptr<void> >;
 
-        Signal & operator =(const Callback & callback)
+        struct AssignStruct
         {
-            m_callbacks.push_back(callback);
-            return *this;
-        }
+            DependenciesWeak    dependencies;
+            Callback            callback;        
+        };
 
-        Signal & operator()()
-        {
-            for (auto & callback : m_callbacks)
-            {
-                callback();
-            }
-            return *this;
-        }
+        ~Signal();
+
+        Signal & add(const DependenciesWeak & dependencies, const Callback & callback);
+
+        Signal & operator =(const Callback & callback);
+
+        Signal & operator =(const AssignStruct & assignStruct);
+
+        Signal & operator()();
 
     private:
 
-        std::vector<Callback> m_callbacks;
+        template<typename T>
+        using Callbacks = std::vector<std::pair<T, DependenciesWeak*> >;
 
-        /*
-        Signal & operator =(const CallbackNoParams & callback)
-        {
-            m_callbacksNoParams.push_back(callback);
-            return *this;
-        }
+        Callbacks<Callback> m_callbacks;
 
-        
-        Signal & operator()(T ... params)
-        {
-            for (auto & callback : m_callbacks)
-            {
-                callback(params...);
-            }
-            for (auto & callback : m_callbacksNoParams)
-            {
-                callback();
-            }
-            return *this;
-        }
-
-        Signal & operator()()
-        {
-            for (auto & callback : m_callbacksNoParams)
-            {
-                callback();
-            }
-            return *this;
-        }
-
-    private:
-
-        std::vector<Callback> m_callbacks;
-        std::vector<CallbackNoParams> m_callbacksNoParams;
-        */
     };
 
     template<typename ... T>
@@ -106,47 +79,53 @@ namespace Guise
 
     public:
 
-        using Callback = std::function<void(T...)>;
-        using CallbackNoParams = std::function<void()>;
+        using Callback          = std::function<void(T...)>;
+        using CallbackNoParams  = std::function<void()>;
+        using Dependencies      = std::vector<std::shared_ptr<void> >;
+        using DependenciesWeak  = std::vector<std::weak_ptr<void> >;
 
-        Signal & operator =(const Callback & callback)
+        struct AssignStruct
         {
-            m_callbacks.push_back(callback);
-            return *this;
-        }
+            DependenciesWeak    dependencies;
+            Callback            callback;    
+        };
+        struct AssignStructNoParams
+        {
+            DependenciesWeak    dependencies;
+            CallbackNoParams    callback;   
+        };
 
-        Signal & operator =(const CallbackNoParams & callback)
-        {
-            m_callbacksNoParams.push_back(callback);
-            return *this;
-        }
+        ~Signal();
 
-        Signal & operator()(T ... params)
-        {
-            for (auto & callback : m_callbacks)
-            {
-                callback(params...);
-            }
-            for (auto & callback : m_callbacksNoParams)
-            {
-                callback();
-            }
-            return *this;
-        }
+        Signal & add(const DependenciesWeak & dependencies, const Callback & callback);
 
-        Signal & operator()()
-        {
-            for (auto & callback : m_callbacksNoParams)
-            {
-                callback();
-            }
-            return *this;
-        }
+        Signal & add(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
+
+        Signal & operator =(const Callback & callback);
+
+        Signal & operator =(const CallbackNoParams & callback);
+
+        Signal & operator =(const AssignStruct & assignStruct);
+
+        Signal & operator =(const AssignStructNoParams & assignStruct);
+
+        Signal & operator()(T ... params);
+
+        Signal & operator()();
 
     private:
 
-        std::vector<Callback> m_callbacks;
-        std::vector<CallbackNoParams> m_callbacksNoParams;
+        template<typename U>
+        void call(U & callback);
+
+        template<typename U>
+        void call(U & callback, T ... params);
+
+        template<typename T>
+        using Callbacks = std::vector<std::pair<T, DependenciesWeak*> >;
+
+        Callbacks<Callback>         m_callbacks;
+        Callbacks<CallbackNoParams> m_callbacksNoParams;
 
     };
 }
