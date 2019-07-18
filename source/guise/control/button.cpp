@@ -87,7 +87,7 @@ namespace Guise
                     m_pressed = true;
                     m_currentStyle = &m_activeStyle;
 
-                    onPressed(e.position); 
+                    onPress(e.position); 
                     forceUpdate();
                 }        
             }
@@ -104,7 +104,7 @@ namespace Guise
                 if (m_renderBounds.intersects(e.position))
                 {
                     m_currentStyle = &m_hoverStyle;
-                    onReleased(e.position);   
+                    onRelease(e.position);   
                 }
                 else
                 {

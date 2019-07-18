@@ -37,6 +37,7 @@
 #endif
 
 #include "guise/canvas.hpp"
+#include "guise/signal.hpp"
 #include <memory>
 #include <string>
 #include <thread>
@@ -81,7 +82,7 @@ namespace Guise
 
         virtual void maximize() = 0;
 
-        virtual void minimize() = 0;
+        virtual void minimize() = 0;     
 
         virtual void render() = 0;
 
@@ -92,6 +93,16 @@ namespace Guise
         virtual void show(const bool focus = true) = 0;
 
         virtual void update() = 0;
+
+        Signal<> onClose;
+
+        Signal<Vector2ui32> onMaximize;
+
+        Signal<> onMinimize;
+
+        Signal<Vector2i32> onMove;
+
+        Signal<Vector2ui32> onResize;
       
     #if defined(GUISE_PLATFORM_WINDOWS)
         virtual ::HDC getWin32HDC() const = 0;

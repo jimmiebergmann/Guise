@@ -36,12 +36,12 @@ namespace Guise
 #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
     static int getSystemDpi(HWND windowHandle, HDC )
     {
-        return static_cast<int>(GetDpiForWindow(windowHandle));
+        return static_cast<int>(::GetDpiForWindow(windowHandle));
     }
 #else
     static int getSystemDpi(HWND, HDC deviceContextHandle)
     {
-        return GetDeviceCaps(deviceContextHandle, LOGPIXELSX);
+        return ::GetDeviceCaps(deviceContextHandle, LOGPIXELSX);
     }
 #endif
     
@@ -54,12 +54,40 @@ namespace Guise
 
     Win32AppWindow::~Win32AppWindow()
     {
-        destroyWindow();
+        close();
     }
 
     void Win32AppWindow::close()
     {
-        // IMPLEMENT
+        if (m_windowHandle)
+        {
+            if (m_deviceContextHandle)
+            {
+                ::ReleaseDC(m_windowHandle, m_deviceContextHandle);
+                m_deviceContextHandle = NULL;
+            }
+
+            ::DestroyWindow(m_windowHandle);
+            m_windowHandle = NULL;
+        }
+
+        if (m_windowClassName.size())
+        {
+            HINSTANCE Hinstance = ::GetModuleHandle(NULL);
+
+        // Convert class name if needed.
+        #ifdef UNICODE
+            std::wstring tempClassName(m_windowClassName.length(), L' ');
+            std::copy(m_windowClassName.begin(), m_windowClassName.end(), tempClassName.begin());
+            ::UnregisterClass(tempClassName.c_str(), Hinstance);
+        #else
+            ::UnregisterClass(m_windowClassName.c_str(), Hinstance);
+        #endif
+
+            m_windowClassName.clear();
+        }
+
+        m_focused = m_maximized = m_minimized = m_showing = false;
     }
 
     std::shared_ptr<Canvas> Win32AppWindow::getCanvas()
@@ -143,12 +171,12 @@ namespace Guise
 
     void Win32AppWindow::show(const bool focus)
     {
-        ShowWindow(m_windowHandle, SW_RESTORE);
+        ::ShowWindow(m_windowHandle, SW_RESTORE);
 
         if (focus)
         {
-            SetForegroundWindow(m_windowHandle);
-            SetFocus(m_windowHandle);
+            ::SetForegroundWindow(m_windowHandle);
+            ::SetFocus(m_windowHandle);
         }
     }
 
@@ -221,44 +249,13 @@ namespace Guise
         m_deviceContextHandle(NULL),
         m_win32Style(0),
         m_win32ExtendedStyle(0),
-        m_windowClassName(createClassName()),
-
+        m_windowClassName(""),
         m_focused(false),
         m_maximized(false),
         m_minimized(false),
         m_showing(false)
     {
         load();
-    }
-
-    void Win32AppWindow::destroyWindow()
-    {
-        HINSTANCE Hinstance = GetModuleHandle(NULL);
-
-        // Destroy the window
-        if (m_windowHandle)
-        {
-            // Release the device context
-            if (m_deviceContextHandle)
-            {
-                ReleaseDC(m_windowHandle, m_deviceContextHandle);
-            }
-
-            DestroyWindow(m_windowHandle);
-        }
-
-        // Unregister the window class
-        if (m_windowClassName.size())
-        {
-            // Convert class name if needed.
-#ifdef UNICODE
-            std::wstring tempClassName(m_windowClassName.length(), L' ');
-            std::copy(m_windowClassName.begin(), m_windowClassName.end(), tempClassName.begin());
-            UnregisterClass(tempClassName.c_str(), Hinstance);
-#else
-            UnregisterClass(m_windowClassName.c_str(), Hinstance);
-#endif
-        }
     }
 
     void Win32AppWindow::load()
@@ -286,7 +283,9 @@ namespace Guise
                                 std::min(std::max(bgColorInt.z, 0), 255));
 
         winClass.hbrBackground = NULL;
-        //winClass.hbrBackground = CreateSolidBrush(RGB(bgColor.x, bgColor.y, bgColor.z));
+        
+        m_windowClassName = createClassName();
+
         #ifdef UNICODE
             std::wstring tempClassName(m_windowClassName.length(), L' ');
             std::copy(m_windowClassName.begin(), m_windowClassName.end(), tempClassName.begin());
@@ -299,6 +298,7 @@ namespace Guise
         // Register the window class
         if (!RegisterClass(&winClass))
         {
+            m_windowClassName.clear();
             throw std::runtime_error("Failed to register Window class.");
         }
 
@@ -388,26 +388,46 @@ namespace Guise
 
         m_canvas->setDpi(m_dpi);
 
-        m_loaded = true;
+        onClose = [this]()
+        {
+            close();
+        };
 
-        /*ShowWindow(m_windowHandle, SW_RESTORE);
-        SetForegroundWindow(m_windowHandle);
-        SetFocus(m_windowHandle);*/
+        onMaximize = [this]()
+        {
+            maximize();
+        };
+
+        onMinimize = [this]()
+        {
+            minimize();
+        };
+
+        m_loaded = true;
     }
 
     LRESULT Win32AppWindow::windowProc(HWND windowHandle, UINT message, WPARAM wParam, LPARAM lParam)
     {
         switch (message)
         {
-            case WM_CREATE:
+            /*case WM_CREATE:
             {          
             }
-            break;
-            case WM_ERASEBKGND:
-                return 1;
-            case WM_PAINT:
+            break;*/
+            case WM_CLOSE:
             {
-            
+                onClose();
+                return 0;
+            }
+            break;
+            case WM_SYSCOMMAND:
+            {
+                switch (wParam)
+                {
+                    case SC_MAXIMIZE: onMaximize(); return 0; break;
+                    case SC_MINIMIZE: onMinimize(); return 0; break;
+                    default: break;
+                }
             }
             break;
             case WM_SIZE:
@@ -422,7 +442,7 @@ namespace Guise
                     default: break;
                 }
 
-                if (m_loaded)
+                if (m_loaded && m_showing)
                 {
                     if (m_renderer)
                     {
@@ -439,10 +459,6 @@ namespace Guise
                 m_position = { static_cast<int32_t>(LOWORD(lParam)), static_cast<int32_t>(HIWORD(lParam)) };
             }
             break;
-            /*case WM_SIZING:
-            {
-            }
-            break;*/
 
             // Keyboard events
             case WM_KEYDOWN:

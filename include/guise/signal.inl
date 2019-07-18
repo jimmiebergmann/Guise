@@ -29,7 +29,7 @@ namespace Guise
     // Implementation of Signal class with no template parameters.
     inline Signal<>::~Signal()
     {
-        for (auto it = m_callbacks.begin(); it != m_callbacks.end(); it++)
+        for (auto it = m_callbacksNoParams.begin(); it != m_callbacksNoParams.end(); it++)
         {
             if (it->second)
             {
@@ -38,28 +38,63 @@ namespace Guise
         }
     }
 
-    inline Signal<> & Signal<>::add(const DependenciesWeak & dependencies, const Callback & callback)
+    inline Signal<> & Signal<>::connect(const DependenciesWeak & dependencies, const CallbackNoParams & callback)
     {
         DependenciesWeak * deps = new DependenciesWeak;
         *deps = dependencies;
-        m_callbacks.push_back({ callback, deps });
+        m_callbacksNoParams.push_back({ callback, deps });
         return *this;
     }
 
-    inline Signal<> & Signal<>::operator =(const Callback & callback)
+    inline Signal<> & Signal<>::connectAnonymously(const DependenciesWeak & dependencies, const CallbackNoParams & callback)
     {
-        m_callbacks.push_back({ callback, nullptr });
+        DependenciesWeak * deps = new DependenciesWeak;
+        *deps = dependencies;
+        m_anonymousCallbacksNoParams.push_back({ callback, deps });
         return *this;
     }
 
-    inline Signal<> & Signal<>::operator =(const AssignStruct & assignStruct)
+    inline void Signal<>::disconnectAll()
     {
-        return add(assignStruct.dependencies, assignStruct.callback);
+        m_callbacksNoParams.clear();
+    }
+
+    inline size_t Signal<>::getAnonymousConnectionCount() const
+    {
+        return m_anonymousCallbacksNoParams.size();
+    }
+    inline size_t Signal<>::getConnectionCount() const
+    {
+        return m_callbacksNoParams.size();
+    }
+
+    inline size_t Signal<>::getTotalConnectionCount() const
+    {
+        return getConnectionCount() + getAnonymousConnectionCount();
+    }
+
+    inline Signal<> & Signal<>::operator =(const CallbackNoParams & callback)
+    {
+        m_callbacksNoParams.push_back({ callback, nullptr });
+        return *this;
+    }
+
+    inline Signal<> & Signal<>::operator =(const AssignStructNoParams & assignStruct)
+    {
+        return connect(assignStruct.dependencies, assignStruct.callback);
     }
 
     inline Signal<> & Signal<>::operator()()
     {
-        for (auto it = m_callbacks.begin(); it != m_callbacks.end();)
+        call(m_anonymousCallbacksNoParams);
+        call(m_callbacksNoParams);
+        return *this;
+    }
+
+    template<typename U>
+    inline void Signal<>::call(U & callback)
+    {
+        for (auto it = callback.begin(); it != callback.end();)
         {
             bool deleted = false;
 
@@ -72,7 +107,7 @@ namespace Guise
                     if (!locked)
                     {
                         delete it->second;
-                        it = m_callbacks.erase(it);
+                        it = callback.erase(it);
                         deleted = true;
                         break;
                     }
@@ -87,7 +122,6 @@ namespace Guise
                 ++it;
             }
         }
-        return *this;
     }
 
 
@@ -112,7 +146,7 @@ namespace Guise
     }
 
     template<typename ... T>
-    inline Signal<T...> & Signal<T...>::add(const DependenciesWeak & dependencies, const Callback & callback)
+    inline Signal<T...> & Signal<T...>::connect(const DependenciesWeak & dependencies, const Callback & callback)
     {
         DependenciesWeak * deps = new DependenciesWeak;
         *deps = dependencies;
@@ -121,12 +155,55 @@ namespace Guise
     }
 
     template<typename ... T>
-    inline Signal<T...> & Signal<T...>::add(const DependenciesWeak & dependencies, const CallbackNoParams & callback)
+    inline Signal<T...> & Signal<T...>::connect(const DependenciesWeak & dependencies, const CallbackNoParams & callback)
     {
         DependenciesWeak * deps = new DependenciesWeak;
         *deps = dependencies;
         m_callbacksNoParams.push_back({ callback, deps });
         return *this;
+    }
+
+    template<typename ... T>
+    inline Signal<T...> & Signal<T...>::connectAnonymously(const DependenciesWeak & dependencies, const Callback & callback)
+    {
+        DependenciesWeak * deps = new DependenciesWeak;
+        *deps = dependencies;
+        m_anonymousCallbacks.push_back({ callback, deps });
+        return *this;
+    }
+
+    template<typename ... T>
+    inline Signal<T...> & Signal<T...>::connectAnonymously(const DependenciesWeak & dependencies, const CallbackNoParams & callback)
+    {
+        DependenciesWeak * deps = new DependenciesWeak;
+        *deps = dependencies;
+        m_anonymousCallbacksNoParams.push_back({ callback, deps });
+        return *this;
+    }
+
+    template<typename ... T>
+    inline void Signal<T...>::disconnectAll()
+    {  
+        m_callbacks.clear();
+        m_callbacksNoParams.clear();
+    }
+
+    template<typename ... T>
+    inline size_t Signal<T...>::getAnonymousConnectionCount() const
+    {
+        return m_anonymousCallbacks.size() + m_anonymousCallbacksNoParams.size();
+    }
+
+    template<typename ... T>
+    inline size_t Signal<T...>::getConnectionCount() const
+    {
+        return m_callbacks.size() + m_callbacksNoParams.size();
+    }
+
+    template<typename ... T>
+    inline size_t Signal<T...>::getTotalConnectionCount() const
+    {
+        return getConnectionCount() + getAnonymousConnectionCount();
     }
 
     template<typename ... T>
@@ -146,28 +223,30 @@ namespace Guise
     template<typename ... T>
     inline Signal<T...> & Signal<T...>::operator =(const AssignStruct & assignStruct)
     {
-        return add(assignStruct.dependencies, assignStruct.callback);
+        return connect(assignStruct.dependencies, assignStruct.callback);
     }
 
     template<typename ... T>
     inline Signal<T...> & Signal<T...>::operator =(const AssignStructNoParams & assignStruct)
     {
-        return add(assignStruct.dependencies, assignStruct.callback);
+        return connect(assignStruct.dependencies, assignStruct.callback);
     }
 
     template<typename ... T>
     inline Signal<T...> & Signal<T...>::operator()(T ... params)
     {
+        call(m_anonymousCallbacks, params...);
+        call(m_anonymousCallbacksNoParams);
         call(m_callbacks, params...);
-        call(m_callbacksNoParams);
+        call(m_callbacksNoParams);       
         return *this;
     }
 
     template<typename ... T>
     inline Signal<T...> & Signal<T...>::operator()()
     {
-        call(m_callbacks);
-        call(m_callbacksNoParams);
+        call(m_anonymousCallbacksNoParams);
+        call(m_callbacksNoParams);      
         return *this;
     }
 

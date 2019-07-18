@@ -35,6 +35,12 @@
 namespace Guise
 {
 
+    /*
+    *
+    * Anonymous connections are not disconnected when calling disconnectAll.
+    *
+    *
+    */
     template<typename ... T>
     class Signal;
 
@@ -44,32 +50,46 @@ namespace Guise
 
     public:
 
-        using Callback          = std::function<void()>;
+        using CallbackNoParams  = std::function<void()>;
         using Dependencies      = std::vector<std::shared_ptr<void> >;
         using DependenciesWeak  = std::vector<std::weak_ptr<void> >;
 
-        struct AssignStruct
+        struct AssignStructNoParams
         {
             DependenciesWeak    dependencies;
-            Callback            callback;        
+            CallbackNoParams    callback;
         };
 
         ~Signal();
 
-        Signal & add(const DependenciesWeak & dependencies, const Callback & callback);
+        Signal & connect(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
 
-        Signal & operator =(const Callback & callback);
+        Signal & connectAnonymously(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
 
-        Signal & operator =(const AssignStruct & assignStruct);
+        void disconnectAll();
+
+        size_t getAnonymousConnectionCount() const;
+
+        size_t getConnectionCount() const;
+
+        size_t getTotalConnectionCount() const;
+
+        Signal & operator =(const CallbackNoParams & callback);
+
+        Signal & operator =(const AssignStructNoParams & assignStruct);
 
         Signal & operator()();
 
     private:
 
+        template<typename U>
+        void call(U & callback);
+
         template<typename T>
         using Callbacks = std::vector<std::pair<T, DependenciesWeak*> >;
 
-        Callbacks<Callback> m_callbacks;
+        Callbacks<CallbackNoParams> m_callbacksNoParams;
+        Callbacks<CallbackNoParams> m_anonymousCallbacksNoParams;
 
     };
 
@@ -97,9 +117,21 @@ namespace Guise
 
         ~Signal();
 
-        Signal & add(const DependenciesWeak & dependencies, const Callback & callback);
+        Signal & connect(const DependenciesWeak & dependencies, const Callback & callback);
 
-        Signal & add(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
+        Signal & connect(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
+
+        Signal & connectAnonymously(const DependenciesWeak & dependencies, const Callback & callback);
+
+        Signal & connectAnonymously(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
+
+        void disconnectAll();
+
+        size_t getAnonymousConnectionCount() const;
+
+        size_t getConnectionCount() const;
+
+        size_t getTotalConnectionCount() const;
 
         Signal & operator =(const Callback & callback);
 
@@ -126,6 +158,8 @@ namespace Guise
 
         Callbacks<Callback>         m_callbacks;
         Callbacks<CallbackNoParams> m_callbacksNoParams;
+        Callbacks<Callback>         m_anonymousCallbacks;
+        Callbacks<CallbackNoParams> m_anonymousCallbacksNoParams;
 
     };
 }

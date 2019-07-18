@@ -43,13 +43,13 @@ int main()
 
     auto button2 = Button::create(canvas1);
     button2->setSize({ 300.0f, 80.0f });
-    button2->onPressed = []() { std::cout << "Pressed button 2!" << std::endl; };
+    button2->onPress = []() { std::cout << "Pressed button 2!" << std::endl; };
     vertGrid1->add(button2);
     
     auto button3 = Button::create(canvas1);
     button3->setSize({ 200.0f, 40.0f });
     button3->getActiveStyle().setBorderWidth(5.0f);
-    button3->onReleased = []() { std::cout << "Released button 3!" << std::endl; };
+    button3->onRelease = []() { std::cout << "Released button 3!" << std::endl; };
     vertGrid1->add(button3);
     
     auto label1 = Label::create(canvas1, "arial", L"Name");
@@ -79,23 +79,23 @@ int main()
         }
     } };
 
-    button1->onPressed = { { button2 }, [&button2]()
+    button1->onPress = { { button2 }, [&button2]()
     {
         button2->release();
         button2.reset();
     } };
     
-    button1->onPressed = { { button2 }, [&button2]()
+    button1->onPress = { { button2 }, [&button2]()
     {
         std::cout << "test. " << std::endl;
     } };
 
-    button3->onReleased = { { appWindow1 }, [&appWindow1]()
+    button3->onRelease = { { appWindow1 }, [&appWindow1]()
     {
         appWindow1->minimize();
     } };
 
-    button2->onReleased = { { appWindow1 }, [&appWindow1]()
+    button2->onRelease = { { appWindow1 }, [&appWindow1]()
     {
         appWindow1->maximize();
     } };
@@ -185,7 +185,14 @@ int main()
             label1->setText(L"World");
         }
     }*/
-    
-    std::this_thread::sleep_for(std::chrono::duration<double>(1000.0f));
+
+    // Wait for application window to close.
+    Semaphore closeSemaphore;
+    appWindow1->onClose = [&closeSemaphore]()
+    {
+        closeSemaphore.notifyOne();
+    };
+    closeSemaphore.wait();
+
     return 0;
 }

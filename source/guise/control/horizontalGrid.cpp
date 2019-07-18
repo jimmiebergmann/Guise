@@ -30,7 +30,7 @@ namespace Guise
 {
   
     // Vertical grid implementations.
-    std::shared_ptr<HorizontalGrid> HorizontalGrid::create(std::shared_ptr<Canvas> & canvas)
+    /*std::shared_ptr<HorizontalGrid> HorizontalGrid::create(std::shared_ptr<Canvas> & canvas)
     {
         return std::shared_ptr<HorizontalGrid>(new HorizontalGrid(canvas));
     }
@@ -40,7 +40,7 @@ namespace Guise
         return ControlType::HorizontalGrid;
     }
 
-    bool HorizontalGrid::handleInputEvent(const Input::Event &/* event*/)
+    bool HorizontalGrid::handleInputEvent(const Input::Event &)
     {
         return false;
     }
@@ -117,6 +117,6 @@ namespace Guise
         m_slotStyle(canvas->getStyleSheet()->getSelector("horizontal-grid-slot"))
     {
         forceUpdate();
-    }
+    }*/
 
 }

@@ -31,7 +31,7 @@
 namespace Guise
 {
 
-    class GUISE_API HorizontalGrid : public ControlContainerList, public Style::ParentRectStyle
+    /*class GUISE_API HorizontalGrid : public ControlContainerList, public Style::ParentRectStyle
     {
 
     public:
@@ -59,7 +59,7 @@ namespace Guise
         std::vector<Bounds2f>   m_childsBounds;
         Style::ParentRectStyle  m_slotStyle;
 
-    };
+    };*/
 
 }
 

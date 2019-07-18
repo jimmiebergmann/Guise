@@ -50,7 +50,7 @@ namespace Guise
 
         ~Win32AppWindow();
        
-        void close(); // IMPLEMENT
+        void close();
 
         std::shared_ptr<Canvas> getCanvas();
 
@@ -62,13 +62,13 @@ namespace Guise
 
         ::HDC getWin32HDC() const;
 
-        bool isFocused() const; // IMPLEMENT
+        bool isFocused() const;
 
-        bool isMaximized() const; // IMPLEMENT
+        bool isMaximized() const;
 
-        bool isMinimized() const; // IMPLEMENT
+        bool isMinimized() const;
 
-        bool isShowing() const; // IMPLEMENT
+        bool isShowing() const;
 
         void maximize();
 
@@ -91,8 +91,6 @@ namespace Guise
         static LRESULT windowProcStatic(HWND HWND, UINT message, WPARAM wParam, LPARAM lParam);
 
         Win32AppWindow(const std::wstring & title, const Vector2ui32 & size);
-
-        void destroyWindow();
 
         void load();
         

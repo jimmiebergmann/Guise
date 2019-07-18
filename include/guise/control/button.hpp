@@ -58,8 +58,8 @@ namespace Guise
         Style::ParentPaintRectStyle & getDisabledStyle();
         Style::ParentPaintRectStyle & getHoverStyle();
 
-        Signal<Vector2f> onPressed;
-        Signal<Vector2f> onReleased;
+        Signal<Vector2f> onPress;
+        Signal<Vector2f> onRelease;
         Signal<Vector2f> onHover;       
 
     private:
