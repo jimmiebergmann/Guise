@@ -226,7 +226,7 @@ namespace Guise
         {
             m_dpi = dpi;
             m_scale = static_cast<float>(m_dpi) / GUISE_DEFAULT_DPI;            
-            onDpiChanged(m_dpi);
+            onDpiChange(m_dpi);
         }   
     }
 
@@ -236,7 +236,7 @@ namespace Guise
         uint32_t dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
         if (dpi != m_dpi)
         {
-            onDpiChanged(m_dpi);
+            onDpiChange(m_dpi);
         }
     }
 

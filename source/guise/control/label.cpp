@@ -152,12 +152,12 @@ namespace Guise
         m_text(text),
         m_texture(nullptr)
     {
-        /*m_canvas.onDpiChanged = [this](uint32_t dpi)
+        m_canvas.onDpiChange.connectAnonymously([this](uint32_t dpi)
         {
             m_dpi = dpi;
             m_changedText = true;
             forceUpdate();
-        };*/
+        });
     }
 
     Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :
@@ -172,12 +172,12 @@ namespace Guise
         m_text(text),
         m_texture(nullptr)
     {
-        /*m_canvas.onDpiChanged = [this](uint32_t dpi)
+        m_canvas.onDpiChange.connectAnonymously([this](uint32_t dpi)
         {
             m_dpi = dpi;
             m_changedText = true;
             forceUpdate();
-        };*/
+        });
     }
 
 

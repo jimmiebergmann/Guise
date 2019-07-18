@@ -62,7 +62,11 @@ namespace Guise
 
         ~Signal();
 
+        Signal & connect(const CallbackNoParams & callback);
+
         Signal & connect(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
+
+        Signal & connectAnonymously(const CallbackNoParams & callback);
 
         Signal & connectAnonymously(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
 
@@ -117,9 +121,17 @@ namespace Guise
 
         ~Signal();
 
+        Signal & connect(const Callback & callback);
+
+        Signal & connect(const CallbackNoParams & callback);
+
         Signal & connect(const DependenciesWeak & dependencies, const Callback & callback);
 
         Signal & connect(const DependenciesWeak & dependencies, const CallbackNoParams & callback);
+
+        Signal & connectAnonymously(const Callback & callback);
+
+        Signal & connectAnonymously(const CallbackNoParams & callback);
 
         Signal & connectAnonymously(const DependenciesWeak & dependencies, const Callback & callback);
 

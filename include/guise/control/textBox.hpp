@@ -55,8 +55,6 @@ namespace Guise
 
         virtual void update();
 
-        ~TextBox();
-
         Signal<const std::wstring &> onChange;
 
         Style::FontStyle & getTextStyle();

@@ -101,7 +101,7 @@ namespace Guise
 
         Control * getActiveControl();
 
-        Signal<uint32_t> onDpiChanged;
+        Signal<uint32_t> onDpiChange;
 
         void updateControlRendering(Control * control);
         void removeControlRendering(Control * control);

@@ -38,11 +38,23 @@ namespace Guise
         }
     }
 
+    inline Signal<> & Signal<>::connect(const CallbackNoParams & callback)
+    {
+        m_callbacksNoParams.push_back({ callback, nullptr });
+        return *this;
+    }
+
     inline Signal<> & Signal<>::connect(const DependenciesWeak & dependencies, const CallbackNoParams & callback)
     {
         DependenciesWeak * deps = new DependenciesWeak;
         *deps = dependencies;
         m_callbacksNoParams.push_back({ callback, deps });
+        return *this;
+    }
+
+    inline Signal<> & Signal<>::connectAnonymously(const CallbackNoParams & callback)
+    {
+        m_anonymousCallbacksNoParams.push_back({ callback, nullptr });
         return *this;
     }
 
@@ -75,8 +87,7 @@ namespace Guise
 
     inline Signal<> & Signal<>::operator =(const CallbackNoParams & callback)
     {
-        m_callbacksNoParams.push_back({ callback, nullptr });
-        return *this;
+        return connect(callback);
     }
 
     inline Signal<> & Signal<>::operator =(const AssignStructNoParams & assignStruct)
@@ -146,6 +157,20 @@ namespace Guise
     }
 
     template<typename ... T>
+    inline Signal<T...> & Signal<T...>::connect(const Callback & callback)
+    {
+        m_callbacks.push_back({ callback, nullptr });
+        return *this;
+    }
+
+    template<typename ... T>
+    inline Signal<T...> & Signal<T...>::connect(const CallbackNoParams & callback)
+    {
+        m_callbacksNoParams.push_back({ callback, nullptr });
+        return *this;
+    }
+
+    template<typename ... T>
     inline Signal<T...> & Signal<T...>::connect(const DependenciesWeak & dependencies, const Callback & callback)
     {
         DependenciesWeak * deps = new DependenciesWeak;
@@ -160,6 +185,20 @@ namespace Guise
         DependenciesWeak * deps = new DependenciesWeak;
         *deps = dependencies;
         m_callbacksNoParams.push_back({ callback, deps });
+        return *this;
+    }
+
+    template<typename ... T>
+    inline Signal<T...> & Signal<T...>::connectAnonymously(const Callback & callback)
+    {
+        m_anonymousCallbacks.push_back({ callback, nullptr });
+        return *this;
+    }
+
+    template<typename ... T>
+    inline Signal<T...> & Signal<T...>::connectAnonymously(const CallbackNoParams & callback)
+    {
+        m_anonymousCallbacksNoParams.push_back({ callback, nullptr });
         return *this;
     }
 
@@ -209,15 +248,13 @@ namespace Guise
     template<typename ... T>
     inline Signal<T...> & Signal<T...>::operator =(const Callback & callback)
     {
-        m_callbacks.push_back({ callback, nullptr });
-        return *this;
+        return connect(callback);
     }
 
     template<typename ... T>
     inline Signal<T...> & Signal<T...>::operator =(const CallbackNoParams & callback)
     {
-        m_callbacksNoParams.push_back({ callback, nullptr });
-        return *this;
+        return connect(callback);
     }
 
     template<typename ... T>

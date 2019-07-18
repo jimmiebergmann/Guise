@@ -68,8 +68,6 @@ namespace Guise
         Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text);
         Label(const Label &) = delete;
 
-        void onNewDpi(const int32_t dpi);
-
         bool                        m_changed;
         bool                        m_changedText;
         int32_t                     m_dpi;

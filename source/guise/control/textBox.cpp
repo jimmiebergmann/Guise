@@ -440,11 +440,6 @@ namespace Guise
             m_changed = true;
         }
     }
-    
-    TextBox::~TextBox()
-    {
-        //getCanvas().unregisterDpiSensitive(this);
-    }
 
     Style::FontStyle & TextBox::getTextStyle()
     {
@@ -480,21 +475,20 @@ namespace Guise
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_textBounds(0.0f, 0.0f, 0.0f, 0.0f)
     {
-        //getCanvas().registerDpiSensitive(this);
-
         if (auto textStyle = canvas->getStyleSheet()->getSelector("text-box-text"))
         {
             m_textStyle = { textStyle };
             m_font = FontLibrary::get(m_textStyle.getFontFamily());
             m_fontSequence = FontSequence(m_font);
         }
-    }
 
-    /*void TextBox::onNewDpi(const int32_t dpi)
-    {
-        m_dpi = dpi;
-        m_changedText = true;
-    }*/
+        m_canvas.onDpiChange.connectAnonymously([this](uint32_t dpi)
+        {
+            m_dpi = dpi;
+            m_changedText = true;
+            forceUpdate();
+        });
+    }
 
     void TextBox::onActiveChange(bool active)
     {
