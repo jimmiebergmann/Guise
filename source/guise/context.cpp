@@ -95,8 +95,12 @@ namespace Guise
 
     bool Context::setDpiAware()
     {
-    #if defined(GUISE_PLATFORM_WINDOWS) && GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10_1703 && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-        return SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+    #if defined(GUISE_PLATFORM_WINDOWS)
+        #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10_1703 && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+            return SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+        #else
+            return false;
+        #endif
     #else
         return false;
     #endif

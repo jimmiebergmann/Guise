@@ -96,6 +96,8 @@ namespace Guise
 
         Signal<> onClose;
 
+        Signal<bool> onFocusChange;
+
         Signal<Vector2ui32> onMaximize;
 
         Signal<> onMinimize;

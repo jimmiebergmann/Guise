@@ -442,6 +442,8 @@ namespace Guise
                     default: break;
                 }
 
+                onResize(m_size);
+
                 if (m_loaded && m_showing)
                 {
                     if (m_renderer)
@@ -457,6 +459,7 @@ namespace Guise
             case WM_MOVE:
             {
                 m_position = { static_cast<int32_t>(LOWORD(lParam)), static_cast<int32_t>(HIWORD(lParam)) };
+                onMove(m_position);
             }
             break;
 
@@ -474,11 +477,16 @@ namespace Guise
                 
                 break;*/
             case WM_SETFOCUS:
-                m_focused = true;
-                break;
+            {   m_focused = true;
+                onFocusChange(m_focused);
+            }
+            break;               
             case WM_KILLFOCUS:
+            {   
                 m_focused = false;
-                break;
+                onFocusChange(m_focused);
+            }
+            break;
         
             // Mouse events.
             case WM_MOUSEMOVE:

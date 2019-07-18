@@ -102,7 +102,7 @@ namespace Guise
         int32_t                     m_dpi;
         Input &                     m_input;
         std::wstring                m_title; 
-        Vector2ui32                 m_position;
+        Vector2i32                  m_position;
         Vector2ui32                 m_size;
         HWND		                m_windowHandle;
         HDC			                m_deviceContextHandle;
