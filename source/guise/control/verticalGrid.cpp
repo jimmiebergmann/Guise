@@ -50,8 +50,8 @@ namespace Guise
     }
 
     VerticalGrid::VerticalGrid() :             
-        Style::ParentRectStyle(nullptr, this),
-        m_slotStyle(nullptr, this),
+        Style::ParentRectStyle(this, nullptr),
+        m_slotStyle(this, nullptr),
         m_childRenderCount(0)
     {
         setChildBoundsAware(true);
@@ -68,9 +68,7 @@ namespace Guise
 
     void VerticalGrid::onCanvasChange(Canvas * canvas)
     {
-        ParentRectStyle & idleStyle = static_cast<Style::ParentRectStyle&>(*this);
-
-        idleStyle.updateEmptyProperties(canvas->getStyleSheet()->getSelector("vertical-grid"));
+        updateEmptyProperties(canvas->getStyleSheet()->getSelector("vertical-grid"));
         m_slotStyle.updateEmptyProperties(canvas->getStyleSheet()->getSelector("vertical-grid-slot"));
     }
 

@@ -137,9 +137,9 @@ namespace Guise
         bool isChildBoundsAware() const;
         void setChildBoundsAware(const bool aware);
 
-        virtual void onUpdate();
+        
 
-    protected:        
+    protected:
 
         virtual void onAddChild(Control & control, const size_t index);
 
@@ -155,9 +155,13 @@ namespace Guise
 
         virtual void onResize();
 
+        virtual void onUpdate();
+
         Bounds2f scale(const Bounds2f & bounds) const;
         Vector4f scale(const Vector4f & vector) const;
         Vector2f scale(const Vector2f & vector) const;
+
+        void update();
 
     private:
 

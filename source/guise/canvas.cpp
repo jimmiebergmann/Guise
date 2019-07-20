@@ -381,15 +381,22 @@ namespace Guise
     void Canvas::resizeControl(Control * control)
     {
         Control * rootControl = control;
-        Control * parent = rootControl->getParent().lock().get();
+        Control * parent = nullptr;
 
-        while (parent && parent->isChildBoundsAware())
+        do
         {
-            rootControl = parent;
             parent = rootControl->getParent().lock().get();
-        }
 
-        rootControl->setBounds(rootControl->getAvailableBounds());
+            auto oldBounds = rootControl->getBounds();
+            rootControl->setBounds(rootControl->getAvailableBounds());
+            if (oldBounds == rootControl->getBounds())
+            {
+                return;
+            }
+
+            rootControl = parent;            
+        }
+        while (parent && parent->isChildBoundsAware());
     }
 
     Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet) :

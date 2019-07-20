@@ -33,81 +33,14 @@ namespace Guise
 {
  
     // Button implementations.
-    /*std::shared_ptr<Label> Label::create(std::shared_ptr<Canvas> & canvas, const std::wstring & text)
+    std::shared_ptr<Label> Label::create(const std::wstring & text)
     {
-        return std::shared_ptr<Label>(new Label(canvas, text));
+        return std::shared_ptr<Label>(new Label(text));
     }
 
-    std::shared_ptr<Label> Label::create(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text)
+    std::shared_ptr<Label> Label::create(const std::string & font, const std::wstring & text)
     {
-        return std::shared_ptr<Label>(new Label(canvas, font, text));
-    }
-
-    bool Label::handleInputEvent(const Input::Event &)
-    {
-        return false;
-    }
-
-    Bounds2f Label::getRenderBounds() const
-    {
-        return m_renderBounds;
-    }
-
-    Bounds2f Label::getSelectBounds() const
-    {
-        return m_renderBounds;
-    }
-
-    ControlType Label::getType() const
-    {
-        return ControlType::Label;
-    }
-
-    void Label::update()
-    {
-        m_renderBounds.position = getCanvasBounds().position;
-
-        if (m_changedText)
-        {
-            m_changedText = false;
-            m_fontSequence.createSequence(m_text, getFontSize(), m_dpi);
-            m_changed = true;
-        }
-
-        if (m_changed)
-        {
-            m_loadData.reset();
-            if (m_fontSequence.createBitmapRgba(m_loadData, m_loadDimensions))
-            {
-                m_renderBounds.size = m_loadDimensions;
-
-                m_canvas.reportControlChange(this);
-            }
-            else
-            {
-                m_changed = false;
-            }
-        }
-    }
-
-    Label::~Label()
-    {
-        //getCanvas().unregisterDpiSensitive(this);
-        /// REMOVE SIGNAL TO m_canvas.onDpiChanged
-    }
-
-    void Label::setText(const std::wstring & text)
-    {
-        if (text != m_text)
-        {
-            m_text = text;
-            m_changedText = true;          
-        }
-    }
-
-    const std::wstring & Label::getText() const
-    {
-        return m_text;
+        return std::shared_ptr<Label>(new Label(font, text));
     }
 
     std::shared_ptr<Font> Label::getFont() const
@@ -115,68 +48,112 @@ namespace Guise
         return m_font;
     }
 
-    Label::Label(std::shared_ptr<Canvas> & canvas, const std::wstring & text) :        
-        Control(*canvas),
-        Style::FontStyle(canvas->getStyleSheet()->getSelector("label")),       
-        m_changed(true),
-        m_changedText(true),
-        m_dpi(canvas->getDpi()),
-        m_font(FontLibrary::get(getFontFamily())),
-        m_fontSequence(m_font),
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
-        m_text(text),
-        m_texture(nullptr)
+    const std::wstring & Label::getText() const
     {
-        m_canvas.onDpiChange.connectAnonymously([this](uint32_t dpi)
-        {
-            m_dpi = dpi;
-            m_changedText = true;
-            forceUpdate();
-        });
+        return m_text;
     }
 
-    Label::Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text) :
-        Control(*canvas),
-        Style::FontStyle(canvas->getStyleSheet()->getSelector("label")),
-        m_changed(true),
+    ControlType Label::getType() const
+    {
+        return ControlType::Label;
+    }
+
+    void Label::setText(const std::wstring & text)
+    {
+        if (text != m_text)
+        {
+            m_text = text;
+            onChange(m_text);
+            update();
+        }
+    }
+
+    Label::Label(const std::wstring & text) :        
+        Style::FontStyle(this, nullptr),
         m_changedText(true),
-        m_dpi(canvas->getDpi()),
+        m_dpi(0),
+        m_fontSequence(m_font),
+        m_text(text),
+        m_texture(nullptr),
+        m_textureSize(0, 0)
+    {
+    }
+
+    Label::Label(const std::string & font, const std::wstring & text) :
+        Style::FontStyle(this, nullptr),
+        m_changedText(true),
+        m_dpi(0),
         m_font(FontLibrary::get(font)),
         m_fontSequence(m_font),
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_text(text),
-        m_texture(nullptr)
+        m_texture(nullptr),
+        m_textureSize(0, 0)
     {
-        m_canvas.onDpiChange.connectAnonymously([this](uint32_t dpi)
+    }
+
+    void Label::onCanvasChange(Canvas * canvas)
+    {
+        m_dpi = canvas->getDpi();
+
+        // We need to get rid of old connection...
+        canvas->onDpiChange.connectAnonymously([this](uint32_t dpi)
         {
             m_dpi = dpi;
             m_changedText = true;
-            forceUpdate();
+            update();
         });
+
+        updateEmptyProperties(canvas->getStyleSheet()->getSelector("label"));
+        m_font = FontLibrary::get(getFontFamily());
+
+        onUpdate();
     }
 
-    void Label::render(RendererInterface & renderer)
+    void Label::onRender(RendererInterface & rendererInterface)
     {
-        if (m_changed)
+        if (m_changedText)
         {
-            m_changed = false;
+            m_changedText = false;
 
             if (m_loadData)
             {
                 if (!m_texture)
                 {
-                    m_texture = renderer.createTexture();
+                    m_texture = rendererInterface.createTexture();
                 }
 
-                m_texture->load(m_loadData.get(), Texture::PixelFormat::RGBA8, m_loadDimensions);
+                m_texture->load(m_loadData.get(), Texture::PixelFormat::RGBA8, m_textureSize);
                 m_loadData.reset();
             }
         }
 
         if (m_texture)
         {
-            renderer.drawQuad(m_renderBounds, m_texture, getFontColor());
+            rendererInterface.drawQuad(getBounds(), m_texture, getFontColor());
         }
-    }*/
+    }
+
+    void Label::onResize()
+    {
+        setBounds({ getBounds().position, m_textureSize });
+    }
+
+    void Label::onUpdate()
+    {
+        if (m_changedText)
+        {
+            m_fontSequence.createSequence(m_text, getFontSize(), m_dpi);
+
+            m_loadData.reset();
+            if (m_fontSequence.createBitmapRgba(m_loadData, m_textureSize))
+            {
+                resize();
+            }
+            else
+            {
+                m_changedText = false;
+            }
+        }
+    }
 
 }

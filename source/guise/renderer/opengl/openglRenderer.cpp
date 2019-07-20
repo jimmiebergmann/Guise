@@ -335,7 +335,8 @@ namespace Guise
         m_context(NULL),
         m_display(display),
         m_window(window),
-        m_dpi(GUISE_DEFAULT_DPI)
+        m_scale(1.0f),
+        m_level(0.0f)
     {
         if(display == NULL)
         {
@@ -358,8 +359,8 @@ namespace Guise
             0L, 0L
         };
 
-        int fbElements = 0;
-        ::GLXFBConfig *fbc = glXChooseFBConfig(display, screen, 0, &fbElements);
+        //int fbElements = 0;
+        //::GLXFBConfig *fbc = glXChooseFBConfig(display, screen, 0, &fbElements);
 
         ::XVisualInfo * visualInfo = NULL;
         if( (visualInfo = glXChooseVisual(m_display, 0, attribs) ) == NULL )

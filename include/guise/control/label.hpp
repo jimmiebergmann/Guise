@@ -34,52 +34,48 @@ namespace Guise
 
     class Texture;
 
-    /*class GUISE_API Label : public Control, public Style::FontStyle
+    class GUISE_API Label : public Control, public Style::FontStyle
     {
 
     public:
 
-        static std::shared_ptr<Label> create(std::shared_ptr<Canvas> & canvas, const std::wstring & text = L"");
-        static std::shared_ptr<Label> create(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text = L"");
-
-        virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual Bounds2f getRenderBounds() const;
-
-        virtual Bounds2f getSelectBounds() const;
-
-        virtual ControlType getType() const;
-
-        virtual void update();
-
-        ~Label();
-
-        void setText(const std::wstring & text);
-
-        const std::wstring & getText() const;
+        static std::shared_ptr<Label> create(const std::wstring & text = L"");
+        static std::shared_ptr<Label> create(const std::string & font, const std::wstring & text = L"");
 
         std::shared_ptr<Font> getFont() const;
 
+        const std::wstring & getText() const;
+
+        virtual ControlType getType() const;
+
+        void setText(const std::wstring & text); 
+
+        Signal<const std::wstring &> onChange;
+
     private:
 
-        Label(std::shared_ptr<Canvas> & canvas, const std::wstring & text);
-        Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text);
+        Label(const std::wstring & text);
+        Label(const std::string & font, const std::wstring & text);
         Label(const Label &) = delete;
 
-        virtual void render(RendererInterface & rendererInterface);
+        virtual void onCanvasChange(Canvas * canvas);
 
-        bool                        m_changed;
+        virtual void onRender(RendererInterface & rendererInterface);
+
+        virtual void onResize();
+
+        virtual void onUpdate();
+
         bool                        m_changedText;
         int32_t                     m_dpi;
         std::shared_ptr<Font>       m_font;
         FontSequence                m_fontSequence;
-        std::unique_ptr<uint8_t[]>  m_loadData;
-        Vector2<size_t>             m_loadDimensions;
-        Bounds2f                    m_renderBounds;
+        std::unique_ptr<uint8_t[]>  m_loadData;      
         std::wstring                m_text;
         std::shared_ptr<Texture>    m_texture;
+        Vector2<size_t>             m_textureSize;
 
-    };*/
+    };
 
 }
 

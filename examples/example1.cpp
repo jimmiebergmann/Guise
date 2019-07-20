@@ -67,19 +67,22 @@ int main()
     
     auto button3 = Button::create();
     button3->setSize({ 200.0f, 40.0f });
+    button3->getStyleHover().setSize({ 200.0f, 45.0f });
     button3->getStyleActive().setBorderWidth(5.0f);
     button3->onRelease = []() { std::cout << "Released button 3!" << std::endl; };
     vertGrid1->add(button3);
 
+    auto label1 = Label::create("arial", L"Name");
+    label1->setFontSize(10);
+    vertGrid1->add(label1);
+
     auto button4 = Button::create();
-    button3->setSize({ 200.0f, 40.0f });
+    button4->setSize({ 200.0f, 40.0f });
     vertGrid1->add(button4);
 
-    button1->disable();
+    //button1->disable();
 
-    /*auto label1 = Label::create(canvas1, "arial", L"Name");
-    label1->setFontSize(10);
-    vertGrid1->add(label1);*/
+    
     /*
     auto horiGrid1 = HorizontalGrid::create(canvas1);
     vertGrid1->add(horiGrid1);

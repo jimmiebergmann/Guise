@@ -304,8 +304,7 @@ namespace Guise
 
         public:
 
-            ParentStyle(ParentStyle * parent = nullptr);
-            //ParentStyle(const std::shared_ptr<Selector> & selector, ParentStyle * parent = nullptr);
+            ParentStyle(Control * control = nullptr, ParentStyle * parent = nullptr);
 
             Vector4f getPadding() const;
             Vector2f getPaddingLow() const;
@@ -325,6 +324,9 @@ namespace Guise
 
             std::optional<Vector4f> m_padding;
 
+        private:
+
+            Signal<> onResizeChange;
         };
 
 
@@ -334,7 +336,6 @@ namespace Guise
         public:
 
             AlignStyle(AlignStyle * parent = nullptr);
-            //AlignStyle(const std::shared_ptr<Selector> & selector, AlignStyle * parent = nullptr);
 
             Property::HorizontalAlign getHorizontalAlign() const;
             Property::VerticalAlign getVerticalAlign() const;
@@ -359,8 +360,7 @@ namespace Guise
 
         public:
 
-            RectStyle(RectStyle * parent = nullptr, Control * control = nullptr);
-            //RectStyle(const std::shared_ptr<Selector> & selector, RectStyle * parent = nullptr);
+            RectStyle(Control * control = nullptr, RectStyle * parent = nullptr);
 
             Property::Overflow getOverflow() const;
             Vector4f getMargin() const;
@@ -391,7 +391,7 @@ namespace Guise
 
         private:
 
-            Signal<> onChange;
+            Signal<> onResizeChange;
 
         };
 
@@ -402,7 +402,6 @@ namespace Guise
         public:
 
             BorderStyle(BorderStyle * parent = nullptr);
-            //BorderStyle(const std::shared_ptr<Selector> & selector, BorderStyle * parent = nullptr);
 
             const Vector4f getBorderColor() const;
             Property::BorderStyle getBorderStyle() const;
@@ -430,8 +429,7 @@ namespace Guise
 
         public:
 
-            PaintRectStyle(PaintRectStyle * parent = nullptr, Control * control = nullptr);
-            //PaintRectStyle(const std::shared_ptr<Selector> & selector, PaintRectStyle * parent = nullptr);
+            PaintRectStyle(Control * control = nullptr, PaintRectStyle * parent = nullptr);
 
             const Vector4f getBackgroundColor() const;
    
@@ -453,8 +451,7 @@ namespace Guise
 
         public:
 
-            FontStyle(FontStyle * parent = nullptr);
-            //FontStyle(const std::shared_ptr<Selector> & selector, FontStyle * parent = nullptr);
+            FontStyle(Control * control = nullptr, FontStyle * parent = nullptr);
 
             const Vector4f getFontBackgroundColor() const;
             const Vector4f getFontColor() const;
@@ -477,6 +474,10 @@ namespace Guise
             std::optional<std::string>  m_fontFamily;
             std::optional<int32_t>      m_fontSize;
 
+        private:
+
+            Signal<> onResizeChange;
+
         };
 
 
@@ -487,8 +488,7 @@ namespace Guise
 
             static Bounds2f calcStyledBounds(const ParentRectStyle & style, const Bounds2f & bounds, const float scale);
 
-            ParentRectStyle(ParentRectStyle * parent = nullptr, Control * control = nullptr);
-            //ParentRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentRectStyle * parent = nullptr);
+            ParentRectStyle(Control * control = nullptr, ParentRectStyle * parent = nullptr);
 
             void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
 
@@ -502,15 +502,42 @@ namespace Guise
 
             static Bounds2f calcStyledBounds(const ParentPaintRectStyle & style, const Bounds2f & bounds, const float scale);
 
-            ParentPaintRectStyle(ParentPaintRectStyle * parent = nullptr, Control * control = nullptr);
-            //ParentPaintRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentPaintRectStyle * parent = nullptr);
+            ParentPaintRectStyle(Control * control = nullptr, ParentPaintRectStyle * parent = nullptr);
 
             void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
 
-        };       
+        }; 
+
+
+        template<typename T>
+        class MultiStyle : public T
+        {
+
+        public:
+
+            MultiStyle(Control * control);
+
+            T & getCurrentStyle();
+
+            const T & getCurrentStyle() const;
+
+        protected:
+
+            void setCurrentStyle(T & style);
+
+            void setCurrentStyle(T * style);
+
+        private:
+
+            Control *   m_control;
+            T *         m_currentStyle;
+
+        };
 
     }
 
 }
+
+#include "guise/style.inl"
 
 #endif

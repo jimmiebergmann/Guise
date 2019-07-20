@@ -33,7 +33,7 @@
 namespace Guise
 {
 
-    class GUISE_API Button : public ControlContainerSingle, public Style::ParentPaintRectStyle
+    class GUISE_API Button : public ControlContainerSingle, public Style::MultiStyle<Style::ParentPaintRectStyle>
     {
 
     public:
@@ -48,8 +48,6 @@ namespace Guise
 
         Style::ParentPaintRectStyle & getStyleActive();
         const Style::ParentPaintRectStyle & getStyleActive() const;
-        Style::ParentPaintRectStyle & getCurrentStyle();
-        const Style::ParentPaintRectStyle & getCurrentStyle() const;
         Style::ParentPaintRectStyle & getStyleDisabled();
         const Style::ParentPaintRectStyle & getStyleDisabled() const;
         Style::ParentPaintRectStyle & getStyleHover();
@@ -76,7 +74,6 @@ namespace Guise
 
         virtual void onResize();
 
-        Style::ParentPaintRectStyle *   m_currentStyle;
         bool                            m_pressed;
         Style::ParentPaintRectStyle     m_styleActive;
         Style::ParentPaintRectStyle     m_styleDisabled;

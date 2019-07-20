@@ -57,12 +57,12 @@ namespace Guise
                 {
                     if (getBounds().intersects(e.position))
                     {
-                        m_currentStyle = &m_styleHover;
+                        setCurrentStyle(m_styleHover);
                         onHover(e.position);
                     }
                     else
                     {
-                        m_currentStyle = this;
+                        setCurrentStyle(this);
                     }
                 }     
             }
@@ -77,7 +77,7 @@ namespace Guise
                 if (getBounds().intersects(e.position))
                 {
                     m_pressed = true;
-                    m_currentStyle = &m_styleActive;
+                    setCurrentStyle(m_styleActive);
 
                     onPress(e.position); 
                 }        
@@ -94,12 +94,12 @@ namespace Guise
 
                 if (getBounds().intersects(e.position))
                 {
-                    m_currentStyle = &m_styleHover;
+                    setCurrentStyle(m_styleHover);
                     onRelease(e.position);   
                 }
                 else
                 {
-                    m_currentStyle = this;
+                    setCurrentStyle(this);
                 }
             }
             break;
@@ -123,15 +123,6 @@ namespace Guise
         return m_styleActive;
     }
 
-    Style::ParentPaintRectStyle & Button::getCurrentStyle()
-    {
-        return *m_currentStyle;
-    }
-    const Style::ParentPaintRectStyle & Button::getCurrentStyle() const
-    {
-        return *m_currentStyle;
-    }
-
     Style::ParentPaintRectStyle & Button::getStyleDisabled()
     {
         return m_styleHover;
@@ -151,8 +142,7 @@ namespace Guise
     }
 
     Button::Button() :
-        Style::ParentPaintRectStyle(nullptr, this),
-        m_currentStyle(this),
+        Style::MultiStyle<Style::ParentPaintRectStyle>(this),
         m_pressed(false),
         m_styleActive(this, this),
         m_styleDisabled(this, this),
@@ -162,14 +152,12 @@ namespace Guise
 
     void Button::onAddChild(Control & control, const size_t)
     {
-        control.setBounds(getBounds().cutEdges(scale(m_currentStyle->getPadding())));
+        control.setBounds(getBounds().cutEdges(scale(getCurrentStyle().getPadding())));
     }
 
     void Button::onCanvasChange(Canvas * canvas)
     {
-        ParentPaintRectStyle & idleStyle = static_cast<Style::ParentPaintRectStyle&>(*this);
-        
-        idleStyle.updateEmptyProperties(canvas->getStyleSheet()->getSelector("button"));
+        updateEmptyProperties(canvas->getStyleSheet()->getSelector("button"));
         m_styleActive.updateEmptyProperties(canvas->getStyleSheet()->getSelector("button:active"));
         m_styleDisabled.updateEmptyProperties(canvas->getStyleSheet()->getSelector("button:disabled"));
         m_styleHover.updateEmptyProperties(canvas->getStyleSheet()->getSelector("button:hover"));
@@ -177,17 +165,17 @@ namespace Guise
 
     void Button::onDisable()
     {
-        m_currentStyle = &m_styleDisabled;
+        setCurrentStyle(m_styleDisabled);
     }
 
     void Button::onEnable()
     {
-        m_currentStyle = this;
+        setCurrentStyle(this);
     }
 
     void Button::onRender(RendererInterface & rendererInterface)
     {
-        rendererInterface.drawRect(getBounds(), *m_currentStyle);
+        rendererInterface.drawRect(getBounds(), getCurrentStyle());
 
         if (auto child = getChild())
         {
@@ -197,11 +185,11 @@ namespace Guise
 
     void Button::onResize()
     {
-        setBounds(calcStyledBounds(*m_currentStyle, getBounds(), getScale()));
+        setBounds(calcStyledBounds(getCurrentStyle(), getBounds(), getScale()));
 
         if (auto child = getChild())
         {
-            child->setBounds(getBounds().cutEdges(scale(m_currentStyle->getPadding())));
+            child->setBounds(getBounds().cutEdges(scale(getCurrentStyle().getPadding())));
         }
     }
 

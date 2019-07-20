@@ -342,6 +342,14 @@ namespace Guise
         return Vector2f::ceil(vector * getScale());
     }
 
+    void Control::update()
+    {
+        if (m_canvas)
+        {
+            m_canvas->updateControl(this);
+        }
+    }
+
     void Control::setCanvas(Canvas * canvas)
     {
         if (m_canvas != canvas)
