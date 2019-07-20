@@ -25,7 +25,7 @@
 
 #ifndef GUISE_CONTROL_MOVABLE_HPP
 #define GUISE_CONTROL_MOVABLE_HPP
-
+/*
 #include "guise/control.hpp"
 
 namespace Guise
@@ -37,23 +37,23 @@ namespace Guise
 
     public:
 
-        static std::shared_ptr<Movable<C> > create(Canvas & canvas);
+        static std::shared_ptr<Movable<C> > create();
 
         ControlType getType() const;
 
-       /* bool handleInputEvent(const Input::Event & event);
+        bool handleInputEvent(const Input::Event & event);
 
         void update(const Bounds2f & canvasBound);
 
         void render(RendererInterface & rendererInterface);
 
         Bounds2f getSelectBounds() const;
-        */
+        
         std::shared_ptr<C> getControl() const;
 
     private:
 
-        Movable(Canvas & canvas);
+        Movable();
         Movable(const Movable<C> &) = delete;
 
         std::shared_ptr<C> m_control;
@@ -62,6 +62,6 @@ namespace Guise
 
 }
 
-#include "guise/control/movable.inl"
+#include "guise/control/movable.inl"*/
 
 #endif

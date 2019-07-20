@@ -22,7 +22,7 @@
 * SOFTWARE.
 *
 */
-
+/*
 namespace Guise
 {
 
@@ -37,7 +37,7 @@ namespace Guise
     inline ControlType Movable<C>::getType() const
     {
         return m_control->getType();
-    }
+    }*/
 
     /* bool handleInputEvent(const Input::Event & event);
 
@@ -48,7 +48,7 @@ namespace Guise
     Bounds2f getSelectBounds() const;
     */
 
-    template<typename C>
+   /* template<typename C>
     inline Movable<C>::Movable(Canvas & canvas) :
         Control(canvas)
     { }
@@ -60,4 +60,4 @@ namespace Guise
     }
 
 
-}
+}*/
