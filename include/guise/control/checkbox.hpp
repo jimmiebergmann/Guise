@@ -33,28 +33,22 @@
 namespace Guise
 {
 
-    /*class GUISE_API Checkbox : public Control, public Style::PaintRectStyle
+    class GUISE_API Checkbox : public Control, public MultiStyleControl<Style::PaintRectStyle>
     {
 
     public:
 
-        static std::shared_ptr<Checkbox> create(std::shared_ptr<Canvas> & canvas);
+        static std::shared_ptr<Checkbox> create();
 
-        virtual bool handleInputEvent(const Input::Event & event);      
-
-        virtual Bounds2f getRenderBounds() const;
-
-        virtual Bounds2f getSelectBounds() const;
+        Style::PaintRectStyle & getCheckedStyle();
+        Style::PaintRectStyle & getCheckedHoverStyle();
+        Style::PaintRectStyle & getCheckedDisabledStyle();
+        Style::PaintRectStyle & getDisabledStyle();
+        Style::PaintRectStyle & getHoverStyle();
 
         virtual ControlType getType() const;
 
-        virtual void update();
-
-        Style::PaintRectStyle & getChekedStyle();
-        Style::PaintRectStyle & getChekedHoverStyle();
-        Style::PaintRectStyle & getChekedDisabledStyle();
-        Style::PaintRectStyle & getDisabledStyle();
-        Style::PaintRectStyle & getHoverStyle();
+        virtual bool handleInputEvent(const Input::Event & event);
 
         Signal<bool>        onChanged;
         Signal<Vector2f>    onPressed;
@@ -63,20 +57,27 @@ namespace Guise
 
     private:
 
-        Checkbox(std::shared_ptr<Canvas> & canvas);
+        Checkbox();
         Checkbox(const Checkbox &) = delete;
 
-        virtual void render(RendererInterface & rendererInterface);
+        virtual void onCanvasChange(Canvas * canvas);
+
+        virtual void onDisable();
+
+        virtual void onEnable();
+
+        virtual void onRender(RendererInterface & rendererInterface);
+
+        virtual void onResize();
 
         bool                    m_checked;
-        Style::PaintRectStyle   m_checkedStyle;
-        Style::PaintRectStyle   m_checkedHoverStyle;
-        Style::PaintRectStyle   m_checkedDisabledStyle;
-        Style::PaintRectStyle   m_disabledStyle;
-        Style::PaintRectStyle   m_hoverStyle;
-        Style::PaintRectStyle * m_currentStyle;
-        Bounds2f                m_renderBounds;
-    };*/
+        Style::PaintRectStyle   m_styleChecked;
+        Style::PaintRectStyle   m_styleCheckedHover;
+        Style::PaintRectStyle   m_styleCheckedDisabled;
+        Style::PaintRectStyle   m_styleDisabled;
+        Style::PaintRectStyle   m_styleHover;
+
+    };
 
 }
 

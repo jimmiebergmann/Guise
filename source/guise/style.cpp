@@ -1087,6 +1087,44 @@ namespace Guise
             }
         }
 
+        Bounds2f RectStyle::calcStyledBounds(const RectStyle & style, const Bounds2f & canvasBounds, const float scale)
+        {
+            const Vector2f newPos = style.getPosition() * scale;
+            const Vector2f newSize = style.getSize() * scale;
+
+            const bool clamp = style.getOverflow() == Style::Property::Overflow::Hidden;
+            Bounds2f bounds = { canvasBounds.position + newPos, newSize };
+
+            if (clamp)
+            {
+                bounds.position = Vector2f::clamp(bounds.position, canvasBounds.position,
+                    Vector2f::max(canvasBounds.position, canvasBounds.position + canvasBounds.size));
+            }
+
+            Vector2f lower = bounds.position;
+            Vector2f higherCanvas = canvasBounds.position + canvasBounds.size;
+            Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, newSize);
+
+            if ((clamp && higherThis.x > higherCanvas.x) || newSize.x <= 0.0f)
+            {
+                bounds.size.x = higherCanvas.x - lower.x;
+            }
+            if ((clamp && higherThis.y > higherCanvas.y) || newSize.y <= 0.0f)
+            {
+                bounds.size.y = higherCanvas.y - lower.y;
+            }
+
+            bounds.size.x = std::max(0.0f, bounds.size.x);
+            bounds.size.y = std::max(0.0f, bounds.size.y);
+
+            bounds.position.x = std::floor(bounds.position.x);
+            bounds.position.y = std::floor(bounds.position.y);
+            bounds.size.x = std::floor(bounds.size.x);
+            bounds.size.y = std::floor(bounds.size.y);
+
+            return bounds;
+        }
+
 
         // Border style implementations.
         BorderStyle::BorderStyle(BorderStyle * parent) :
@@ -1366,44 +1404,6 @@ namespace Guise
 
 
         // Parent rect style.
-        Bounds2f ParentRectStyle::calcStyledBounds(const ParentRectStyle & style, const Bounds2f & canvasBounds, const float scale)
-        {
-            const Vector2f newPos = style.getPosition() * scale;
-            const Vector2f newSize = style.getSize() * scale;
-
-            const bool clamp = style.getOverflow() == Style::Property::Overflow::Hidden;
-            Bounds2f bounds = { canvasBounds.position + newPos, newSize };
-
-            if (clamp)
-            {
-                bounds.position = Vector2f::clamp(bounds.position, canvasBounds.position,
-                                                  Vector2f::max(canvasBounds.position, canvasBounds.position + canvasBounds.size));
-            }
-
-            Vector2f lower = bounds.position;
-            Vector2f higherCanvas = canvasBounds.position + canvasBounds.size;
-            Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, newSize);
-
-            if ((clamp && higherThis.x > higherCanvas.x) || newSize.x <= 0.0f)
-            {
-                bounds.size.x = higherCanvas.x - lower.x;
-            }
-            if ((clamp && higherThis.y > higherCanvas.y) || newSize.y <= 0.0f)
-            {
-                bounds.size.y = higherCanvas.y - lower.y;
-            }
-
-            bounds.size.x = std::max(0.0f, bounds.size.x);
-            bounds.size.y = std::max(0.0f, bounds.size.y);
-
-            bounds.position.x = std::floor(bounds.position.x);
-            bounds.position.y = std::floor(bounds.position.y);
-            bounds.size.x = std::floor(bounds.size.x);
-            bounds.size.y = std::floor(bounds.size.y);
-
-            return bounds;
-        }
-
         ParentRectStyle::ParentRectStyle(Control * control, ParentRectStyle * parent) :
             Style::RectStyle(control, parent),
             Style::ParentStyle(control, parent)
@@ -1417,44 +1417,6 @@ namespace Guise
 
 
         // Parent paint rect style.
-        Bounds2f ParentPaintRectStyle::calcStyledBounds(const ParentPaintRectStyle & style, const Bounds2f & canvasBounds, const float scale)
-        {   
-            const Vector2f newPos = style.getPosition() * scale;
-            const Vector2f newSize = style.getSize() * scale;
-
-            const bool clamp = style.getOverflow() == Style::Property::Overflow::Hidden;
-            Bounds2f bounds = { canvasBounds.position + newPos, newSize };
-
-            if (clamp)
-            {
-                bounds.position = Vector2f::clamp(bounds.position, canvasBounds.position,
-                                                  Vector2f::max(canvasBounds.position, canvasBounds.position + canvasBounds.size));
-            }
-
-            Vector2f lower = bounds.position;
-            Vector2f higherCanvas = canvasBounds.position + canvasBounds.size;
-            Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, newSize);
-
-            if ((clamp && higherThis.x > higherCanvas.x) || newSize.x <= 0.0f)
-            {
-                bounds.size.x = higherCanvas.x - lower.x;
-            }
-            if ((clamp && higherThis.y > higherCanvas.y) || newSize.y <= 0.0f)
-            {
-                bounds.size.y = higherCanvas.y - lower.y;
-            }
-
-            bounds.size.x = std::max(0.0f, bounds.size.x);
-            bounds.size.y = std::max(0.0f, bounds.size.y);
-
-            bounds.position.x = std::floor(bounds.position.x);
-            bounds.position.y = std::floor(bounds.position.y);
-            bounds.size.x = std::floor(bounds.size.x);
-            bounds.size.y = std::floor(bounds.size.y);
-
-            return bounds;
-        }
-
         ParentPaintRectStyle::ParentPaintRectStyle(Control * control, ParentPaintRectStyle * parent) :
             Style::PaintRectStyle(control, parent),
             Style::ParentStyle(control, parent)

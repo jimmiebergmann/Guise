@@ -261,6 +261,10 @@ namespace Guise
 
     };
 
+    template<typename T>
+    using  MultiStyleControl = Style::MultiStyle<T, Control>;
+
+
 }
 
 #endif

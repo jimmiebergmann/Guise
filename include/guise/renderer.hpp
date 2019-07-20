@@ -52,7 +52,7 @@ namespace Guise
 
         virtual void setLevel(const size_t level) = 0;
 
-        virtual void drawRect(const Bounds2f & bounds, const Style::ParentPaintRectStyle & style) = 0;
+        virtual void drawRect(const Bounds2f & bounds, const Style::PaintRectStyle & style) = 0;
 
         virtual void drawQuad(const Bounds2f & bounds, const Vector4f & color) = 0;      
         virtual void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color) = 0;

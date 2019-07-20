@@ -43,7 +43,7 @@ namespace Guise
         m_level = static_cast<float>(level);
     }
 
-    void OpenGLRenderer::drawRect(const Bounds2f & bounds, const Style::ParentPaintRectStyle & style)
+    void OpenGLRenderer::drawRect(const Bounds2f & bounds, const Style::PaintRectStyle & style)
     {
         drawQuad(bounds, style.getBackgroundColor());
 

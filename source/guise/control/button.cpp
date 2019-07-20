@@ -47,73 +47,6 @@ namespace Guise
         return false;
     }
 
-    bool Button::handleInputEvent(const Input::Event & e)
-    {
-        switch (e.type)
-        {   
-            case Input::EventType::MouseMove:          
-            {    
-                if (!m_pressed)
-                {
-                    if (getBounds().intersects(e.position))
-                    {
-                        setCurrentStyle(m_styleHover);
-                        onHover(e.position);
-                    }
-                    else
-                    {
-                        setCurrentStyle(this);
-                    }
-                }     
-            }
-            break;
-            case Input::EventType::MouseJustPressed:
-            {
-                if (e.button != 0)
-                {
-                    break;
-                }
-
-                if (getBounds().intersects(e.position))
-                {
-                    m_pressed = true;
-                    setCurrentStyle(m_styleActive);
-
-                    onPress(e.position); 
-                }        
-            }
-            break;
-            case Input::EventType::MouseRelease:
-            {
-                if (e.button != 0)
-                {
-                    break;
-                }
-
-                m_pressed = false;
-
-                if (getBounds().intersects(e.position))
-                {
-                    setCurrentStyle(m_styleHover);
-                    onRelease(e.position);   
-                }
-                else
-                {
-                    setCurrentStyle(this);
-                }
-            }
-            break;
-            default: break;
-        }
-
-        return true;
-    }
-
-    ControlType Button::getType() const
-    {
-        return ControlType::Button;
-    }
-
     Style::ParentPaintRectStyle & Button::getStyleActive()
     {
         return m_styleActive;
@@ -141,8 +74,75 @@ namespace Guise
         return m_styleHover;
     }
 
+    ControlType Button::getType() const
+    {
+        return ControlType::Button;
+    }
+
+    bool Button::handleInputEvent(const Input::Event & e)
+    {
+        switch (e.type)
+        {
+        case Input::EventType::MouseMove:
+        {
+            if (!m_pressed)
+            {
+                if (getBounds().intersects(e.position))
+                {
+                    setCurrentStyle(m_styleHover);
+                    onHover(e.position);
+                }
+                else
+                {
+                    setCurrentStyle(this);
+                }
+            }
+        }
+        break;
+        case Input::EventType::MouseJustPressed:
+        {
+            if (e.button != 0)
+            {
+                break;
+            }
+
+            if (getBounds().intersects(e.position))
+            {
+                m_pressed = true;
+                setCurrentStyle(m_styleActive);
+
+                onPress(e.position);
+            }
+        }
+        break;
+        case Input::EventType::MouseRelease:
+        {
+            if (e.button != 0)
+            {
+                break;
+            }
+
+            m_pressed = false;
+
+            if (getBounds().intersects(e.position))
+            {
+                setCurrentStyle(m_styleHover);
+                onRelease(e.position);
+            }
+            else
+            {
+                setCurrentStyle(this);
+            }
+        }
+        break;
+        default: break;
+        }
+
+        return true;
+    }
+
     Button::Button() :
-        Style::MultiStyle<Style::ParentPaintRectStyle>(this),
+        MultiStyleControl<Style::ParentPaintRectStyle>(this),
         m_pressed(false),
         m_styleActive(this, this),
         m_styleDisabled(this, this),

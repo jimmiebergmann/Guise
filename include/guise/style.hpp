@@ -382,6 +382,8 @@ namespace Guise
             
         protected:
 
+            static Bounds2f calcStyledBounds(const RectStyle & style, const Bounds2f & bounds, const float scale);
+
             RectStyle * m_parent;
 
             std::optional<Vector4f>                     m_margin;
@@ -486,8 +488,6 @@ namespace Guise
 
         public:
 
-            static Bounds2f calcStyledBounds(const ParentRectStyle & style, const Bounds2f & bounds, const float scale);
-
             ParentRectStyle(Control * control = nullptr, ParentRectStyle * parent = nullptr);
 
             void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
@@ -500,8 +500,6 @@ namespace Guise
 
         public:
 
-            static Bounds2f calcStyledBounds(const ParentPaintRectStyle & style, const Bounds2f & bounds, const float scale);
-
             ParentPaintRectStyle(Control * control = nullptr, ParentPaintRectStyle * parent = nullptr);
 
             void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
@@ -509,13 +507,13 @@ namespace Guise
         }; 
 
 
-        template<typename T>
+        template<typename T, typename U>
         class MultiStyle : public T
         {
 
         public:
 
-            MultiStyle(Control * control);
+            MultiStyle(U * control);
 
             T & getCurrentStyle();
 
@@ -529,8 +527,8 @@ namespace Guise
 
         private:
 
-            Control *   m_control;
-            T *         m_currentStyle;
+            U *   m_control;
+            T *   m_currentStyle;
 
         };
 

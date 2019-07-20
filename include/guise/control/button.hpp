@@ -33,18 +33,14 @@
 namespace Guise
 {
 
-    class GUISE_API Button : public ControlContainerSingle, public Style::MultiStyle<Style::ParentPaintRectStyle>
+    class GUISE_API Button : public ControlContainerSingle, public MultiStyleControl<Style::ParentPaintRectStyle>
     {
 
     public:
 
         static std::shared_ptr<Button> create();
 
-        virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
-
-        virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual ControlType getType() const;
+        virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());       
 
         Style::ParentPaintRectStyle & getStyleActive();
         const Style::ParentPaintRectStyle & getStyleActive() const;
@@ -52,6 +48,10 @@ namespace Guise
         const Style::ParentPaintRectStyle & getStyleDisabled() const;
         Style::ParentPaintRectStyle & getStyleHover();
         const Style::ParentPaintRectStyle & getStyleHover() const;
+
+        virtual ControlType getType() const;
+
+        virtual bool handleInputEvent(const Input::Event & event);
 
         Signal<Vector2f> onPress;
         Signal<Vector2f> onRelease;

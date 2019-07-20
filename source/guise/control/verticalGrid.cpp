@@ -63,7 +63,7 @@ namespace Guise
         {
             return;
         }
-        resizeChilds();
+        setBounds(getAvailableBounds());
     }
 
     void VerticalGrid::onCanvasChange(Canvas * canvas)
@@ -78,11 +78,13 @@ namespace Guise
         {
             return;
         }
-        resizeChilds();
+        setBounds(getAvailableBounds());
     }
 
     void VerticalGrid::onRender(RendererInterface & rendererInterface)
     {
+        //rendererInterface.drawQuad(getBounds(), Vector4f(0.0f, 1.0f, 0.0f, 0.4f));
+
         auto childs = getChilds();
         for (auto it = childs.begin(); it != childs.begin() + m_childRenderCount; it++)
         {
@@ -98,8 +100,10 @@ namespace Guise
 
     void VerticalGrid::resizeChilds()
     {
-        auto boundsLeft = getBounds().cutEdges(scale(getPadding()));
+        auto padding = scale(getPadding());
+        auto boundsLeft = getBounds().cutEdges(padding);
         auto slotPadding = scale(m_slotStyle.getPadding());
+        float maxWidth = 0.0f;
 
         m_childRenderCount = 0;
         auto childs = getChilds();
@@ -110,16 +114,27 @@ namespace Guise
             child->setBounds(cutBoundsLeft);
 
             auto childBounds = child->getBounds();
-            auto childHeight = childBounds.size.y ? childBounds.size.y : 0.0f;
 
+            float extraHeight = std::max(childBounds.position.y - cutBoundsLeft.position.y, 0.0f);
+            auto childHeight = std::max(childBounds.size.y + extraHeight, 0.0f);
             boundsLeft.cutTop(childHeight + slotPadding.y + slotPadding.w);
 
+            maxWidth = std::max(maxWidth, childBounds.size.x);
+
             m_childRenderCount++;
-            if (!boundsLeft.size.y)
+            if (!boundsLeft.size.x)
             {
                 break;
             }
         }
+
+        maxWidth += padding.x + padding.z + slotPadding.x + slotPadding.z;
+        maxWidth = std::min(maxWidth, getBounds().size.x);
+
+        auto newBounds = getBounds();
+        newBounds.size.x = maxWidth;
+        newBounds.size.y -= boundsLeft.size.y;
+        setBounds(newBounds);
     }
 
 }

@@ -31,35 +31,39 @@
 namespace Guise
 {
 
-    /*class GUISE_API HorizontalGrid : public ControlContainerList, public Style::ParentRectStyle
+    class GUISE_API HorizontalGrid : public ControlContainerList, public Style::ParentRectStyle
     {
 
     public:
 
-        static std::shared_ptr<HorizontalGrid> create(std::shared_ptr<Canvas> & canvas);
+        static std::shared_ptr<HorizontalGrid> create();
+
+        Style::ParentRectStyle & getSlotStyle();
+        const Style::ParentRectStyle & getSlotStyle() const;
 
         virtual ControlType getType() const;
 
-        virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void update(const Bounds2f & canvasBounds);
-
-        virtual Bounds2f getRenderBounds() const;
-
-        virtual Bounds2f getSelectBounds() const;
-
-        Style::ParentRectStyle & getSlotStyle();
-
     private:
 
-        HorizontalGrid(std::shared_ptr<Canvas> & canvas);
+        HorizontalGrid();
         HorizontalGrid(const HorizontalGrid &) = delete;
 
-        Bounds2f                m_renderBounds;
-        std::vector<Bounds2f>   m_childsBounds;
-        Style::ParentRectStyle  m_slotStyle;
+        virtual void onAddChild(Control & control, const size_t index);
 
-    };*/
+        virtual void onCanvasChange(Canvas * canvas);
+
+        virtual void onRemoveChild(Control & control, const size_t index);
+
+        virtual void onRender(RendererInterface & rendererInterface);
+
+        virtual void onResize();
+
+        void resizeChilds();
+
+        Style::ParentRectStyle  m_slotStyle;
+        size_t                  m_childRenderCount;
+
+    };
 
 }
 

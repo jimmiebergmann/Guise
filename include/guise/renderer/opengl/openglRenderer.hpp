@@ -57,7 +57,7 @@ namespace Guise
 
         float getScale() const;
 
-        void drawRect(const Bounds2f & bounds, const Style::ParentPaintRectStyle & style);
+        void drawRect(const Bounds2f & bounds, const Style::PaintRectStyle & style);
 
         void drawQuad(const Bounds2f & bounds, const Vector4f & color);
         void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color);

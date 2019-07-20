@@ -151,6 +151,12 @@ namespace Guise
         return { Vector2f::floor(in.position), Vector2f::floor(in.size) };
     }
 
+    /*template <typename T>
+    Bounds<2, T> Bounds<2, T>::min(const Bounds<2, T> & left, const Bounds<2, T> & right)
+    {
+
+    }*/
+
     template <typename T>
     inline Bounds<2, T>::Bounds()
     { }
@@ -208,10 +214,18 @@ namespace Guise
     }
 
     template <typename T>
+    inline Bounds<2, T> & Bounds<2, T>::cutLeft(const T value)
+    {
+        position.x += value;
+        size.x     -= value;
+        return *this;
+    }
+
+    template <typename T>
     inline Bounds<2, T> & Bounds<2, T>::cutTop(const T value)
     {
         position.y += value;
-        size.y     -= value;
+        size.y -= value;
         return *this;
     }
 

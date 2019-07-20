@@ -31,20 +31,45 @@ namespace Guise
 {
 
     // Button implementations.
-    /*std::shared_ptr<Checkbox> Checkbox::create(std::shared_ptr<Canvas> & canvas)
+    std::shared_ptr<Checkbox> Checkbox::create()
     {
-        return std::shared_ptr<Checkbox>(new Checkbox(canvas));
+        return std::shared_ptr<Checkbox>(new Checkbox());
+    }
+
+    Style::PaintRectStyle & Checkbox::getCheckedStyle()
+    {
+        return m_styleChecked;
+    }
+
+    Style::PaintRectStyle & Checkbox::getCheckedHoverStyle()
+    {
+        return m_styleCheckedHover;
+    }
+
+    Style::PaintRectStyle & Checkbox::getCheckedDisabledStyle()
+    {
+        return m_styleCheckedDisabled;
+    }
+
+    Style::PaintRectStyle & Checkbox::getDisabledStyle()
+    {
+        return m_styleDisabled;
+    }
+
+    Style::PaintRectStyle & Checkbox::getHoverStyle()
+    {
+        return m_styleHover;
+    }
+
+    ControlType Checkbox::getType() const
+    {
+        return ControlType::Checkbox;
     }
 
     bool Checkbox::handleInputEvent(const Input::Event & e)
     {
-        if (!m_enabled)
-        {
-            return false;
-        }
-
         switch (e.type)
-        {       
+        {
             case Input::EventType::MouseRelease:
             {
                 if (e.button != 0)
@@ -52,22 +77,22 @@ namespace Guise
                     break;
                 }
 
-                if (m_renderBounds.intersects(e.position))
+                if (getBounds().intersects(e.position))
                 {
                     m_checked = !m_checked;
 
                     if (m_checked)
                     {
-                        m_currentStyle = &m_checkedStyle;
+                        setCurrentStyle(m_styleChecked);
                     }
                     else
                     {
-                        m_currentStyle = this;
+                        setCurrentStyle(this);
                     }
 
                 }
 
-                forceUpdate();
+                update();
             }
             break;
             default: break;
@@ -76,97 +101,45 @@ namespace Guise
         return true;
     }
 
-    Bounds2f Checkbox::getRenderBounds() const
-    {
-        return m_renderBounds;
-    }
-
-    Bounds2f Checkbox::getSelectBounds() const
-    {
-        return m_renderBounds;
-    }
-
-    ControlType Checkbox::getType() const
-    {
-        return ControlType::Checkbox;
-    }
-
-    void Checkbox::update()
-    {
-        Bounds2f renderBounds = calcRenderBounds(*m_currentStyle);
-        if (renderBounds != m_renderBounds || isUpdateForced())
-        {
-            m_renderBounds = { renderBounds.position , renderBounds.size };
-            m_canvas.reportControlChange(this);
-        }
-    }
-
-    Style::PaintRectStyle & Checkbox::getChekedStyle()
-    {
-        return m_checkedStyle;
-    }
-
-    Style::PaintRectStyle & Checkbox::getChekedHoverStyle()
-    {
-        return m_checkedHoverStyle;
-    }
-
-    Style::PaintRectStyle & Checkbox::getChekedDisabledStyle()
-    {
-        return m_checkedDisabledStyle;
-    }
-
-    Style::PaintRectStyle & Checkbox::getDisabledStyle()
-    {
-        return m_disabledStyle;
-    }
-
-    Style::PaintRectStyle & Checkbox::getHoverStyle()
-    {
-        return m_hoverStyle;
-    }
-
-    Checkbox::Checkbox(std::shared_ptr<Canvas> & canvas) :
-        Control(*canvas),
-        Style::PaintRectStyle(canvas->getStyleSheet()->getSelector("checkbox")),
+    Checkbox::Checkbox() :
+        MultiStyleControl<Style::PaintRectStyle>(this),
         m_checked(false),
-        m_checkedStyle(*this),
-        m_checkedHoverStyle(*this),
-        m_checkedDisabledStyle(*this),
-        m_disabledStyle(*this),
-        m_hoverStyle(*this),
-        m_currentStyle(this),
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f)
+        m_styleChecked(this, this),
+        m_styleCheckedHover(this, this),
+        m_styleCheckedDisabled(this, this),
+        m_styleDisabled(this, this),
+        m_styleHover(this, this)
     {
-        if (auto checkedStyle = canvas->getStyleSheet()->getSelector("checkbox:checked"))
-        {
-            m_checkedStyle = { checkedStyle, this };
-        }
-
-        if (auto checkedHoverStyle = canvas->getStyleSheet()->getSelector("checkbox:checked:hover"))
-        {
-            m_checkedHoverStyle = { checkedHoverStyle, this };
-        }
-
-        if (auto checkedDisabledStyle = canvas->getStyleSheet()->getSelector("checkbox:checked:disabled"))
-        {
-            m_checkedDisabledStyle = { checkedDisabledStyle, this };
-        }
-
-        if (auto disabledStyle = canvas->getStyleSheet()->getSelector("checkbox:disabled"))
-        {
-            m_disabledStyle = { disabledStyle, this };
-        }
-
-        if (auto hoverStyle = canvas->getStyleSheet()->getSelector("checkbox:hover"))
-        {
-            m_hoverStyle = { hoverStyle, this };
-        }
     }
 
-    void Checkbox::render(RendererInterface & renderer)
+    void Checkbox::onCanvasChange(Canvas * canvas)
     {
-        renderer.drawQuad(m_renderBounds, m_currentStyle->getBackgroundColor());
-    }*/
+        updateEmptyProperties(canvas->getStyleSheet()->getSelector("checkbox"));
+        m_styleChecked.updateEmptyProperties(canvas->getStyleSheet()->getSelector("checkbox:checked"));
+        m_styleCheckedHover.updateEmptyProperties(canvas->getStyleSheet()->getSelector("checkbox:checked:hover"));
+        m_styleCheckedDisabled.updateEmptyProperties(canvas->getStyleSheet()->getSelector("checkbox:checked:disabled"));
+        m_styleDisabled.updateEmptyProperties(canvas->getStyleSheet()->getSelector("checkbox:disabled"));
+        m_styleHover.updateEmptyProperties(canvas->getStyleSheet()->getSelector("checkbox:hover"));
+    }
+
+    void Checkbox::onDisable()
+    {
+        setCurrentStyle(m_styleDisabled);
+    }
+
+    void Checkbox::onEnable()
+    {
+        setCurrentStyle(this);
+    }
+
+    void Checkbox::onRender(RendererInterface & rendererInterface)
+    {
+        rendererInterface.drawRect(getBounds(), getCurrentStyle());
+    }
+
+    void Checkbox::onResize()
+    {
+        setBounds(calcStyledBounds(getCurrentStyle(), getBounds(), getScale()));
+    }
 
 }

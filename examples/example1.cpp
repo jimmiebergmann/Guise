@@ -4,7 +4,7 @@
 #include "guise/control/button.hpp"
 #include "guise/control/movable.hpp"
 #include "guise/control/verticalGrid.hpp"
-//#include "guise/control/horizontalGrid.hpp"
+#include "guise/control/horizontalGrid.hpp"
 #include "guise/control/label.hpp"
 #include "guise/control/textBox.hpp"
 #include "guise/control/checkbox.hpp"
@@ -72,24 +72,25 @@ int main()
     button3->onRelease = []() { std::cout << "Released button 3!" << std::endl; };
     vertGrid1->add(button3);
 
-    auto label1 = Label::create("arial", L"Name");
+    auto label1 = Label::create("arial", L"Checkboxes!");
     label1->setFontSize(10);
     vertGrid1->add(label1);
+
+    auto horiGrid1 = HorizontalGrid::create();
+    vertGrid1->add(horiGrid1);
+    //horiGrid1->setSize({ 200.0f, 40.0f });
+    auto checkbox1 = Checkbox::create();
+    checkbox1->setPosition({10.0, 0.0f});
+    auto checkbox2 = Checkbox::create();
+    checkbox2->getCheckedStyle().setSize({30.0f, 30.0f});
+    horiGrid1->add(checkbox1);
+    horiGrid1->add(checkbox2);
 
     auto button4 = Button::create();
     button4->setSize({ 200.0f, 40.0f });
     vertGrid1->add(button4);
 
-    //button1->disable();
 
-    
-    /*
-    auto horiGrid1 = HorizontalGrid::create(canvas1);
-    vertGrid1->add(horiGrid1);
-    horiGrid1->setSize({ 200.0f, 100.0f });
-    horiGrid1->add(Checkbox::create(canvas1));
-    horiGrid1->add(Checkbox::create(canvas1));
-    */
 
     //auto textbox1 = TextBox::create(canvas1);
     //vertGrid1->add(textbox1);

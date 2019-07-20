@@ -29,27 +29,27 @@ namespace Guise
     namespace Style
     {
 
-        template<typename T>
-        MultiStyle<T>::MultiStyle(Control * control) :
+        template<typename T, typename U>
+        MultiStyle<T, U>::MultiStyle(U * control) :
             T(control, nullptr),
             m_control(control),
             m_currentStyle(this)
         { }
 
-        template<typename T>
-        T & MultiStyle<T>::getCurrentStyle()
+        template<typename T, typename U>
+        T & MultiStyle<T, U>::getCurrentStyle()
         {
             return *m_currentStyle;
         }
 
-        template<typename T>
-        const T & MultiStyle<T>::getCurrentStyle() const
+        template<typename T, typename U>
+        const T & MultiStyle<T, U>::getCurrentStyle() const
         {
             return *m_currentStyle;
         }
 
-        template<typename T>
-        void MultiStyle<T>::setCurrentStyle(T & style)
+        template<typename T, typename U>
+        void MultiStyle<T, U>::setCurrentStyle(T & style)
         {
             if (&style != m_currentStyle)
             {
@@ -58,8 +58,8 @@ namespace Guise
             }
         }
 
-        template<typename T>
-        void MultiStyle<T>::setCurrentStyle(T * style)
+        template<typename T, typename U>
+        void MultiStyle<T, U>::setCurrentStyle(T * style)
         {
             if (!style)
             {
