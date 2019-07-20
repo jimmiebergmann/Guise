@@ -33,7 +33,7 @@ namespace Guise
 {
  
     // Button implementations.
-    std::shared_ptr<Label> Label::create(std::shared_ptr<Canvas> & canvas, const std::wstring & text)
+    /*std::shared_ptr<Label> Label::create(std::shared_ptr<Canvas> & canvas, const std::wstring & text)
     {
         return std::shared_ptr<Label>(new Label(canvas, text));
     }
@@ -47,31 +47,6 @@ namespace Guise
     {
         return false;
     }
-
-    void Label::render(RendererInterface & renderer)
-    {
-        if (m_changed)
-        {
-            m_changed = false;
-
-            if (m_loadData)
-            {
-                if (!m_texture)
-                {
-                    m_texture = renderer.createTexture();
-                }
-
-                m_texture->load(m_loadData.get(), Texture::PixelFormat::RGBA8, m_loadDimensions);
-                m_loadData.reset();
-            }
-        }
-
-        if (m_texture)
-        {
-            renderer.drawQuad(m_renderBounds, m_texture, getFontColor());
-        }
-    }
-
 
     Bounds2f Label::getRenderBounds() const
     {
@@ -106,7 +81,7 @@ namespace Guise
             {
                 m_renderBounds.size = m_loadDimensions;
 
-                m_canvas.updateControlRendering(this);
+                m_canvas.reportControlChange(this);
             }
             else
             {
@@ -180,5 +155,28 @@ namespace Guise
         });
     }
 
+    void Label::render(RendererInterface & renderer)
+    {
+        if (m_changed)
+        {
+            m_changed = false;
+
+            if (m_loadData)
+            {
+                if (!m_texture)
+                {
+                    m_texture = renderer.createTexture();
+                }
+
+                m_texture->load(m_loadData.get(), Texture::PixelFormat::RGBA8, m_loadDimensions);
+                m_loadData.reset();
+            }
+        }
+
+        if (m_texture)
+        {
+            renderer.drawQuad(m_renderBounds, m_texture, getFontColor());
+        }
+    }*/
 
 }

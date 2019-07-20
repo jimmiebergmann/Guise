@@ -29,6 +29,7 @@
 #include "guise/build.hpp"
 #include "guise/math/bounds.hpp"
 #include "guise/renderer/texture.hpp"
+#include "guise/style.hpp"
 #include <memory>
 
 namespace Guise
@@ -47,7 +48,11 @@ namespace Guise
 
     public:
 
-        virtual int32_t getDpi() = 0;
+        virtual float getScale() const = 0;
+
+        virtual void setLevel(const size_t level) = 0;
+
+        virtual void drawRect(const Bounds2f & bounds, const Style::ParentPaintRectStyle & style) = 0;
 
         virtual void drawQuad(const Bounds2f & bounds, const Vector4f & color) = 0;      
         virtual void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color) = 0;
@@ -87,7 +92,7 @@ namespace Guise
 
         virtual void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size) = 0;
 
-        virtual void setDpi(const int32_t dpi) = 0;
+        virtual void setScale(const float scale) = 0;
 
         virtual void clearColor() = 0;
 

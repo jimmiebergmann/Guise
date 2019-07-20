@@ -27,6 +27,8 @@
 #define GUISE_STYLE_HPP
 
 #include "guise/build.hpp"
+#include "guise/math/bounds.hpp"
+#include "guise/signal.hpp"
 #include <initializer_list>
 #include <mutex>
 #include <map>
@@ -36,6 +38,8 @@
 
 namespace Guise
 {
+
+    class Control;
 
     namespace Style
     {
@@ -301,7 +305,7 @@ namespace Guise
         public:
 
             ParentStyle(ParentStyle * parent = nullptr);
-            ParentStyle(const std::shared_ptr<Selector> & selector, ParentStyle * parent = nullptr);
+            //ParentStyle(const std::shared_ptr<Selector> & selector, ParentStyle * parent = nullptr);
 
             Vector4f getPadding() const;
             Vector2f getPaddingLow() const;
@@ -312,6 +316,8 @@ namespace Guise
             void setPadding(const float & padding);
             void setPaddingLow(const Vector2f & paddingLow);
             void setPaddingHigh(const Vector2f & paddingHigh);
+
+            void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
 
         protected:
 
@@ -328,13 +334,15 @@ namespace Guise
         public:
 
             AlignStyle(AlignStyle * parent = nullptr);
-            AlignStyle(const std::shared_ptr<Selector> & selector, AlignStyle * parent = nullptr);
+            //AlignStyle(const std::shared_ptr<Selector> & selector, AlignStyle * parent = nullptr);
 
             Property::HorizontalAlign getHorizontalAlign() const;
             Property::VerticalAlign getVerticalAlign() const;
 
             void setHorizontalAlign(const Property::HorizontalAlign horizontalAlign);
             void setVerticalAlign(const Property::VerticalAlign verticalAlign);
+
+            void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
 
         protected:
 
@@ -351,8 +359,8 @@ namespace Guise
 
         public:
 
-            RectStyle(RectStyle * parent = nullptr);
-            RectStyle(const std::shared_ptr<Selector> & selector, RectStyle * parent = nullptr);
+            RectStyle(RectStyle * parent = nullptr, Control * control = nullptr);
+            //RectStyle(const std::shared_ptr<Selector> & selector, RectStyle * parent = nullptr);
 
             Property::Overflow getOverflow() const;
             Vector4f getMargin() const;
@@ -369,6 +377,8 @@ namespace Guise
             void setOverflow(const Property::Overflow overflow);
             void setPosition(const Vector2f & position);
             void setSize(const Size & size);
+
+            void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
             
         protected:
 
@@ -379,6 +389,10 @@ namespace Guise
             std::optional<Vector2f>                     m_position;
             std::optional<Size>                         m_size;
 
+        private:
+
+            Signal<> onChange;
+
         };
 
 
@@ -388,7 +402,7 @@ namespace Guise
         public:
 
             BorderStyle(BorderStyle * parent = nullptr);
-            BorderStyle(const std::shared_ptr<Selector> & selector, BorderStyle * parent = nullptr);
+            //BorderStyle(const std::shared_ptr<Selector> & selector, BorderStyle * parent = nullptr);
 
             const Vector4f getBorderColor() const;
             Property::BorderStyle getBorderStyle() const;
@@ -397,6 +411,8 @@ namespace Guise
             void setBorderColor(const Vector4f & color);
             void setBorderStyle(const Property::BorderStyle style);
             void setBorderWidth(const float width);
+
+            void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
 
         protected:
 
@@ -414,18 +430,20 @@ namespace Guise
 
         public:
 
-            PaintRectStyle(PaintRectStyle * parent = nullptr);
-            PaintRectStyle(const std::shared_ptr<Selector> & selector, PaintRectStyle * parent = nullptr);
+            PaintRectStyle(PaintRectStyle * parent = nullptr, Control * control = nullptr);
+            //PaintRectStyle(const std::shared_ptr<Selector> & selector, PaintRectStyle * parent = nullptr);
 
             const Vector4f getBackgroundColor() const;
    
             void setBackgroundColor(const Vector4f & color);
 
+            void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
+
         protected:
 
             PaintRectStyle * m_parent;
 
-            std::optional<Vector4f>                     m_backgroundColor;
+            std::optional<Vector4f> m_backgroundColor;
 
         };
 
@@ -436,7 +454,7 @@ namespace Guise
         public:
 
             FontStyle(FontStyle * parent = nullptr);
-            FontStyle(const std::shared_ptr<Selector> & selector, FontStyle * parent = nullptr);
+            //FontStyle(const std::shared_ptr<Selector> & selector, FontStyle * parent = nullptr);
 
             const Vector4f getFontBackgroundColor() const;
             const Vector4f getFontColor() const;
@@ -448,6 +466,8 @@ namespace Guise
             void setFontFamily(const std::string & family);
             void setFontSize(const int32_t size);
 
+            void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
+
         protected:
 
             FontStyle * m_parent;
@@ -455,7 +475,7 @@ namespace Guise
             std::optional<Vector4f>     m_fontBackgroundColor;
             std::optional<Vector4f>     m_fontColor;
             std::optional<std::string>  m_fontFamily;
-            std::optional<int32_t>          m_fontSize;
+            std::optional<int32_t>      m_fontSize;
 
         };
 
@@ -465,8 +485,12 @@ namespace Guise
 
         public:
 
-            ParentRectStyle(ParentRectStyle * parent = nullptr);
-            ParentRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentRectStyle * parent = nullptr);
+            static Bounds2f calcStyledBounds(const ParentRectStyle & style, const Bounds2f & bounds, const float scale);
+
+            ParentRectStyle(ParentRectStyle * parent = nullptr, Control * control = nullptr);
+            //ParentRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentRectStyle * parent = nullptr);
+
+            void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
 
         };
 
@@ -476,8 +500,12 @@ namespace Guise
 
         public:
 
-            ParentPaintRectStyle(ParentPaintRectStyle * parent = nullptr);
-            ParentPaintRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentPaintRectStyle * parent = nullptr);
+            static Bounds2f calcStyledBounds(const ParentPaintRectStyle & style, const Bounds2f & bounds, const float scale);
+
+            ParentPaintRectStyle(ParentPaintRectStyle * parent = nullptr, Control * control = nullptr);
+            //ParentPaintRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentPaintRectStyle * parent = nullptr);
+
+            void updateEmptyProperties(const std::shared_ptr<Selector> & selector);
 
         };       
 

@@ -10,11 +10,11 @@ TEST(Control, Button)
    {
         auto canvas = Canvas::create({ 800, 600 });
 
-        auto button1 = Button::create(canvas);
+        auto button1 = Button::create();
         EXPECT_EQ(button1->getType(), ControlType::Button);
         EXPECT_TRUE(button1->getParent().expired());
 
-        auto button2 = Button::create(canvas);
+        auto button2 = Button::create();
         EXPECT_TRUE(button2->getParent().expired());
     }
         /*{

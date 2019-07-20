@@ -34,9 +34,9 @@ namespace Guise
 {
 
 #if GUISE_PLATFORM_WINDOWS >= GUISE_PLATFORM_WINDOWS_10
-    static int getSystemDpi(HWND windowHandle, HDC )
+    static uint32_t getSystemDpi(HWND windowHandle, HDC )
     {
-        return static_cast<int>(::GetDpiForWindow(windowHandle));
+        return static_cast<uint32_t>(::GetDpiForWindow(windowHandle));
     }
 #else
     static int getSystemDpi(HWND, HDC deviceContextHandle)
@@ -95,7 +95,7 @@ namespace Guise
         return m_canvas;
     }
 
-    int32_t Win32AppWindow::getDpi() const
+    uint32_t Win32AppWindow::getDpi() const
     {
         return m_dpi;
     }
@@ -103,6 +103,11 @@ namespace Guise
     Vector2i32 Win32AppWindow::getPosition() const
     {
         return m_position;
+    }
+
+    float Win32AppWindow::getScale() const
+    {
+        return m_scale;
     }
 
     Vector2ui32 Win32AppWindow::getSize() const
@@ -159,14 +164,34 @@ namespace Guise
         m_renderer->present();
     }
 
-    void Win32AppWindow::setDpi(const int32_t dpi)
+    void Win32AppWindow::setDpi(const uint32_t dpi)
     {
-        m_dpi = dpi;
+        //if (dpi != m_dpi)
+        //{
+            m_dpi = dpi;
+            m_scale = static_cast<float>(m_dpi) / GUISE_DEFAULT_DPI;
+        //}
     }
 
     void Win32AppWindow::setRenderer(const std::shared_ptr<Renderer> & renderer)
     {
         m_renderer = renderer;
+        if (m_renderer)
+        {
+            m_renderer->setScale(m_scale);
+        }
+    }
+
+    void Win32AppWindow::setScale(const float scale)
+    {
+        m_scale = std::max(scale, 0.0f);
+        m_dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
+        //uint32_t dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
+        //if (dpi != m_dpi)
+        //{
+        //    m_dpi = dpi;
+            //onDpiChange(m_dpi);
+        //}
     }
 
     void Win32AppWindow::show(const bool focus)
@@ -241,6 +266,7 @@ namespace Guise
         m_loaded(false),
         m_canvas(Canvas::create(size)),
         m_dpi(GUISE_DEFAULT_DPI),
+        m_scale(1.0f),
         m_input(m_canvas->getInput()),
         m_title(title),
         m_position(0, 0),
@@ -352,7 +378,7 @@ namespace Guise
         // Get the device context
         m_deviceContextHandle = GetDC(m_windowHandle);
 
-        int32_t systemDPi = getSystemDpi(m_windowHandle, m_deviceContextHandle);
+        uint32_t systemDPi = getSystemDpi(m_windowHandle, m_deviceContextHandle);
         
         RECT rect;
         if (GetWindowRect(m_windowHandle, &rect))
@@ -366,6 +392,7 @@ namespace Guise
             if (systemDPi != m_dpi)
             {
                 m_dpi = systemDPi;
+                m_scale = static_cast<float>(m_dpi) / GUISE_DEFAULT_DPI;
                 m_size = m_size * m_dpi / GUISE_DEFAULT_DPI;
 
                 RECT newWindowRect;
@@ -387,6 +414,11 @@ namespace Guise
         }
 
         m_canvas->setDpi(m_dpi);
+        if (m_renderer)
+        {
+            m_renderer->setScale(m_scale);
+        }
+
 
         onClose = [this]()
         {
@@ -581,12 +613,13 @@ namespace Guise
             case WM_DPICHANGED:
             {
                 m_dpi = LOWORD(wParam);
+                m_scale = static_cast<float>(m_dpi) / GUISE_DEFAULT_DPI;
 
                 if (m_renderer)
                 {
-                    m_renderer->setDpi(m_dpi);
+                    m_renderer->setScale(m_scale);
                 }
-                m_canvas->setDpi(m_dpi);
+                m_canvas->setScale(m_scale);
 
                 RECT * const newSize = reinterpret_cast<RECT*>(lParam);
                 SetWindowPos(windowHandle,

@@ -31,31 +31,37 @@
 namespace Guise
 {
 
-    class GUISE_API VerticalGrid : public ControlContainerList, public  Style::ParentRectStyle
+    class GUISE_API VerticalGrid : public ControlContainerList, public Style::ParentRectStyle
     {
 
     public:
 
-        static std::shared_ptr<VerticalGrid> create(std::shared_ptr<Canvas> & canvas);
-
-        virtual Bounds2f getRenderBounds() const;
-
-        virtual Bounds2f getSelectBounds() const;
+        static std::shared_ptr<VerticalGrid> create();
 
         Style::ParentRectStyle & getSlotStyle();
         const Style::ParentRectStyle & getSlotStyle() const;
 
         virtual ControlType getType() const;
 
-        virtual void update();
-
     private:
 
-        VerticalGrid(std::shared_ptr<Canvas> & canvas);
+        VerticalGrid();
         VerticalGrid(const VerticalGrid &) = delete;
 
-        Bounds2f                m_renderBounds;        
+        virtual void onAddChild(Control & control, const size_t index);
+
+        virtual void onCanvasChange(Canvas * canvas);
+
+        virtual void onRemoveChild(Control & control, const size_t index);
+
+        virtual void onRender(RendererInterface & rendererInterface);
+
+        virtual void onResize();
+
+        void resizeChilds();
+    
         Style::ParentRectStyle  m_slotStyle;
+        size_t                  m_childRenderCount;
 
     };
 

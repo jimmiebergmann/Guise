@@ -33,16 +33,14 @@
 namespace Guise
 {
 
-    class GUISE_API Checkbox : public Control, public Style::PaintRectStyle
+    /*class GUISE_API Checkbox : public Control, public Style::PaintRectStyle
     {
 
     public:
 
         static std::shared_ptr<Checkbox> create(std::shared_ptr<Canvas> & canvas);
 
-        virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void render(RendererInterface & rendererInterface);
+        virtual bool handleInputEvent(const Input::Event & event);      
 
         virtual Bounds2f getRenderBounds() const;
 
@@ -68,6 +66,8 @@ namespace Guise
         Checkbox(std::shared_ptr<Canvas> & canvas);
         Checkbox(const Checkbox &) = delete;
 
+        virtual void render(RendererInterface & rendererInterface);
+
         bool                    m_checked;
         Style::PaintRectStyle   m_checkedStyle;
         Style::PaintRectStyle   m_checkedHoverStyle;
@@ -76,7 +76,7 @@ namespace Guise
         Style::PaintRectStyle   m_hoverStyle;
         Style::PaintRectStyle * m_currentStyle;
         Bounds2f                m_renderBounds;
-    };
+    };*/
 
 }
 

@@ -25,6 +25,7 @@
 
 #include "guise/style.hpp"
 #include "guise/defaultStyles.hpp"
+#include "guise/control.hpp"
 #include <algorithm>
 #include <iostream>
 
@@ -676,7 +677,7 @@ namespace Guise
             m_parent(parent)
         { }
 
-        ParentStyle::ParentStyle(const std::shared_ptr<Selector> & selector, ParentStyle * parent) :
+        /*ParentStyle::ParentStyle(const std::shared_ptr<Selector> & selector, ParentStyle * parent) :
             m_parent(parent)
         {
             if (!selector)
@@ -708,7 +709,7 @@ namespace Guise
                 default: break;
                 }
             }
-        }
+        }*/
 
         Vector4f ParentStyle::getPadding() const
         {
@@ -756,13 +757,49 @@ namespace Guise
             m_padding.value().w = paddingHigh.y;
         }
 
+        void ParentStyle::updateEmptyProperties(const std::shared_ptr<Selector> & selector)
+        {
+            if (!selector)
+            {
+                return;
+            }
+
+            if(!m_padding.has_value())
+            {
+                auto padding = selector->getProperty("padding");
+                if (padding)
+                {
+                    switch (padding->getDataType())
+                    {
+                        case Property::DataType::Float:
+                        {
+                            auto val = padding->getFloat();
+                            m_padding = { val, val, val, val };
+                        }
+                        break;
+                        case Property::DataType::Vector2f:
+                        {
+                            m_padding = { padding->getVector2f(), padding->getVector2f() };
+                        }
+                        break;
+                        case Property::DataType::Vector4f:
+                        {
+                            m_padding = padding->getVector4f();
+                        }
+                        break;
+                        default: break;
+                    }
+                }
+            }
+        }
+
 
         // Align style implementations.
         AlignStyle::AlignStyle(AlignStyle * parent) :
             m_parent(parent)
         {}
 
-        AlignStyle::AlignStyle(const std::shared_ptr<Selector> & selector, AlignStyle * parent) :
+        /*AlignStyle::AlignStyle(const std::shared_ptr<Selector> & selector, AlignStyle * parent) :
             m_parent(parent)
         {
             if (!selector)
@@ -805,7 +842,7 @@ namespace Guise
                 default: break;
                 }
             }
-        }
+        }*/
 
         Property::HorizontalAlign AlignStyle::getHorizontalAlign() const
         {
@@ -825,14 +862,72 @@ namespace Guise
             m_verticalAlign = verticalAlign;
         }
 
+        void AlignStyle::updateEmptyProperties(const std::shared_ptr<Selector> & selector)
+        {
+            if (!selector)
+            {
+                return;
+            }
+
+            if (!m_verticalAlign.has_value())
+            {
+                auto vertAlign = selector->getProperty("vertical-align");
+                if (!vertAlign)
+                {
+                    vertAlign = selector->getProperty("vert-align");
+                }
+                if (vertAlign)
+                {
+                    switch (vertAlign->getDataType())
+                    {
+                        case Property::DataType::VerticalAlign:
+                        {
+                            m_verticalAlign = vertAlign->getVerticalAlign();
+                        }
+                        break;
+                        default: break;
+                    }
+                }
+            }
+
+            if (!m_horizontalAlign.has_value())
+            {
+                auto horiAlign = selector->getProperty("horizontal-align");
+                if (!horiAlign)
+                {
+                    horiAlign = selector->getProperty("hori-align");
+                }
+                if (horiAlign)
+                {
+                    switch (horiAlign->getDataType())
+                    {
+                    case Property::DataType::HorizontalAlign:
+                    {
+                        m_horizontalAlign = horiAlign->getHorizontalAlign();
+                    }
+                    break;
+                    default: break;
+                    }
+                }
+            }
+        }
+
 
         // Rect style implementations.
-        RectStyle::RectStyle(RectStyle * parent) :
+        RectStyle::RectStyle(RectStyle * parent, Control * control) :
             AlignStyle(parent),
             m_parent(parent)
-        { }
+        {
+            if (control)
+            {
+                onChange.connectAnonymously([control]()
+                {
+                    control->resize();
+                });
+            }
+        }
 
-        RectStyle::RectStyle(const std::shared_ptr<Selector> & selector, RectStyle * parent) :
+        /*RectStyle::RectStyle(const std::shared_ptr<Selector> & selector, RectStyle * parent) :
             AlignStyle(selector, parent),
             m_parent(parent)
         {
@@ -875,6 +970,7 @@ namespace Guise
             {
                 m_position = position->getVector2f();
             }
+
             auto size = selector->getProperty("size");
             if (size)
             {
@@ -892,10 +988,9 @@ namespace Guise
                     break;
                     default: break;
                 }
-                
             }
-        }
-
+        }*/
+        
         Property::Overflow RectStyle::getOverflow() const
         {
             return m_overflow.has_value() ? m_overflow.value() : (m_parent ? m_parent->getOverflow() : Property::Overflow::Hidden);
@@ -960,10 +1055,98 @@ namespace Guise
         void RectStyle::setPosition(const Vector2f & position)
         {
             m_position = position;
+
+            if (position != m_position)
+            {
+                m_position = position;
+                onChange();
+            }
         }
         void RectStyle::setSize(const Size & size)
         {
-            m_size = size;
+            if (size != m_size)
+            {
+                m_size = size;
+                onChange();
+            }
+        }
+
+        void RectStyle::updateEmptyProperties(const std::shared_ptr<Selector> & selector)
+        {
+            if (!selector)
+            {
+                return;
+            }
+
+            AlignStyle::updateEmptyProperties(selector);
+
+            if (!m_margin.has_value())
+            {
+                auto margin = selector->getProperty("margin");
+                if (margin)
+                {
+                    switch (margin->getDataType())
+                    {
+                    case Property::DataType::Float:
+                    {
+                        auto val = margin->getFloat();
+                        m_margin = { val, val, val, val };
+                    }
+                    break;
+                    case Property::DataType::Vector2f:
+                    {
+                        m_margin = { margin->getVector2f(), margin->getVector2f() };
+                    }
+                    break;
+                    case Property::DataType::Vector4f:
+                    {
+                        m_margin = margin->getVector4f();
+                    }
+                    break;
+                    default: break;
+                    }
+                }
+            }
+
+            if (!m_overflow.has_value())
+            {
+                auto overflow = selector->getProperty("overflow");
+                if (overflow && overflow->getDataType() == Property::DataType::Overflow)
+                {
+                    m_overflow = overflow->getOverflow();
+                }
+            }
+
+            if (!m_position.has_value())
+            {
+                auto position = selector->getProperty("position");
+                if (position && position->getDataType() == Property::DataType::Vector2f)
+                {
+                    m_position = position->getVector2f();
+                }
+            }
+
+            if (!m_size.has_value())
+            {
+                auto size = selector->getProperty("size");
+                if (size)
+                {
+                    switch (size->getDataType())
+                    {
+                        case Property::DataType::Size:
+                        {
+                            m_size = size->getSize();
+                        }
+                        break;
+                        case Property::DataType::Vector2f:
+                        {
+                            m_size = size->getVector2f();
+                        }
+                        break;
+                        default: break;
+                    }
+                }
+            }
         }
 
 
@@ -972,7 +1155,7 @@ namespace Guise
             m_parent(parent)
         { }
 
-        BorderStyle::BorderStyle(const std::shared_ptr<Selector> & selector, BorderStyle * parent) :
+        /*BorderStyle::BorderStyle(const std::shared_ptr<Selector> & selector, BorderStyle * parent) :
             m_parent(parent)
         {
             if (!selector)
@@ -995,7 +1178,7 @@ namespace Guise
             {
                 m_borderWidth = borderWidth->getFloat();
             }
-        }
+        }*/
 
         const Vector4f BorderStyle::getBorderColor() const
         {
@@ -1023,15 +1206,48 @@ namespace Guise
             m_borderWidth = width;
         }
 
+        void BorderStyle::updateEmptyProperties(const std::shared_ptr<Selector> & selector)
+        {
+            if (!selector)
+            {
+                return;
+            }
+
+            if (!m_borderColor.has_value())
+            {
+                auto borderColor = selector->getProperty("border-color");
+                if (borderColor && borderColor->getDataType() == Property::DataType::Vector4f)
+                {
+                    m_borderColor = borderColor->getVector4f();
+                }
+            }
+            if (!m_borderStyle.has_value())
+            {
+                auto borderStyle = selector->getProperty("border-style");
+                if (borderStyle && borderStyle->getDataType() == Property::DataType::BorderStyle)
+                {
+                    m_borderStyle = borderStyle->getBorderStyle();
+                }
+            }
+            if (!m_borderWidth.has_value())
+            {
+                auto borderWidth = selector->getProperty("border-width");
+                if (borderWidth && borderWidth->getDataType() == Property::DataType::Float)
+                {
+                    m_borderWidth = borderWidth->getFloat();
+                }
+            }          
+        }
+
 
         // Paint rect style
-        PaintRectStyle::PaintRectStyle(PaintRectStyle * parent) :
-            RectStyle(parent),
+        PaintRectStyle::PaintRectStyle(PaintRectStyle * parent, Control * control) :
+            RectStyle(parent, control),
             BorderStyle(parent),
             m_parent(parent)
         { }
 
-        PaintRectStyle::PaintRectStyle(const std::shared_ptr<Selector> & selector, PaintRectStyle * parent) :
+       /* PaintRectStyle::PaintRectStyle(const std::shared_ptr<Selector> & selector, PaintRectStyle * parent) :
             RectStyle(selector, parent),
             BorderStyle(selector, parent),
             m_parent(parent)
@@ -1065,7 +1281,7 @@ namespace Guise
                 default: break;
                 }
             }
-        }
+        }*/
 
         const Vector4f PaintRectStyle::getBackgroundColor() const
         {
@@ -1077,14 +1293,52 @@ namespace Guise
             m_backgroundColor = color;
         }
 
+        void PaintRectStyle::updateEmptyProperties(const std::shared_ptr<Selector> & selector)
+        {
+            if (!selector)
+            {
+                return;
+            }
+
+            Style::RectStyle::updateEmptyProperties(selector);
+            Style::BorderStyle::updateEmptyProperties(selector);
+
+            if (!m_backgroundColor.has_value())
+            {
+                auto bgColor = selector->getProperty("background-color");
+                if (bgColor)
+                {
+                    switch (bgColor->getDataType())
+                    {
+                        case Property::DataType::Float:
+                        {
+                            auto val = bgColor->getFloat();
+                            m_backgroundColor = { val, val, val, 1.0f };
+                        }
+                        break;
+                        case Property::DataType::Vector3f:
+                        {
+                            m_backgroundColor = { bgColor->getVector3f(), 1.0f };
+                        }
+                        break;
+                        case Property::DataType::Vector4f:
+                        {
+                            m_backgroundColor = bgColor->getVector4f();
+                        }
+                        break;
+                        default: break;
+                    }
+                }
+            }
+        }
+
 
         // Font style implementations.
-
         FontStyle::FontStyle(FontStyle * parent) :
             m_parent(parent)
         { }
 
-        FontStyle::FontStyle(const std::shared_ptr<Selector> & selector, FontStyle * parent) :
+        /*FontStyle::FontStyle(const std::shared_ptr<Selector> & selector, FontStyle * parent) :
             m_parent(parent)
         {
             if (!selector)
@@ -1165,7 +1419,7 @@ namespace Guise
             {
                 m_overflow = overflow->getOverflow();
             }
-        }
+        }*/
 
         const Vector4f FontStyle::getFontBackgroundColor() const
         {
@@ -1201,28 +1455,217 @@ namespace Guise
             m_fontSize = size;
         }
 
+        void FontStyle::updateEmptyProperties(const std::shared_ptr<Selector> & selector)
+        {
+            if (!selector)
+            {
+                return;
+            }
+
+            if (!m_fontBackgroundColor.has_value())
+            {
+                auto fontBgColor = selector->getProperty("font-background-color");
+                if (fontBgColor)
+                {
+                    switch (fontBgColor->getDataType())
+                    {
+                    case Property::DataType::Integer:
+                    {
+                        float val = static_cast<float>(fontBgColor->getInteger());
+                        m_fontBackgroundColor = { val, val, val, 1.0f };
+                    }
+                    break;
+                    case Property::DataType::Float:
+                    {
+                        float val = static_cast<float>(fontBgColor->getFloat());
+                        m_fontBackgroundColor = { val, val, val, 1.0f };
+                    }
+                    case Property::DataType::Vector3f:
+                    {
+                        m_fontBackgroundColor = { fontBgColor->getVector3f(), 1.0f };
+                    }
+                    break;
+                    case Property::DataType::Vector4f:
+                    {
+                        m_fontBackgroundColor = fontBgColor->getVector4f();
+                    }
+                    break;
+                    default: break;
+                    }
+                }
+            }
+
+            if (!m_fontColor.has_value())
+            {
+                auto fontColor = selector->getProperty("font-color");
+                if (fontColor)
+                {
+                    switch (fontColor->getDataType())
+                    {
+                    case Property::DataType::Integer:
+                    {
+                        float val = static_cast<float>(fontColor->getInteger());
+                        m_fontColor = { val, val, val, 1.0f };
+                    }
+                    break;
+                    case Property::DataType::Float:
+                    {
+                        float val = static_cast<float>(fontColor->getFloat());
+                        m_fontColor = { val, val, val, 1.0f };
+                    }
+                    case Property::DataType::Vector3f:
+                    {
+                        m_fontColor = { fontColor->getVector3f(), 1.0f };
+                    }
+                    break;
+                    case Property::DataType::Vector4f:
+                    {
+                        m_fontColor = fontColor->getVector4f();
+                    }
+                    break;
+                    default: break;
+                    }
+                }
+            }
+
+            if (!m_fontFamily.has_value())
+            {
+                auto fontFamily = selector->getProperty("font-family");
+                if (fontFamily && fontFamily->getDataType() == Property::DataType::String)
+                {
+                    m_fontFamily = fontFamily->getString();
+                }
+            }
+
+            if (!m_fontSize.has_value())
+            {
+                auto fontSize = selector->getProperty("font-size");
+                if (fontSize && fontSize->getDataType() == Property::DataType::Integer)
+                {
+                    m_fontSize = fontSize->getInteger();
+                }
+            }
+
+            if (!m_overflow.has_value())
+            {
+                auto overflow = selector->getProperty("overflow");
+                if (overflow && overflow->getDataType() == Property::DataType::Overflow)
+                {
+                    m_overflow = overflow->getOverflow();
+                }
+            }
+        }
+
 
         // Parent rect style.
-        ParentRectStyle::ParentRectStyle(ParentRectStyle * parent) :
-            Style::RectStyle(parent),
+        Bounds2f ParentRectStyle::calcStyledBounds(const ParentRectStyle & style, const Bounds2f & canvasBounds, const float scale)
+        {
+            const Vector2f newPos = style.getPosition() * scale;
+            const Vector2f newSize = style.getSize() * scale;
+
+            const bool clamp = style.getOverflow() == Style::Property::Overflow::Hidden;
+            Bounds2f bounds = { canvasBounds.position + newPos, newSize };
+
+            if (clamp)
+            {
+                bounds.position = Vector2f::clamp(bounds.position, canvasBounds.position,
+                                                  Vector2f::max(canvasBounds.position, canvasBounds.position + canvasBounds.size));
+            }
+
+            Vector2f lower = bounds.position;
+            Vector2f higherCanvas = canvasBounds.position + canvasBounds.size;
+            Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, newSize);
+
+            if ((clamp && higherThis.x > higherCanvas.x) || newSize.x <= 0.0f)
+            {
+                bounds.size.x = higherCanvas.x - lower.x;
+            }
+            if ((clamp && higherThis.y > higherCanvas.y) || newSize.y <= 0.0f)
+            {
+                bounds.size.y = higherCanvas.y - lower.y;
+            }
+
+            bounds.size.x = std::max(0.0f, bounds.size.x);
+            bounds.size.y = std::max(0.0f, bounds.size.y);
+
+            bounds.position.x = std::floor(bounds.position.x);
+            bounds.position.y = std::floor(bounds.position.y);
+            bounds.size.x = std::floor(bounds.size.x);
+            bounds.size.y = std::floor(bounds.size.y);
+
+            return bounds;
+        }
+
+        ParentRectStyle::ParentRectStyle(ParentRectStyle * parent, Control * control) :
+            Style::RectStyle(parent, control),
             Style::ParentStyle(parent)
         { }
 
-        ParentRectStyle::ParentRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentRectStyle * parent) :
+        /*ParentRectStyle::ParentRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentRectStyle * parent) :
             Style::RectStyle(selector, parent),
             Style::ParentStyle(selector, parent)
-        { }
+        { }*/
+
+        void ParentRectStyle::updateEmptyProperties(const std::shared_ptr<Selector> & selector)
+        {
+            Style::RectStyle::updateEmptyProperties(selector);
+            Style::ParentStyle::updateEmptyProperties(selector);
+        }
 
 
         // Parent paint rect style.
-        ParentPaintRectStyle::ParentPaintRectStyle(ParentPaintRectStyle * parent) :
-            Style::PaintRectStyle(parent),
+        Bounds2f ParentPaintRectStyle::calcStyledBounds(const ParentPaintRectStyle & style, const Bounds2f & canvasBounds, const float scale)
+        {   
+            const Vector2f newPos = style.getPosition() * scale;
+            const Vector2f newSize = style.getSize() * scale;
+
+            const bool clamp = style.getOverflow() == Style::Property::Overflow::Hidden;
+            Bounds2f bounds = { canvasBounds.position + newPos, newSize };
+
+            if (clamp)
+            {
+                bounds.position = Vector2f::clamp(bounds.position, canvasBounds.position,
+                                                  Vector2f::max(canvasBounds.position, canvasBounds.position + canvasBounds.size));
+            }
+
+            Vector2f lower = bounds.position;
+            Vector2f higherCanvas = canvasBounds.position + canvasBounds.size;
+            Vector2f higherThis = bounds.position + Vector2f::max({ 0.0f, 0.0f }, newSize);
+
+            if ((clamp && higherThis.x > higherCanvas.x) || newSize.x <= 0.0f)
+            {
+                bounds.size.x = higherCanvas.x - lower.x;
+            }
+            if ((clamp && higherThis.y > higherCanvas.y) || newSize.y <= 0.0f)
+            {
+                bounds.size.y = higherCanvas.y - lower.y;
+            }
+
+            bounds.size.x = std::max(0.0f, bounds.size.x);
+            bounds.size.y = std::max(0.0f, bounds.size.y);
+
+            bounds.position.x = std::floor(bounds.position.x);
+            bounds.position.y = std::floor(bounds.position.y);
+            bounds.size.x = std::floor(bounds.size.x);
+            bounds.size.y = std::floor(bounds.size.y);
+
+            return bounds;
+        }
+
+        ParentPaintRectStyle::ParentPaintRectStyle(ParentPaintRectStyle * parent, Control * control) :
+            Style::PaintRectStyle(parent, control),
             Style::ParentStyle(parent)
         { }
-        ParentPaintRectStyle::ParentPaintRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentPaintRectStyle * parent) :
+        /*ParentPaintRectStyle::ParentPaintRectStyle(const std::shared_ptr<Style::Selector> & selector, ParentPaintRectStyle * parent) :
             Style::PaintRectStyle(selector, parent),
             Style::ParentStyle(selector, parent)
-        { }
+        { }*/
+
+        void ParentPaintRectStyle::updateEmptyProperties(const std::shared_ptr<Selector> & selector)
+        {
+            Style::PaintRectStyle::updateEmptyProperties(selector);
+            Style::ParentStyle::updateEmptyProperties(selector);
+        }
 
     }
 

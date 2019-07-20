@@ -257,6 +257,9 @@ namespace Guise
 
         T operator[] (const size_t index);
 
+        static Vector<4, T> ceil(const Vector<4, T> & vec);
+        static Vector<4, T> floor(const Vector<4, T> & vec);
+
         T x;
         T y;
         T z;

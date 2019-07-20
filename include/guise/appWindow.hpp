@@ -66,9 +66,11 @@ namespace Guise
 
         virtual std::shared_ptr<Canvas> getCanvas() = 0;
 
-        virtual int32_t getDpi() const = 0;
+        virtual uint32_t getDpi() const = 0;
 
         virtual Vector2i32 getPosition() const = 0;
+
+        virtual float getScale() const = 0;
 
         virtual Vector2ui32 getSize() const = 0;
 
@@ -86,9 +88,11 @@ namespace Guise
 
         virtual void render() = 0;
 
-        virtual void setDpi(const int32_t dpi) = 0;
+        virtual void setDpi(const uint32_t dpi) = 0;
 
         virtual void setRenderer(const std::shared_ptr<Renderer> & renderer) = 0;
+
+        virtual void setScale(const float scale) = 0;
 
         virtual void show(const bool focus = true) = 0;
 

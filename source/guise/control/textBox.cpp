@@ -32,7 +32,7 @@ namespace Guise
 {
 
     // Text box implementations.
-    std::shared_ptr<TextBox> TextBox::create(std::shared_ptr<Canvas> & canvas)
+    /*std::shared_ptr<TextBox> TextBox::create(std::shared_ptr<Canvas> & canvas)
     {
         return std::shared_ptr<TextBox>(new TextBox(canvas));
     }
@@ -90,10 +90,10 @@ namespace Guise
                     size_t index = 0;
                     if (intersectTextInterpolated(e.position.x, index))
                     {
-                        /*if (!shiftPressed)
-                        {
-                            m_cursorIndex = index;
-                        }*/
+                        //if (!shiftPressed)
+                        //{
+                        //    m_cursorIndex = index;
+                        //}
                 
                         m_cursorSelectIndex = index;
                         m_cursorBlinkTimer = std::chrono::system_clock::now();
@@ -311,110 +311,6 @@ namespace Guise
         return true;
     }
 
-    void TextBox::render(RendererInterface & renderer)
-    {
-        const float scale = m_canvas.getScale();
-
-        if (m_changedText)
-        {
-            m_changedText = false;
-            m_fontSequence.createSequence(m_text, m_textStyle.getFontSize(), m_dpi);
-            m_changed = true;
-        }
-
-        if (m_changed)
-        {
-            m_changed = false;
-
-            std::unique_ptr<uint8_t[]> data;
-            Vector2<size_t> dimensions = { 0, 0 };
-
-            if (m_fontSequence.createBitmapRgba(data, dimensions, 0, m_text.size()))
-            {
-                if (!m_textTexture)
-                {
-                    m_textTexture = renderer.createTexture();
-                }
-
-                m_textTexture->load(data.get(), Texture::PixelFormat::RGBA8, dimensions);
-            }
-            else
-            {
-                m_textTexture.reset();
-            }
-        }
-
-        renderer.drawQuad(m_renderBounds, getBackgroundColor());
-
-        const bool drawBorder = getBorderStyle() != Style::Property::BorderStyle::None && getBorderWidth() > 0.0f;
-        if (drawBorder)
-        {
-            const float borderWidth = std::floor(getBorderWidth() * scale);
-            renderer.drawBorder(m_renderBounds, borderWidth, getBorderColor());
-        }
-
-        const auto paddingLow = Vector2f::ceil(getPaddingLow() * scale);
-        const auto paddingHigh = Vector2f::ceil(getPaddingHigh() * scale);
-
-        m_textBounds = { { m_renderBounds.position.x + paddingLow.x, m_renderBounds.position.y }, { 0.0f, 0.0f } };
-        if (m_textTexture)
-        {     
-            Bounds2i32 textMask =
-            {
-                Vector2i32::max({ 0, 0 }, { m_textBounds.position.x, m_textBounds.position.y + paddingLow.y }),
-                Vector2i32::max({ 0, 0 }, m_renderBounds.size - paddingLow - paddingLow)
-            };
-            
-            renderer.pushMask(textMask);
-      
-            // Render text     
-            m_textBounds.size = m_textTexture->getDimensions();         
-            m_textBounds.position.y += m_fontSequence.calcVerticalPosition(m_renderBounds.size.y);
-            renderer.drawQuad(m_textBounds, m_textTexture, m_textStyle.getFontColor());
-
-            // Render masks
-            //renderer.drawQuad(m_textBounds, { 0.0f, 1.0f, 0.0f, 0.3f });
-            //renderer.drawQuad(textMask, { 1.0f, 0.0f, 0.0f, 0.3f });
-
-            const bool isSelected = m_cursorIndex != m_cursorSelectIndex;
-            if (isSelected)
-            {
-                float selectLow = getCursorPosition(m_cursorSelectIndex);
-                float selectHigh = getCursorPosition(m_cursorIndex);
-                if (selectLow > selectHigh)
-                {
-                    std::swap(selectLow, selectHigh);
-                }
-
-                Bounds2f selectBounds =
-                {
-                    { selectLow + m_textBounds.position.x, m_textBounds.position.y },
-                    { selectHigh - selectLow, m_textBounds.size.y }
-                };
-
-                renderer.drawQuad(selectBounds, { 0.0f, 0.45f, 0.85f, 0.7f });
-            }
-
-            renderer.popMask();
-        }
-
-        if (m_active)
-        {
-            auto endTime = std::chrono::system_clock::now();
-            std::chrono::duration<double> duration = endTime - m_cursorBlinkTimer;
-
-            const bool renderCursor = (static_cast<int>(duration.count() * 1000.0f) % 1000) < 500;
-            if (renderCursor)
-            {
-                float cursorPosition = getCursorPosition(m_cursorIndex);
-                cursorPosition += m_textBounds.position.x;
-
-                Bounds2f cursorBounds = { { cursorPosition, m_renderBounds.position.y },{ 1.0f, m_renderBounds.size.y } };
-                renderer.drawQuad(cursorBounds, m_textStyle.getFontColor());
-            }  
-        }   
-    }
-
     Bounds2f TextBox::getRenderBounds() const
     {
         return m_renderBounds;
@@ -432,7 +328,7 @@ namespace Guise
 
     void TextBox::update()
     {
-        m_canvas.updateControlRendering(this);
+        m_canvas.reportControlChange(this);
         auto renderBounds = calcRenderBounds(*this);
         if (renderBounds != m_renderBounds)
         {
@@ -489,6 +385,111 @@ namespace Guise
             forceUpdate();
         });
     }
+
+    void TextBox::render(RendererInterface & renderer)
+    {
+        const float scale = m_canvas.getScale();
+
+        if (m_changedText)
+        {
+            m_changedText = false;
+            m_fontSequence.createSequence(m_text, m_textStyle.getFontSize(), m_dpi);
+            m_changed = true;
+        }
+
+        if (m_changed)
+        {
+            m_changed = false;
+
+            std::unique_ptr<uint8_t[]> data;
+            Vector2<size_t> dimensions = { 0, 0 };
+
+            if (m_fontSequence.createBitmapRgba(data, dimensions, 0, m_text.size()))
+            {
+                if (!m_textTexture)
+                {
+                    m_textTexture = renderer.createTexture();
+                }
+
+                m_textTexture->load(data.get(), Texture::PixelFormat::RGBA8, dimensions);
+            }
+            else
+            {
+                m_textTexture.reset();
+            }
+        }
+
+        renderer.drawQuad(m_renderBounds, getBackgroundColor());
+
+        const bool drawBorder = getBorderStyle() != Style::Property::BorderStyle::None && getBorderWidth() > 0.0f;
+        if (drawBorder)
+        {
+            const float borderWidth = std::floor(getBorderWidth() * scale);
+            renderer.drawBorder(m_renderBounds, borderWidth, getBorderColor());
+        }
+
+        const auto paddingLow = Vector2f::ceil(getPaddingLow() * scale);
+        const auto paddingHigh = Vector2f::ceil(getPaddingHigh() * scale);
+
+        m_textBounds = { { m_renderBounds.position.x + paddingLow.x, m_renderBounds.position.y },{ 0.0f, 0.0f } };
+        if (m_textTexture)
+        {
+            Bounds2i32 textMask =
+            {
+                Vector2i32::max({ 0, 0 },{ m_textBounds.position.x, m_textBounds.position.y + paddingLow.y }),
+                Vector2i32::max({ 0, 0 }, m_renderBounds.size - paddingLow - paddingLow)
+            };
+
+            renderer.pushMask(textMask);
+
+            // Render text     
+            m_textBounds.size = m_textTexture->getDimensions();
+            m_textBounds.position.y += m_fontSequence.calcVerticalPosition(m_renderBounds.size.y);
+            renderer.drawQuad(m_textBounds, m_textTexture, m_textStyle.getFontColor());
+
+            // Render masks
+            //renderer.drawQuad(m_textBounds, { 0.0f, 1.0f, 0.0f, 0.3f });
+            //renderer.drawQuad(textMask, { 1.0f, 0.0f, 0.0f, 0.3f });
+
+            const bool isSelected = m_cursorIndex != m_cursorSelectIndex;
+            if (isSelected)
+            {
+                float selectLow = getCursorPosition(m_cursorSelectIndex);
+                float selectHigh = getCursorPosition(m_cursorIndex);
+                if (selectLow > selectHigh)
+                {
+                    std::swap(selectLow, selectHigh);
+                }
+
+                Bounds2f selectBounds =
+                {
+                    { selectLow + m_textBounds.position.x, m_textBounds.position.y },
+                { selectHigh - selectLow, m_textBounds.size.y }
+                };
+
+                renderer.drawQuad(selectBounds, { 0.0f, 0.45f, 0.85f, 0.7f });
+            }
+
+            renderer.popMask();
+        }
+
+        if (m_active)
+        {
+            auto endTime = std::chrono::system_clock::now();
+            std::chrono::duration<double> duration = endTime - m_cursorBlinkTimer;
+
+            const bool renderCursor = (static_cast<int>(duration.count() * 1000.0f) % 1000) < 500;
+            if (renderCursor)
+            {
+                float cursorPosition = getCursorPosition(m_cursorIndex);
+                cursorPosition += m_textBounds.position.x;
+
+                Bounds2f cursorBounds = { { cursorPosition, m_renderBounds.position.y },{ 1.0f, m_renderBounds.size.y } };
+                renderer.drawQuad(cursorBounds, m_textStyle.getFontColor());
+            }
+        }
+    }
+
 
     void TextBox::onActiveChange(bool active)
     {
@@ -647,6 +648,6 @@ namespace Guise
         }
 
         return true;
-    }
+    }*/
 
 }

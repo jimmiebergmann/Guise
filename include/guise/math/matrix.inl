@@ -45,6 +45,12 @@ namespace Guise
     {}
 
     template <typename T>
+    Matrix<4, 4, T> & Matrix<4, 4, T>::loadIdentity()
+    {
+        return *this = Matrix<4, 4, T>(1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1);
+    }
+
+    template <typename T>
     Matrix<4, 4, T> & Matrix<4, 4, T>::loadOrthographic(const T left, const T right, const T bottom,
                                                     const T top, const T zNear, const T zFar)
     {
@@ -69,45 +75,46 @@ namespace Guise
     }
 
     template <typename T>
-    Matrix<4, 4, T> & Matrix<4, 4, T>::loadScale(float , float , float )
+    Matrix<4, 4, T> & Matrix<4, 4, T>::scale(float x, float y, float z)
     {
-        return *this;
+        Matrix<4, 4, T> s(x, 0, 0, 0,  0, y, 0, 0,  0, 0, z, 0,  0, 0, 0, 1);
+        return *this = *this * s;
     }
 
     template <typename T>
-    Matrix<4, 4, T> & Matrix<4, 4, T>::scale(float x, float y, float z)
+    Matrix<4, 4, T> & Matrix<4, 4, T>::translate(float x, float y, float z)
     {
-        Matrix<4, 4, T> scale(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
-        return *this = *this * scale;
+        Matrix<4, 4, T> t(1, 0, 0, x,  0, 1, 0, y,  0, 0, 1, z,  0, 0, 0, 1);
+        return *this = *this * t;
     }
 
     template <typename T>
     Matrix<4, 4, T> Matrix<4, 4, T>::operator *(const Matrix<4, 4, T> & mat) const
     {
         auto & Mat1 = *this;
-        Matrix<4, 4, T> Dest;
+        Matrix<4, 4, T> dest;
 
-        Dest.m[0] = Mat1.m[0] * mat.m[0] + Mat1.m[4] * mat.m[1] + Mat1.m[8] * mat.m[2] + Mat1.m[12] * mat.m[3];
-        Dest.m[4] = Mat1.m[0] * mat.m[4] + Mat1.m[4] * mat.m[5] + Mat1.m[8] * mat.m[6] + Mat1.m[12] * mat.m[7];
-        Dest.m[8] = Mat1.m[0] * mat.m[8] + Mat1.m[4] * mat.m[9] + Mat1.m[8] * mat.m[10] + Mat1.m[12] * mat.m[11];
-        Dest.m[12] = Mat1.m[0] * mat.m[12] + Mat1.m[4] * mat.m[13] + Mat1.m[8] * mat.m[14] + Mat1.m[12] * mat.m[15];
+        dest.m[0] = Mat1.m[0] * mat.m[0] + Mat1.m[4] * mat.m[1] + Mat1.m[8] * mat.m[2] + Mat1.m[12] * mat.m[3];
+        dest.m[4] = Mat1.m[0] * mat.m[4] + Mat1.m[4] * mat.m[5] + Mat1.m[8] * mat.m[6] + Mat1.m[12] * mat.m[7];
+        dest.m[8] = Mat1.m[0] * mat.m[8] + Mat1.m[4] * mat.m[9] + Mat1.m[8] * mat.m[10] + Mat1.m[12] * mat.m[11];
+        dest.m[12] = Mat1.m[0] * mat.m[12] + Mat1.m[4] * mat.m[13] + Mat1.m[8] * mat.m[14] + Mat1.m[12] * mat.m[15];
 
-        Dest.m[1] = Mat1.m[1] * mat.m[0] + Mat1.m[5] * mat.m[1] + Mat1.m[9] * mat.m[2] + Mat1.m[13] * mat.m[3];
-        Dest.m[5] = Mat1.m[1] * mat.m[4] + Mat1.m[5] * mat.m[5] + Mat1.m[9] * mat.m[6] + Mat1.m[13] * mat.m[7];
-        Dest.m[9] = Mat1.m[1] * mat.m[8] + Mat1.m[5] * mat.m[9] + Mat1.m[9] * mat.m[10] + Mat1.m[13] * mat.m[11];
-        Dest.m[13] = Mat1.m[1] * mat.m[12] + Mat1.m[5] * mat.m[13] + Mat1.m[9] * mat.m[14] + Mat1.m[13] * mat.m[15];
+        dest.m[1] = Mat1.m[1] * mat.m[0] + Mat1.m[5] * mat.m[1] + Mat1.m[9] * mat.m[2] + Mat1.m[13] * mat.m[3];
+        dest.m[5] = Mat1.m[1] * mat.m[4] + Mat1.m[5] * mat.m[5] + Mat1.m[9] * mat.m[6] + Mat1.m[13] * mat.m[7];
+        dest.m[9] = Mat1.m[1] * mat.m[8] + Mat1.m[5] * mat.m[9] + Mat1.m[9] * mat.m[10] + Mat1.m[13] * mat.m[11];
+        dest.m[13] = Mat1.m[1] * mat.m[12] + Mat1.m[5] * mat.m[13] + Mat1.m[9] * mat.m[14] + Mat1.m[13] * mat.m[15];
 
-        Dest.m[2] = Mat1.m[2] * mat.m[0] + Mat1.m[6] * mat.m[1] + Mat1.m[10] * mat.m[2] + Mat1.m[14] * mat.m[3];
-        Dest.m[6] = Mat1.m[2] * mat.m[4] + Mat1.m[6] * mat.m[5] + Mat1.m[10] * mat.m[6] + Mat1.m[14] * mat.m[7];
-        Dest.m[10] = Mat1.m[2] * mat.m[8] + Mat1.m[6] * mat.m[9] + Mat1.m[10] * mat.m[10] + Mat1.m[14] * mat.m[11];
-        Dest.m[14] = Mat1.m[2] * mat.m[12] + Mat1.m[6] * mat.m[13] + Mat1.m[10] * mat.m[14] + Mat1.m[14] * mat.m[15];
+        dest.m[2] = Mat1.m[2] * mat.m[0] + Mat1.m[6] * mat.m[1] + Mat1.m[10] * mat.m[2] + Mat1.m[14] * mat.m[3];
+        dest.m[6] = Mat1.m[2] * mat.m[4] + Mat1.m[6] * mat.m[5] + Mat1.m[10] * mat.m[6] + Mat1.m[14] * mat.m[7];
+        dest.m[10] = Mat1.m[2] * mat.m[8] + Mat1.m[6] * mat.m[9] + Mat1.m[10] * mat.m[10] + Mat1.m[14] * mat.m[11];
+        dest.m[14] = Mat1.m[2] * mat.m[12] + Mat1.m[6] * mat.m[13] + Mat1.m[10] * mat.m[14] + Mat1.m[14] * mat.m[15];
 
-        Dest.m[3] = Mat1.m[3] * mat.m[0] + Mat1.m[7] * mat.m[1] + Mat1.m[11] * mat.m[2] + Mat1.m[15] * mat.m[3];
-        Dest.m[7] = Mat1.m[3] * mat.m[4] + Mat1.m[7] * mat.m[5] + Mat1.m[11] * mat.m[6] + Mat1.m[15] * mat.m[7];
-        Dest.m[11] = Mat1.m[3] * mat.m[8] + Mat1.m[7] * mat.m[9] + Mat1.m[11] * mat.m[10] + Mat1.m[15] * mat.m[11];
-        Dest.m[15] = Mat1.m[3] * mat.m[12] + Mat1.m[7] * mat.m[13] + Mat1.m[11] * mat.m[14] + Mat1.m[15] * mat.m[15];
+        dest.m[3] = Mat1.m[3] * mat.m[0] + Mat1.m[7] * mat.m[1] + Mat1.m[11] * mat.m[2] + Mat1.m[15] * mat.m[3];
+        dest.m[7] = Mat1.m[3] * mat.m[4] + Mat1.m[7] * mat.m[5] + Mat1.m[11] * mat.m[6] + Mat1.m[15] * mat.m[7];
+        dest.m[11] = Mat1.m[3] * mat.m[8] + Mat1.m[7] * mat.m[9] + Mat1.m[11] * mat.m[10] + Mat1.m[15] * mat.m[11];
+        dest.m[15] = Mat1.m[3] * mat.m[12] + Mat1.m[7] * mat.m[13] + Mat1.m[11] * mat.m[14] + Mat1.m[15] * mat.m[15];
 
-        return Dest;
+        return dest;
     }
 
     

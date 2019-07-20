@@ -30,20 +30,10 @@ namespace Guise
 {
   
     // Vertical grid implementations.
-    std::shared_ptr<VerticalGrid> VerticalGrid::create(std::shared_ptr<Canvas> & canvas)
+    std::shared_ptr<VerticalGrid> VerticalGrid::create()
     {
-        return std::shared_ptr<VerticalGrid>(new VerticalGrid(canvas));
+        return std::shared_ptr<VerticalGrid>(new VerticalGrid());
     }    
-    
-    Bounds2f VerticalGrid::getRenderBounds() const
-    {
-        return m_renderBounds;
-    }
-
-    Bounds2f VerticalGrid::getSelectBounds() const
-    {
-        return m_renderBounds;
-    }
 
     Style::ParentRectStyle & VerticalGrid::getSlotStyle()
     {
@@ -59,42 +49,79 @@ namespace Guise
         return ControlType::VerticalGrid;
     }
 
-    void VerticalGrid::update()
+    VerticalGrid::VerticalGrid() :             
+        Style::ParentRectStyle(nullptr, this),
+        m_slotStyle(nullptr, this),
+        m_childRenderCount(0)
     {
-        Bounds2f renderBounds = calcRenderBounds(*this);
-        if (renderBounds != m_renderBounds || isUpdateForced())
-        {
-            m_renderBounds = renderBounds;
-
-            const auto scale = m_canvas.getScale();
-            const auto paddingLow = Vector2f::ceil(getPaddingLow() * scale);
-            const auto paddingHigh = Vector2f::ceil(getPaddingHigh() * scale);
-            const auto slotPadding = m_slotStyle.getPadding() * scale;
-            Bounds2f childBoundsLeft(m_renderBounds.position + paddingLow, m_renderBounds.size - paddingLow - paddingHigh);
-            childBoundsLeft.position.x += slotPadding.x;
-            childBoundsLeft.size.x -= (slotPadding.x + slotPadding.z);
-
-            auto childs = getChilds();
-            for (auto it = childs.begin(); childBoundsLeft.size.y > 0.0f && it != childs.end(); it++)
-            {
-                childBoundsLeft.position.y += slotPadding.y;
-                childBoundsLeft.size.y -= (slotPadding.y + slotPadding.w);
-                (*it)->update(childBoundsLeft);
-
-                auto childRenderBounds = (*it)->getRenderBounds();
-                float childHeight = std::max(childRenderBounds.position.y - childBoundsLeft.position.y, 0.0f) + std::max(childRenderBounds.size.y, 0.0f);
-
-                childBoundsLeft.position.y += childHeight + slotPadding.w;
-                childBoundsLeft.size.y -= childHeight;
-            }
-        }    
+        setChildBoundsAware(true);
     }
 
-    VerticalGrid::VerticalGrid(std::shared_ptr<Canvas> & canvas) :             
-        ControlContainerList(*canvas),
-        Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("vertical-grid")),       
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
-        m_slotStyle(canvas->getStyleSheet()->getSelector("vertical-grid-slot"))
-    { }
+    void VerticalGrid::onAddChild(Control &, const size_t index)
+    {
+        if (index + 1 <= m_childRenderCount )
+        {
+            return;
+        }
+        resizeChilds();
+    }
+
+    void VerticalGrid::onCanvasChange(Canvas * canvas)
+    {
+        ParentRectStyle & idleStyle = static_cast<Style::ParentRectStyle&>(*this);
+
+        idleStyle.updateEmptyProperties(canvas->getStyleSheet()->getSelector("vertical-grid"));
+        m_slotStyle.updateEmptyProperties(canvas->getStyleSheet()->getSelector("vertical-grid-slot"));
+    }
+
+    void VerticalGrid::onRemoveChild(Control &, const size_t index)
+    {
+        if (index + 1 >= m_childRenderCount)
+        {
+            return;
+        }
+        resizeChilds();
+    }
+
+    void VerticalGrid::onRender(RendererInterface & rendererInterface)
+    {
+        auto childs = getChilds();
+        for (auto it = childs.begin(); it != childs.begin() + m_childRenderCount; it++)
+        {
+            (*it)->draw(rendererInterface);
+        }
+    }
+
+    void VerticalGrid::onResize()
+    {
+        setBounds(calcStyledBounds(*this, getBounds(), getScale()));
+        resizeChilds();
+    }
+
+    void VerticalGrid::resizeChilds()
+    {
+        auto boundsLeft = getBounds().cutEdges(scale(getPadding()));
+        auto slotPadding = scale(m_slotStyle.getPadding());
+
+        m_childRenderCount = 0;
+        auto childs = getChilds();
+        for (auto it = childs.begin(); it != childs.end(); it++)
+        {
+            auto child = *it;
+            auto cutBoundsLeft = Bounds2f(boundsLeft).cutEdges(slotPadding);
+            child->setBounds(cutBoundsLeft);
+
+            auto childBounds = child->getBounds();
+            auto childHeight = childBounds.size.y ? childBounds.size.y : 0.0f;
+
+            boundsLeft.cutTop(childHeight + slotPadding.y + slotPadding.w);
+
+            m_childRenderCount++;
+            if (!boundsLeft.size.y)
+            {
+                break;
+            }
+        }
+    }
 
 }

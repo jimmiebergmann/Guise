@@ -49,7 +49,7 @@ namespace Guise
             auto renderer = Renderer::createDefault(appWindowData->appWindow);
             appWindowData->appWindow->setRenderer(renderer);
             renderer->setViewportSize({0, 0}, appWindow->getSize());
-            renderer->setDpi(appWindow->getDpi());
+            renderer->setScale(appWindow->getScale());
 
             windowIsCreated.notifyOne();
 

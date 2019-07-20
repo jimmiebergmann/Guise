@@ -130,6 +130,28 @@ namespace Guise
 
     // Bounds 2D implementations.
     template <typename T>
+    Bounds<2, T> Bounds<2, T>::ceil(const Bounds<2, T> & in)
+    {
+
+        return { Vector2f::ceil(in.position), Vector2f::ceil(in.size) };
+    }
+
+    template <typename T>
+    Bounds<2, T> Bounds<2, T>::clamp(const Bounds<2, T> & in, const Bounds<2, T> & bounds)
+    {
+        Vector2f low = Vector2f::clamp(in.position, bounds.position, bounds.position + bounds.size);
+        Vector2f high = Vector2f::clamp(in.position + in.size, bounds.position, bounds.position + bounds.size);
+
+        return { low , high - low };
+    }
+
+    template <typename T>
+    Bounds<2, T> Bounds<2, T>::floor(const Bounds<2, T> & in)
+    {
+        return { Vector2f::floor(in.position), Vector2f::floor(in.size) };
+    }
+
+    template <typename T>
     inline Bounds<2, T>::Bounds()
     { }
 
@@ -159,6 +181,38 @@ namespace Guise
                position.x + size.x >= bounds.position.x &&
                position.y <= bounds.position.y + bounds.size.y &&
                position.y + size.y >= bounds.position.y;
+    }
+
+    template <typename T>
+    inline Bounds<2, T> & Bounds<2, T>::cutEdges(const T value)
+    {
+        position += {value, value};
+        size     -= {value * T(2), value * T(2)};
+        return *this;
+    }
+
+    template <typename T>
+    inline Bounds<2, T> & Bounds<2, T>::cutEdges(const Vector2<T> & value)
+    {
+        position += value;
+        size     -= value * T(2);
+        return *this;
+    }
+
+    template <typename T>
+    inline Bounds<2, T> & Bounds<2, T>::cutEdges(const Vector4<T> & value)
+    {
+        position += {value.x, value.y};
+        size     -= {value.x + value.z, value.y + value.w};
+        return *this;
+    }
+
+    template <typename T>
+    inline Bounds<2, T> & Bounds<2, T>::cutTop(const T value)
+    {
+        position.y += value;
+        size.y     -= value;
+        return *this;
     }
 
     template <typename T>
@@ -213,15 +267,6 @@ namespace Guise
     inline bool Bounds<2, T>::operator != (const Bounds<2, T> & bounds) const
     {
         return position != bounds.position || size != bounds.size;
-    }
-
-    template <typename T>
-    Bounds<2, T> Bounds<2, T>::clamp(const Bounds<2, T> & in, const Bounds<2, T> & bounds)
-    {
-        Vector2f low = Vector2f::clamp(in.position, bounds.position, bounds.position + bounds.size);
-        Vector2f high = Vector2f::clamp(in.position + in.size, bounds.position, bounds.position + bounds.size);
-
-        return { low , high - low };
     }
 
 }

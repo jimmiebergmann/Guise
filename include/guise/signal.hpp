@@ -27,7 +27,6 @@
 #define GUISE_SIGNAL_HPP
 
 #include "guise/build.hpp"
-#include "guise/control.hpp"
 #include <functional>
 #include <vector>
 #include <memory>

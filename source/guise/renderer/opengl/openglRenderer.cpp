@@ -33,41 +33,51 @@
 namespace Guise
 {
 
-    int32_t OpenGLRenderer::getDpi()
+    float OpenGLRenderer::getScale() const
     {
-        return m_dpi;
+        return m_scale;
+    }
+
+    void OpenGLRenderer::setLevel(const size_t level)
+    {
+        m_level = static_cast<float>(level);
+    }
+
+    void OpenGLRenderer::drawRect(const Bounds2f & bounds, const Style::ParentPaintRectStyle & style)
+    {
+        drawQuad(bounds, style.getBackgroundColor());
+
+        const bool border = style.getBorderStyle() != Style::Property::BorderStyle::None && style.getBorderWidth();
+        if (border)
+        {
+            drawBorder(bounds, style.getBorderWidth(), style.getBorderColor());
+        }
     }
 
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const Vector4f & color)
     {
-        glDisable(GL_TEXTURE_2D);
-        glBegin(GL_QUADS);
-
-        Bounds2f newBounds =
-        {
-            Vector2f::ceil(bounds.position), Vector2f::ceil(bounds.size)
-        };
+        Bounds2f newBounds = Bounds2f::floor(bounds);
 
         if (m_maskStack.size())
         {
             newBounds = Bounds2f::clamp(newBounds, m_maskStack.top());
         }
 
+        glDisable(GL_TEXTURE_2D);
+        glBegin(GL_QUADS);
+
         glColor4f(color.x, color.y, color.z, color.w);
-        glVertex2f(newBounds.position.x, newBounds.position.y);
-        glVertex2f(newBounds.position.x + newBounds.size.x, newBounds.position.y);
-        glVertex2f(newBounds.position.x + newBounds.size.x, newBounds.position.y + newBounds.size.y);
-        glVertex2f(newBounds.position.x, newBounds.position.y + newBounds.size.y);
+        glVertex3f(newBounds.position.x, newBounds.position.y, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x, newBounds.position.y, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x, newBounds.position.y + newBounds.size.y, m_level);
+        glVertex3f(newBounds.position.x, newBounds.position.y + newBounds.size.y, m_level);
 
         glEnd();
     }
 
     void OpenGLRenderer::drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color)
     {
-        Bounds2f newCoordBounds =
-        {
-            Vector2f::ceil(bounds.position), Vector2f::ceil(bounds.size)
-        };
+        Bounds2f newBounds = Bounds2f::floor(bounds);
 
         Vector2f newTexCoords[2] = { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
 
@@ -75,14 +85,14 @@ namespace Guise
         {
             Vector2f boundsVec[2] =
             {
-                newCoordBounds.position, newCoordBounds.position + newCoordBounds.size
+                newBounds.position, newBounds.position + newBounds.size
             };
 
-            newCoordBounds = Bounds2f::clamp(newCoordBounds, m_maskStack.top());   
+            newBounds = Bounds2f::clamp(newBounds, m_maskStack.top());
 
             Vector2f maskVec[2] =
             {
-                newCoordBounds.position, newCoordBounds.position + newCoordBounds.size
+                newBounds.position, newBounds.position + newBounds.size
             };
             
             newTexCoords[0].x =        ((maskVec[0].x - boundsVec[0].x) / (boundsVec[1].x - boundsVec[0].x));
@@ -91,7 +101,6 @@ namespace Guise
             newTexCoords[1].y = 1.0f - ((maskVec[0].y - boundsVec[0].y) / (boundsVec[1].y - boundsVec[0].y));
         }
 
-
         glEnable(GL_TEXTURE_2D);
         texture->bind(0);
 
@@ -99,16 +108,16 @@ namespace Guise
         glColor4f(color.x, color.y, color.z, color.w);
 
         glTexCoord2f(newTexCoords[0].x, newTexCoords[1].y);
-        glVertex2f(newCoordBounds.position.x, newCoordBounds.position.y);
+        glVertex3f(newBounds.position.x, newBounds.position.y, m_level);
 
         glTexCoord2f(newTexCoords[1].x, newTexCoords[1].y);
-        glVertex2f(newCoordBounds.position.x + newCoordBounds.size.x, newCoordBounds.position.y);
+        glVertex3f(newBounds.position.x + newBounds.size.x, newBounds.position.y, m_level);
 
         glTexCoord2f(newTexCoords[1].x, newTexCoords[0].y);
-        glVertex2f(newCoordBounds.position.x + newCoordBounds.size.x, newCoordBounds.position.y + newCoordBounds.size.y);
+        glVertex3f(newBounds.position.x + newBounds.size.x, newBounds.position.y + newBounds.size.y, m_level);
 
         glTexCoord2f(newTexCoords[0].x, newTexCoords[0].y);
-        glVertex2f(newCoordBounds.position.x, newCoordBounds.position.y + newCoordBounds.size.y);
+        glVertex3f(newBounds.position.x, newBounds.position.y + newBounds.size.y, m_level);
 
         glEnd();
 
@@ -117,46 +126,53 @@ namespace Guise
 
     void OpenGLRenderer::drawBorder(const Bounds2f & bounds, const float width, const Vector4f & color)
     {
+        const Bounds2f newBounds = Bounds2f::floor(bounds);
+
+        const float sWidth = std::floor(width * m_scale);
+
+        const float widthX = newBounds.size.x > sWidth ? sWidth : newBounds.size.x;
+        const float widthY = newBounds.size.y > sWidth ? sWidth : newBounds.size.y;
+
         glDisable(GL_TEXTURE_2D);
         glBegin(GL_QUADS);
 
-        const float widthX = bounds.size.x > width ? width : bounds.size.x;
-        const float widthY = bounds.size.y > width ? width : bounds.size.y;
-
         glColor4f(color.x, color.y, color.z, color.w);
 
-        glVertex2f(bounds.position.x, bounds.position.y);
-        glVertex2f(bounds.position.x + bounds.size.x , bounds.position.y);
-        glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + widthY);
-        glVertex2f(bounds.position.x + widthX, bounds.position.y + widthY);
+        glVertex3f(newBounds.position.x, newBounds.position.y, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x , newBounds.position.y, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x - widthX, newBounds.position.y + widthY, m_level);
+        glVertex3f(newBounds.position.x + widthX, newBounds.position.y + widthY, m_level);
 
-        glVertex2f(bounds.position.x + widthX, bounds.position.y + bounds.size.y - widthY);
-        glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + bounds.size.y - widthY);
-        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
-        glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+        glVertex3f(newBounds.position.x + widthX, newBounds.position.y + newBounds.size.y - widthY, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x - widthX, newBounds.position.y + newBounds.size.y - widthY, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x, newBounds.position.y + newBounds.size.y, m_level);
+        glVertex3f(newBounds.position.x, newBounds.position.y + newBounds.size.y, m_level);
 
-        glVertex2f(bounds.position.x, bounds.position.y);
-        glVertex2f(bounds.position.x + widthX, bounds.position.y + widthY);
-        glVertex2f(bounds.position.x + widthX, bounds.position.y + bounds.size.y - widthY);
-        glVertex2f(bounds.position.x, bounds.position.y + bounds.size.y);
+        glVertex3f(newBounds.position.x, newBounds.position.y, m_level);
+        glVertex3f(newBounds.position.x + widthX, newBounds.position.y + widthY, m_level);
+        glVertex3f(newBounds.position.x + widthX, newBounds.position.y + newBounds.size.y - widthY, m_level);
+        glVertex3f(newBounds.position.x, newBounds.position.y + newBounds.size.y, m_level);
 
 
-        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y);
-        glVertex2f(bounds.position.x + bounds.size.x, bounds.position.y + bounds.size.y);
-        glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + bounds.size.y - widthY);
-        glVertex2f(bounds.position.x + bounds.size.x - widthX, bounds.position.y + widthY);
+        glVertex3f(newBounds.position.x + newBounds.size.x, newBounds.position.y, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x, newBounds.position.y + newBounds.size.y, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x - widthX, newBounds.position.y + newBounds.size.y - widthY, m_level);
+        glVertex3f(newBounds.position.x + newBounds.size.x - widthX, newBounds.position.y + widthY, m_level);
 
         glEnd();
     }
 
     void OpenGLRenderer::drawLine(const Vector2f & point1, const Vector2f & point2, const float width, const Vector4f & color)
     {
+        Vector2f p1 = point1 * m_scale;
+        Vector2f p2 = point2 * m_scale;
+
         glDisable(GL_TEXTURE_2D);
-        glLineWidth(width);
+        glLineWidth(width * m_scale);
         glBegin(GL_LINES);
         glColor4f(color.x, color.y, color.z, color.w);
-        glVertex2f(point1.x, point1.y);
-        glVertex2f(point2.x, point2.y);
+        glVertex3f(p1.x, p1.y, m_level);
+        glVertex3f(p2.x, p2.y, m_level);
         glEnd();
     }
 
@@ -224,15 +240,14 @@ namespace Guise
         updateProjectionMatrix();
     }
 
-    void OpenGLRenderer::setDpi(const int32_t dpi)
+    void OpenGLRenderer::setScale(const float scale)
     {
-        m_dpi = dpi;
-        updateProjectionMatrix();
+        m_scale = scale;
     }
 
     void OpenGLRenderer::clearColor()
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       
     }
 
     void OpenGLRenderer::present()
@@ -247,7 +262,7 @@ namespace Guise
     void OpenGLRenderer::updateProjectionMatrix()
     {
         Matrix4x4f orthoMat;
-        orthoMat.loadOrthographic(0.0f, (float)m_viewPort.size.x, (float)m_viewPort.size.y, 0.0f, 0.0f, 1.0f);
+        orthoMat.loadOrthographic(0.0f, (float)m_viewPort.size.x, (float)m_viewPort.size.y, 0.0f, -255.0f, 0.0f);
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
@@ -257,7 +272,8 @@ namespace Guise
 #if defined(GUISE_PLATFORM_WINDOWS)
     OpenGLRenderer::OpenGLRenderer(HDC deviceContextHandle) :
         m_deviceContextHandle(deviceContextHandle),
-        m_dpi(GUISE_DEFAULT_DPI)
+        m_scale(1.0f),
+        m_level(0.0f)
     {
         // Filling the pixel fromat structure.
         static PIXELFORMATDESCRIPTOR pfd = {
@@ -309,6 +325,9 @@ namespace Guise
         glEnable(GL_COLOR_MATERIAL);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        
     }
 
 #elif defined(GUISE_PLATFORM_LINUX)

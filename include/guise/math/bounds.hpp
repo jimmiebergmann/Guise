@@ -105,6 +105,10 @@ namespace Guise
 
     public:
 
+        static Bounds<2, T> ceil(const Bounds<2, T> & in);
+        static Bounds<2, T> clamp(const Bounds<2, T> & in, const Bounds<2, T> & bounds);
+        static Bounds<2, T> floor(const Bounds<2, T> & in);
+
         Bounds();
         Bounds(const Vector<2, T> & position, const Vector<2, T> & size);
         Bounds(const T pX, const T pY, const T sX, const T sY);
@@ -116,9 +120,13 @@ namespace Guise
         template <typename U>
         Bounds(const Bounds<2, U> & bounds);
 
-
         bool intersects(const Vector<2, T> & point) const;
         bool intersects(const Bounds<2, T> & bounds) const;
+
+        Bounds<2, T> & cutEdges(const T value);
+        Bounds<2, T> & cutEdges(const Vector2<T> & value);
+        Bounds<2, T> & cutEdges(const Vector4<T> & value);
+        Bounds<2, T> & cutTop(const T value);
 
         Bounds<2, T> & operator = (const Bounds<2, T> & bounds);
 
@@ -127,8 +135,6 @@ namespace Guise
 
         bool operator == (const Bounds<2, T> & bounds) const;
         bool operator != (const Bounds<2, T> & bounds) const;
-
-        static Bounds<2, T> clamp(const Bounds<2, T> & in, const Bounds<2, T> & bounds);
 
         Vector<2, T> position;
         Vector<2, T> size;

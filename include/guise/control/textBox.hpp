@@ -36,7 +36,7 @@
 namespace Guise
 {
 
-    class GUISE_API TextBox : public Control, public Style::ParentPaintRectStyle
+    /*class GUISE_API TextBox : public Control, public Style::ParentPaintRectStyle
     {
 
     public:
@@ -44,8 +44,6 @@ namespace Guise
         static std::shared_ptr<TextBox> create(std::shared_ptr<Canvas> & canvas);
 
         virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void render(RendererInterface & rendererInterface);
 
         virtual Bounds2f getRenderBounds() const;
 
@@ -67,6 +65,8 @@ namespace Guise
 
         TextBox(std::shared_ptr<Canvas> & canvas);
         TextBox(const TextBox &) = delete;
+
+        virtual void render(RendererInterface & rendererInterface);
 
         void onActiveChange(bool active);
 
@@ -96,7 +96,7 @@ namespace Guise
 
         Style::FontStyle                        m_textStyle;
 
-    };
+    };*/
 
 }
 

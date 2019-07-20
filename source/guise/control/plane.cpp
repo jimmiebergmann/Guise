@@ -31,7 +31,7 @@ namespace Guise
 {
 
     // Plane implementations.
-    std::shared_ptr<Plane> Plane::create(std::shared_ptr<Canvas> & canvas)
+   /* std::shared_ptr<Plane> Plane::create(std::shared_ptr<Canvas> & canvas)
     {
         return std::shared_ptr<Plane>(new Plane(canvas));
     }
@@ -58,6 +58,8 @@ namespace Guise
         {
             m_renderBounds = renderBounds;
 
+            m_canvas.reportControlChange(this);
+
             Bounds2f childsBounds = calcChildRenderBounds(*this);
             if (childsBounds != m_childsBounds || isUpdateForced())
             {
@@ -76,6 +78,6 @@ namespace Guise
         Style::ParentRectStyle(canvas->getStyleSheet()->getSelector("plane")),    
         m_childsBounds(0.0f, 0.0f, 0.0f, 0.0f),
         m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f)      
-    { }
+    { }*/
 
 }

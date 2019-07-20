@@ -103,11 +103,12 @@ namespace Guise
 
         Signal<uint32_t> onDpiChange;
 
-        void updateControlRendering(Control * control);
-        void removeControlRendering(Control * control);
+        void reportControlChange(Control * control);
+        void reportControlRemove(Control * control);
 
-        void forceControlUpdate(Control * control);
-        void unforceControlUpdate(Control * control);
+        void updateControl(Control * control);
+
+        void resizeControl(Control * control);
 
     private:
 
@@ -125,8 +126,8 @@ namespace Guise
         Control *                                   m_activeControl;
         Control *                                   m_hoveredControl;
 
-        std::map<Control *, size_t>                 m_renderControls;
-        std::map<size_t, std::vector<Control *> >   m_renderControlLevels; 
+        std::map<Control *, size_t>                 m_selectControls;
+        std::map<size_t, std::vector<Control *> >   m_selectControlLevels; 
         std::set<Control * >                        m_updateControls;
 
     };

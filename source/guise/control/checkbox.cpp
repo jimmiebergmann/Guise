@@ -31,7 +31,7 @@ namespace Guise
 {
 
     // Button implementations.
-    std::shared_ptr<Checkbox> Checkbox::create(std::shared_ptr<Canvas> & canvas)
+    /*std::shared_ptr<Checkbox> Checkbox::create(std::shared_ptr<Canvas> & canvas)
     {
         return std::shared_ptr<Checkbox>(new Checkbox(canvas));
     }
@@ -76,11 +76,6 @@ namespace Guise
         return true;
     }
 
-    void Checkbox::render(RendererInterface & renderer)
-    {
-        renderer.drawQuad(m_renderBounds, m_currentStyle->getBackgroundColor());
-    }
-
     Bounds2f Checkbox::getRenderBounds() const
     {
         return m_renderBounds;
@@ -102,8 +97,7 @@ namespace Guise
         if (renderBounds != m_renderBounds || isUpdateForced())
         {
             m_renderBounds = { renderBounds.position , renderBounds.size };
-
-            m_canvas.updateControlRendering(this);
+            m_canvas.reportControlChange(this);
         }
     }
 
@@ -169,5 +163,10 @@ namespace Guise
             m_hoverStyle = { hoverStyle, this };
         }
     }
+
+    void Checkbox::render(RendererInterface & renderer)
+    {
+        renderer.drawQuad(m_renderBounds, m_currentStyle->getBackgroundColor());
+    }*/
 
 }

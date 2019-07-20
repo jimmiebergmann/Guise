@@ -625,5 +625,17 @@ namespace Guise
     {
         return *(&x + (sizeof(T) * index));
     }
+
+    template <typename T>
+    Vector<4, T> Vector<4, T>::ceil(const Vector<4, T> & vec)
+    {
+        return { std::ceil(vec.x), std::ceil(vec.y), std::ceil(vec.z), std::ceil(vec.w) };
+    }
+
+    template <typename T>
+    Vector<4, T> Vector<4, T>::floor(const Vector<4, T> & vec)
+    {
+        return { std::floor(vec.x), std::floor(vec.y), std::floor(vec.z), std::floor(vec.w) };
+    }
     
 }

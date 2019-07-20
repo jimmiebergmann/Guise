@@ -54,7 +54,7 @@ namespace Guise
 
         std::shared_ptr<Canvas> getCanvas();
 
-        int32_t getDpi() const;
+        uint32_t getDpi() const;
 
         ::Display * getLinuxDisplay() const;
 
@@ -63,6 +63,8 @@ namespace Guise
         ::Window getLinuxWindow() const;
 
         Vector2i32 getPosition() const;
+
+        float getScale() const; // IMPLEMENT
 
         Vector2ui32 getSize() const;
 
@@ -80,9 +82,11 @@ namespace Guise
 
         void render();
 
-        void setDpi(const int32_t dpi);
+        void setDpi(const uint32_t dpi);
 
         void setRenderer(const std::shared_ptr<Renderer> & renderer);
+
+        void setScale(const float scale); // IMPLEMENT
 
         void show(const bool focus = true);  // IMPLEMENT
 
@@ -105,7 +109,7 @@ namespace Guise
 */
         std::shared_ptr<Renderer>   m_renderer;
         std::shared_ptr<Canvas>     m_canvas;
-        int32_t                     m_dpi;
+        uint32_t                    m_dpi;
         Input &                     m_input;
         std::wstring                m_title; 
         Vector2ui32                 m_size;

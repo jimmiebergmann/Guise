@@ -69,24 +69,14 @@ namespace Guise
     bool Canvas::add(const std::shared_ptr<Control> & control, const size_t)
     {
         m_childs.push_back(control);
+        control->setCanvas(this);
         control->setLevel(1);
+        control->setBounds({ { 0.0f, 0.0f }, m_size });
         return true;
     }
 
     void Canvas::update()
     {
-        for (auto & child : m_childs)
-        {
-            child->update({ {0.0f, 0.0f}, m_size });
-        }
-         
-        for (auto * control : m_updateControls)
-        {
-            control->update();
-            control->pollUpdateForced();
-        }
-        m_updateControls.clear();
-
         m_input.update();
         
         struct MouseIntersector
@@ -117,6 +107,7 @@ namespace Guise
                     m_hoveredControl->handleInputEvent(e);
                 }
             }
+
             m_hoveredControl = mouseHit.control;
         };
 
@@ -183,16 +174,19 @@ namespace Guise
                 default: break;
             }
         }
+
+        for (auto * control : m_updateControls)
+        {
+            control->onUpdate();
+        }
+        m_updateControls.clear();
     }
 
     void Canvas::render(RendererInterface & renderInterface)
     {
-        for (auto levelIt = m_renderControlLevels.begin(); levelIt != m_renderControlLevels.end(); levelIt++)
+        for (auto & child : m_childs)
         {
-            for (auto controlIt = levelIt->second.begin(); controlIt != levelIt->second.end(); controlIt++)
-            {
-                (*controlIt)->render(renderInterface);
-            }
+            child->draw(renderInterface);
         }
     }
 
@@ -218,6 +212,11 @@ namespace Guise
     void Canvas::resize(const Vector2ui32 & size)
     {
         m_size = size;
+
+        for (auto & child : m_childs)
+        {
+            child->setBounds({ {0.0f, 0.0f}, size });
+        }
     }
 
     void Canvas::setDpi(const uint32_t dpi)
@@ -236,6 +235,7 @@ namespace Guise
         uint32_t dpi = static_cast<uint32_t>(m_scale * GUISE_DEFAULT_DPI);
         if (dpi != m_dpi)
         {
+            m_dpi = dpi;
             onDpiChange(m_dpi);
         }
     }
@@ -275,44 +275,44 @@ namespace Guise
         return m_activeControl;
     }
 
-    void Canvas::updateControlRendering(Control * control)
+    void Canvas::reportControlChange(Control * control)
     {   
         if (control == nullptr)
         {
             return;
         }
 
-        auto itControl = m_renderControls.find(control);
+        auto itControl = m_selectControls.find(control);
 
         // Add new.
-        if (itControl == m_renderControls.end())
+        if (itControl == m_selectControls.end())
         {
-            if (!control->getRenderBounds().intersects(Bounds2f{ { 0.0f, 0.0f }, m_size }))
+            if (!control->getBounds().intersects(Bounds2f{ { 0.0f, 0.0f }, m_size }))
             {
                 return;
             }
 
             const size_t level = control->getLevel();
-            auto itLevel = m_renderControlLevels.find(level);
-            if (itLevel == m_renderControlLevels.end())
+            auto itLevel = m_selectControlLevels.find(level);
+            if (itLevel == m_selectControlLevels.end())
             {
-                itLevel = m_renderControlLevels.insert({ level, {} }).first;
+                itLevel = m_selectControlLevels.insert({ level, {} }).first;
             }
 
             itLevel->second.push_back(control);
-            m_renderControls.insert({ control, level });           
+            m_selectControls.insert({ control, level });
         }
         // Update existing.
         else
         {
             // Not inside canvas anymore, remove it.
-            if (!control->getRenderBounds().intersects(Bounds2f{ { 0.0f, 0.0f }, m_size }))
+            if (!control->getBounds().intersects(Bounds2f{ { 0.0f, 0.0f }, m_size }))
             {
-                auto itLevel = m_renderControlLevels.find(itControl->second);
+                auto itLevel = m_selectControlLevels.find(itControl->second);
                 auto itControl2 = std::find(itLevel->second.begin(), itLevel->second.end(), control);
 
                 itLevel->second.erase(itControl2);
-                m_renderControls.erase(control);
+                m_selectControls.erase(control);
 
                 if (control == m_selectedControl)
                 {
@@ -341,10 +341,10 @@ namespace Guise
         }
     }
 
-    void Canvas::removeControlRendering(Control * control)
+    void Canvas::reportControlRemove(Control * control)
     {
-        auto itLevel = m_renderControlLevels.find(control->getLevel());
-        if (itLevel == m_renderControlLevels.end())
+        auto itLevel = m_selectControlLevels.find(control->getLevel());
+        if (itLevel == m_selectControlLevels.end())
         {
             return;
         }
@@ -356,7 +356,8 @@ namespace Guise
         }
 
         itLevel->second.erase(itControl);
-        m_renderControls.erase(control);
+        m_selectControls.erase(control);
+        m_updateControls.erase(control);
 
         if (control == m_selectedControl)
         {
@@ -372,14 +373,23 @@ namespace Guise
         }
     }
 
-    void Canvas::forceControlUpdate(Control * control)
+    void Canvas::updateControl(Control * control)
     {
         m_updateControls.insert(control);
     }
 
-    void Canvas::unforceControlUpdate(Control * control)
+    void Canvas::resizeControl(Control * control)
     {
-        m_updateControls.erase(control);
+        Control * rootControl = control;
+        Control * parent = rootControl->getParent().lock().get();
+
+        while (parent && parent->isChildBoundsAware())
+        {
+            rootControl = parent;
+            parent = rootControl->getParent().lock().get();
+        }
+
+        rootControl->setBounds(rootControl->getAvailableBounds());
     }
 
     Canvas::Canvas(const Vector2ui32 & size, std::shared_ptr<Style::Sheet> * styleSheet) :
@@ -404,7 +414,7 @@ namespace Guise
 
     Control * Canvas::queryControlHit(const Vector2f & point) const
     {
-        for (auto levelIt = m_renderControlLevels.rbegin(); levelIt != m_renderControlLevels.rend(); levelIt++)
+        for (auto levelIt = m_selectControlLevels.rbegin(); levelIt != m_selectControlLevels.rend(); levelIt++)
         {
             for (auto controlIt = levelIt->second.rbegin(); controlIt != levelIt->second.rend(); controlIt++)
             {

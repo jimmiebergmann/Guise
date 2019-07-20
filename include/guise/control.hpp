@@ -75,22 +75,16 @@ namespace Guise
 
     public:
 
-        Control(Canvas & canvas);
+        Control();
 
         virtual ~Control();
 
-        Canvas & getCanvas();
-        const Canvas & getCanvas() const;
+        Canvas * getCanvas();
+        const Canvas * getCanvas() const;
 
-        virtual void update();
-
-        void update(const Bounds2f & canvasBounds);
+        void draw(RendererInterface & rendererInterface);
 
         virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void render(RendererInterface & rendererInterface);
-
-        virtual Bounds2f getRenderBounds() const;
 
         virtual Bounds2f getSelectBounds() const;        
 
@@ -108,10 +102,6 @@ namespace Guise
         virtual void hide(const bool occupySpace = false);
         virtual bool isVisible() const;
 
-        void forceUpdate();
-        bool isUpdateForced();
-        bool pollUpdateForced();
-
         virtual bool intersects(const Vector2f & point) const;
 
         virtual size_t getLevel() const;
@@ -119,6 +109,8 @@ namespace Guise
 
         virtual std::weak_ptr<Control> getParent();
         virtual std::weak_ptr<const Control> getParent() const;
+        virtual std::shared_ptr<Control> getChild();
+        virtual std::shared_ptr<const Control> getChild() const;
         virtual std::vector<std::shared_ptr<Control> > getChilds();
         virtual std::vector<std::shared_ptr<const Control> > getChilds() const;
 
@@ -131,35 +123,55 @@ namespace Guise
 
         virtual void onActiveChange(bool active);
 
+        // TEST.
+        Bounds2f getAvailableBounds() const;
+
+        Bounds2f getBounds() const;
+
+        const Bounds2f & setBounds(const Bounds2f & bounds);
+
+        float getScale() const;
+
+        void resize();
+
+        bool isChildBoundsAware() const;
+        void setChildBoundsAware(const bool aware);
+
+        virtual void onUpdate();
+
     protected:        
 
-        /*
-        * Returning DPI converted coordinates of rendering bounds by given parameters.
-        *
-        */
-       // Bounds2f calcRenderBounds(const Bounds2f & canvasBound, const Vector2f & position, const Vector2f & size, const Style::Property::Overflow overflow) const;
+        virtual void onAddChild(Control & control, const size_t index);
 
-        Bounds2f calcRenderBounds(const Style::RectStyle & style) const;
-        Bounds2f calcChildRenderBounds(const Style::ParentStyle & style) const;
+        virtual void onCanvasChange(Canvas * canvas);
 
-        Bounds2f getCanvasBounds() const;
+        virtual void onDisable();
 
-        float getCanvasScale() const;
+        virtual void onEnable();
 
-        Canvas &    m_canvas;
-        bool        m_enabled;        // NOT IN USE???   
-        bool        m_inputEnabled;   // NOT IN USE???    
-        bool        m_visible;        // NOT IN USE???   
+        virtual void onRemoveChild(Control & control, const size_t index);
+
+        virtual void onRender(RendererInterface & rendererInterface);
+
+        virtual void onResize();
+
+        Bounds2f scale(const Bounds2f & bounds) const;
+        Vector4f scale(const Vector4f & vector) const;
+        Vector2f scale(const Vector2f & vector) const;
 
     private:
 
-        friend class ControlContainer;
-        
-        Bounds2f                m_canvasBounds;
-        bool                    m_forceUpdate;        
+        virtual void setCanvas(Canvas * canvas);
+
+        Bounds2f                m_availableBounds;
+        Bounds2f                m_bounds;
+        Canvas *                m_canvas;
+        uint8_t                 m_flags;
         size_t                  m_level;
         std::weak_ptr<Control>  m_parent;
-        //mutable std::mutex      m_mutex;
+
+        friend class Canvas;
+        friend class ControlContainer;
 
     };
 
@@ -167,16 +179,18 @@ namespace Guise
     {
 
     public:
-
-        ControlContainer(Canvas & canvas);
         
         virtual ~ControlContainer();
 
     protected:
 
         void adoptControl(Control & control);
+
         void releaseControl(Control & control);
 
+        virtual void setCanvas(Canvas * canvas);
+
+        void setControlCanvas(Control * control);
     };
 
     class GUISE_API ControlContainerSingle : public ControlContainer
@@ -184,22 +198,27 @@ namespace Guise
 
     public:
 
-        ControlContainerSingle(Canvas & canvas);
-
         virtual ~ControlContainerSingle();
 
         void setLevel(const size_t level);
 
+        std::shared_ptr<Control> getChild();
+        std::shared_ptr<const Control> getChild() const;
         std::vector<std::shared_ptr<Control> > getChilds();
         std::vector<std::shared_ptr<const Control> > getChilds() const;
 
-        virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        virtual void enable();
+        virtual void disable();
+
+        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
         bool remove(Control & control);
         bool remove(const std::shared_ptr<Control> & control);
         bool remove(const size_t index);
         size_t removeAll();
 
-    protected:
+    private:
+
+        virtual void setCanvas(Canvas * canvas);
 
         std::shared_ptr<Control>    m_child;
         mutable std::mutex          m_mutex;
@@ -211,14 +230,17 @@ namespace Guise
 
     public:
 
-        ControlContainerList(Canvas & canvas);
-
         virtual ~ControlContainerList();
 
         void setLevel(const size_t level);
 
+        std::shared_ptr<Control> getChild();
+        std::shared_ptr<const Control> getChild() const;
         std::vector<std::shared_ptr<Control> > getChilds();
         std::vector<std::shared_ptr<const Control> > getChilds() const;
+
+        virtual void enable();
+        virtual void disable();
 
         bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
         bool remove(Control & control);
@@ -227,6 +249,8 @@ namespace Guise
         size_t removeAll();
 
     private:
+
+        virtual void setCanvas(Canvas * canvas);
 
         std::vector<std::shared_ptr<Control> >  m_childs;
         mutable std::mutex                      m_mutex;

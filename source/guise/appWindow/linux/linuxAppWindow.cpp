@@ -53,7 +53,7 @@ namespace Guise
         return m_canvas;
     }
 
-    int32_t LinuxAppWindow::getDpi() const
+    uint32_t LinuxAppWindow::getDpi() const
     {
         return m_dpi;
     }
@@ -61,6 +61,11 @@ namespace Guise
     Vector2i32 LinuxAppWindow::getPosition() const
     {
         return { 0, 0 };
+    }
+
+    float LinuxAppWindow::getScale() const
+    {
+        return 0.0f; // IMPLEMENT
     }
 
     Vector2ui32 LinuxAppWindow::getSize() const
@@ -131,7 +136,7 @@ namespace Guise
         m_renderer->present();
     }
 
-    void LinuxAppWindow::setDpi(const int32_t dpi)
+    void LinuxAppWindow::setDpi(const uint32_t dpi)
     {
         m_dpi = dpi;
     }
@@ -139,6 +144,11 @@ namespace Guise
     void LinuxAppWindow::setRenderer(const std::shared_ptr<Renderer> & renderer)
     {
         m_renderer = renderer;
+    }
+
+    void LinuxAppWindow::setScale(const float /*scale*/)
+    {
+        // IMPLEMENT
     }
 
     void LinuxAppWindow::show(const bool /*focus*/)

@@ -53,7 +53,11 @@ namespace Guise
     public:
 
         // Interface functions.
-        int32_t getDpi();
+        void setLevel(const size_t level);
+
+        float getScale() const;
+
+        void drawRect(const Bounds2f & bounds, const Style::ParentPaintRectStyle & style);
 
         void drawQuad(const Bounds2f & bounds, const Vector4f & color);
         void drawQuad(const Bounds2f & bounds, const std::shared_ptr<Texture> & texture, const Vector4f & color);
@@ -81,7 +85,7 @@ namespace Guise
 
         void setViewportSize(const Vector2ui32 & position, const Vector2ui32 & size);
 
-        void setDpi(const int32_t dpi);
+        void setScale(const float scale);
 
         void clearColor();
 
@@ -110,7 +114,8 @@ namespace Guise
 
         Vector4f                m_clearColor;
         Bounds2i32              m_viewPort;
-        int32_t                 m_dpi;
+        float                   m_scale;
+        float                   m_level;
         std::stack<Bounds2i32>  m_maskStack;
 
     };

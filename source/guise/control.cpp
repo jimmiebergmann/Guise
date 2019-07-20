@@ -25,61 +25,52 @@
 
 #include "guise/control.hpp"
 #include "guise/canvas.hpp"
+#include <iostream>
 
-template <typename T, typename U>
-static bool ptrEquals(const std::weak_ptr<T>& t, const std::shared_ptr<U>& u)
-{
-    return !t.owner_before(u) && !u.owner_before(t);
-}
+#define GUISE_CONTROL_CHECK_FLAG(x) static_cast<bool>(m_flags & x)
+#define GUISE_CONTROL_SET_FLAG(x) m_flags |= x
+#define GUISE_CONTROL_UNSET_FLAG(x) m_flags &= ~x
 
+#define GUISE_CONTROL_FLAG_RESIZING         0x01    // 1    0000 0001
+#define GUISE_CONTROL_FLAG_ENABLED          0x02    // 2    0000 0010
+#define GUISE_CONTROL_FLAG_INPUTENABLED     0x04    // 4    0000 0100
+#define GUISE_CONTROL_FLAG_VISIBLE          0x08    // 8    0000 1000
+#define GUISE_CONTROL_FLAG_CHILDBOUNDSAWARE 0x10    // 16   0001 0000
 
 namespace Guise
 {
 
     // Control implementations.
-    Control::Control(Canvas & canvas) :
-        m_canvas(canvas),
-        m_enabled(true),
-        m_inputEnabled(true),
-        m_visible(true),
-        m_canvasBounds(0.0f, 0.0f, 0.0f, 0.0f),
-        m_forceUpdate(false),
-        m_level(0)     
+    Control::Control() :
+        m_availableBounds(0.0f, 0.0f, 0.0f, 0.0f),
+        m_bounds(0.0f, 0.0f, 0.0f, 0.0f),
+        m_canvas(nullptr),
+        m_flags(GUISE_CONTROL_FLAG_ENABLED | GUISE_CONTROL_FLAG_INPUTENABLED | GUISE_CONTROL_FLAG_VISIBLE),
+        m_level(0)
     { }
 
     Control::~Control()
     {
-        if (m_forceUpdate)
+        if (m_canvas)
         {
-            m_canvas.unforceControlUpdate(this);
+            m_canvas->reportControlRemove(this);
         }
-        m_canvas.removeControlRendering(this);
     }
 
-    Canvas & Control::getCanvas()
+    Canvas * Control::getCanvas()
     {
         return m_canvas;
     }
 
-    const Canvas & Control::getCanvas() const
+    const Canvas * Control::getCanvas() const
     {
         return m_canvas;
     }
 
-    void Control::update()
+    void Control::draw(RendererInterface & rendererInterface)
     {
-    }
-
-    void Control::update(const Bounds2f & canvasBounds)
-    {
-        m_canvasBounds = canvasBounds;
-        update();
-
-        if (m_forceUpdate)
-        {
-            m_forceUpdate = false;
-            m_canvas.unforceControlUpdate(this);
-        }
+        rendererInterface.setLevel(m_level);
+        onRender(rendererInterface);
     }
 
     bool Control::handleInputEvent(const Input::Event &)
@@ -87,94 +78,69 @@ namespace Guise
         return false;
     }
 
-    void Control::render(RendererInterface &)
-    {
-    }
-
-    Bounds2f Control::getRenderBounds() const
-    {
-        return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
-    }
-
     Bounds2f Control::getSelectBounds() const
     {
-        return { { 0.0f, 0.0f },{ 0.0f, 0.0f } };
+        return m_bounds;
     }
 
     void Control::enable()
     {
-        if (!m_enabled)
+        if (!GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_ENABLED))
         {
-            m_enabled = true;
-            forceUpdate();
-        }      
+            GUISE_CONTROL_SET_FLAG(GUISE_CONTROL_FLAG_ENABLED);
+            onEnable();
+        }    
     }
 
     void Control::disable()
     {
-        if (m_enabled)
+        if (GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_ENABLED))
         {
-            m_enabled = false;
-            forceUpdate();
-        }       
+            GUISE_CONTROL_UNSET_FLAG(GUISE_CONTROL_FLAG_ENABLED);
+            onDisable();
+        }     
     }
 
     bool Control::isEnabled()
     {
-        return m_enabled;
+        return GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_ENABLED);
     }
 
     void Control::enableInput()
     {
-        m_inputEnabled = true;
+        GUISE_CONTROL_SET_FLAG(GUISE_CONTROL_FLAG_INPUTENABLED);
     }
 
     void Control::disableInput()
     {
-        m_inputEnabled = false;
+        GUISE_CONTROL_UNSET_FLAG(GUISE_CONTROL_FLAG_INPUTENABLED);
     }
 
     bool Control::isInputEnabled() const
     {
-        return m_inputEnabled;
+        return GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_INPUTENABLED);
     }
 
     void Control::show()
     {
-        m_visible = true;
+        GUISE_CONTROL_SET_FLAG(GUISE_CONTROL_FLAG_VISIBLE);
     }
 
     void Control::hide(const bool)
     {
-        m_visible = false;
+        GUISE_CONTROL_UNSET_FLAG(GUISE_CONTROL_FLAG_VISIBLE);
     }
 
     bool Control::isVisible() const
     {
-        return m_visible;
-    }
-
-    void Control::forceUpdate()
-    {
-        m_forceUpdate = true;
-        m_canvas.forceControlUpdate(this);
-    }
-
-    bool Control::isUpdateForced()
-    {
-        return m_forceUpdate;
-    }
-
-    bool Control::pollUpdateForced()
-    {
-        const bool forced = m_forceUpdate;
-        m_forceUpdate = false;
-        return forced;
+        return GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_VISIBLE);
     }
 
     bool Control::intersects(const Vector2f & point) const
     {
-        return m_enabled && m_inputEnabled && getSelectBounds().intersects(point);
+        return GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_ENABLED) &&
+               GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_INPUTENABLED) &&
+               getSelectBounds().intersects(point);
     }
 
     size_t Control::getLevel() const
@@ -187,6 +153,10 @@ namespace Guise
         if (level != m_level)
         {
             m_level = level;
+            if (m_canvas)
+            {
+                m_canvas->reportControlChange(this);
+            }
         }
     }
 
@@ -197,6 +167,15 @@ namespace Guise
     std::weak_ptr<const Control> Control::getParent() const
     {
         return m_parent;
+    }
+
+    std::shared_ptr<Control> Control::getChild()
+    {
+        return nullptr;
+    }
+    std::shared_ptr<const Control> Control::getChild() const
+    {
+        return nullptr;
     }
 
     std::vector<std::shared_ptr<Control> > Control::getChilds()
@@ -248,6 +227,136 @@ namespace Guise
     {
     }
 
+    Bounds2f Control::getAvailableBounds() const
+    {
+        return m_availableBounds;
+    }
+
+    Bounds2f Control::getBounds() const
+    {
+        return m_bounds;
+    }
+
+    const Bounds2f & Control::setBounds(const Bounds2f & bounds)
+    {
+        if (bounds != m_bounds)
+        {
+            m_bounds = bounds;
+        
+            if (m_canvas)
+            {
+                m_canvas->reportControlChange(this);
+            }
+        }
+
+        if (!GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_RESIZING))
+        {
+            GUISE_CONTROL_SET_FLAG(GUISE_CONTROL_FLAG_RESIZING);
+            m_availableBounds = m_bounds;
+            onResize();            
+            GUISE_CONTROL_UNSET_FLAG(GUISE_CONTROL_FLAG_RESIZING);
+        }
+
+        return m_bounds;
+    }
+
+    float Control::getScale() const
+    {
+        return m_canvas ? m_canvas->getScale() : 1.0f;
+    }
+
+    void Control::resize()
+    {
+        if (m_canvas)
+        {
+            m_canvas->resizeControl(this);
+        }
+        /*m_bounds = m_givenBounds;
+
+        if (m_canvas)
+        {
+            m_canvas->reportControlChange(this);
+        }
+
+        if (!GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_RESIZING))
+        {
+            GUISE_CONTROL_SET_FLAG(GUISE_CONTROL_FLAG_RESIZING);
+            onResize();
+            GUISE_CONTROL_UNSET_FLAG(GUISE_CONTROL_FLAG_RESIZING);
+        }*/
+    }
+
+    bool Control::isChildBoundsAware() const
+    {
+        return GUISE_CONTROL_CHECK_FLAG(GUISE_CONTROL_FLAG_CHILDBOUNDSAWARE);
+    }
+
+    void Control::setChildBoundsAware(const bool aware)
+    {
+        if (aware)
+        {
+            GUISE_CONTROL_SET_FLAG(GUISE_CONTROL_FLAG_CHILDBOUNDSAWARE);
+        }
+        else
+        {
+            GUISE_CONTROL_UNSET_FLAG(GUISE_CONTROL_FLAG_CHILDBOUNDSAWARE);
+        }
+    }
+
+    void Control::onUpdate()
+    {
+    }
+    void Control::onAddChild(Control &, const size_t)
+    {
+    }
+    void Control::onCanvasChange(Canvas *)
+    {
+    }
+    void Control::onDisable()
+    {
+    }
+    void Control::onEnable()
+    {
+    }
+    void Control::onRemoveChild(Control &, const size_t)
+    {
+    }
+    void Control::onRender(RendererInterface &)
+    {
+    }
+    void Control::onResize()
+    {
+    }
+
+    Bounds2f Control::scale(const Bounds2f & bounds) const
+    {
+        return Bounds2f::ceil(bounds * getScale());
+    }
+
+    Vector4f Control::scale(const Vector4f & vector) const
+    {
+        return Vector4f::ceil(vector * getScale());
+    }
+    Vector2f Control::scale(const Vector2f & vector) const
+    {
+        return Vector2f::ceil(vector * getScale());
+    }
+
+    void Control::setCanvas(Canvas * canvas)
+    {
+        if (m_canvas != canvas)
+        {
+            if (m_canvas)
+            {
+                m_canvas->reportControlRemove(this);
+            }
+
+            m_canvas = canvas;
+            onCanvasChange(m_canvas);
+        }
+    }
+    
+    /*
     Bounds2f Control::calcRenderBounds(const Style::RectStyle & style) const
     {
         const float scale = m_canvas.getScale();
@@ -302,35 +411,41 @@ namespace Guise
     float Control::getCanvasScale() const
     {
         return m_canvas.getScale();
-    }
+    }*/
 
 
     // ControlContainer implementations.
-    ControlContainer::ControlContainer(Canvas & canvas) :
-        Control(canvas)
-    { }
-
     ControlContainer::~ControlContainer()
     { }
 
     void ControlContainer::adoptControl(Control & control)
     {
+        control.setCanvas(m_canvas);
         control.release();
         control.m_parent = Control::shared_from_this();
     }
 
     void ControlContainer::releaseControl(Control & control)
     {
-        m_canvas.removeControlRendering(&control);
+        if (m_canvas)
+        {
+            m_canvas->reportControlRemove(&control);
+        }
         control.m_parent.reset();
+    }
+
+    void ControlContainer::setCanvas(Canvas * canvas)
+    {
+        Control::setCanvas(canvas);
+    }
+
+    void ControlContainer::setControlCanvas(Control * control)
+    {
+        control->setCanvas(m_canvas);
     }
 
 
     // ControlContainerSingle implementations.
-    ControlContainerSingle::ControlContainerSingle(Canvas & canvas) :
-        ControlContainer(canvas)
-    { }
-
     ControlContainerSingle::~ControlContainerSingle()
     {
         removeAll();
@@ -353,6 +468,17 @@ namespace Guise
         }
     }
 
+    std::shared_ptr<Control> ControlContainerSingle::getChild()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_child;
+    }
+    std::shared_ptr<const Control> ControlContainerSingle::getChild() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_child;
+    }
+
     std::vector<std::shared_ptr<Control> > ControlContainerSingle::getChilds()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -360,7 +486,38 @@ namespace Guise
     }
     std::vector<std::shared_ptr<const Control> > ControlContainerSingle::getChilds() const
     {
+        std::lock_guard<std::mutex> lock(m_mutex);
         return { m_child };
+    }
+
+    void ControlContainerSingle::enable()
+    {
+        if (!isEnabled())
+        {
+            Control::enable();
+
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            if (m_child)
+            {
+                m_child->enable();
+            }
+        }
+    }
+
+    void ControlContainerSingle::disable()
+    {
+        if (isEnabled())
+        {
+            Control::disable();
+
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            if (m_child)
+            {
+                m_child->disable();
+            }
+        }
     }
 
     bool ControlContainerSingle::add(const std::shared_ptr<Control> & control, const size_t)
@@ -372,91 +529,132 @@ namespace Guise
 
         removeAll();
 
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::shared_ptr<Control> newChild;
 
-        adoptControl(*control.get());
-        m_child = control;
-
-        size_t level = getLevel();
-        if (level != 0)
         {
-            m_child->setLevel(level + 1);
-        }    
+            std::lock_guard<std::mutex> lock(m_mutex);
 
-        forceUpdate();
+            adoptControl(*control.get());
+            m_child = control;
+
+            size_t level = getLevel();
+            if (level != 0)
+            {
+                m_child->setLevel(level + 1);
+            }
+            newChild = m_child;
+        }
+
+        onAddChild(*newChild, 0);
+
         return true;
     }
 
     bool ControlContainerSingle::remove(Control & control)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::shared_ptr<Control> oldChild;
 
-        if (!m_child || m_child.get() != &control)
         {
-            return false;
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            if (!m_child || m_child.get() != &control)
+            {
+                return false;
+            }
+
+            oldChild = m_child;
+            releaseControl(*oldChild.get());
+            m_child->setLevel(0);
+            m_child.reset();
         }
- 
-        releaseControl(control);
-        m_child->setLevel(0);
-        m_child.reset();
-        forceUpdate();
+        
+        onRemoveChild(*oldChild, 0);
 
         return true;
     }
 
     bool ControlContainerSingle::remove(const std::shared_ptr<Control> & control)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::shared_ptr<Control> oldChild;
 
-        if (!m_child || !control || m_child != control)
         {
-            return false;
-        }
+            std::lock_guard<std::mutex> lock(m_mutex);
 
-        releaseControl(*control.get());
-        m_child.reset();
-        forceUpdate();
+            if (!m_child || !control || m_child != control)
+            {
+                return false;
+            }
+
+            oldChild = m_child;
+            releaseControl(*oldChild.get());
+            m_child.reset();
+        }
+        
+        onRemoveChild(*oldChild, 0);
 
         return true;
     }
 
     bool ControlContainerSingle::remove(const size_t)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::shared_ptr<Control> oldChild;
 
-        if (!m_child)
         {
-            return false;
-        }
+            std::lock_guard<std::mutex> lock(m_mutex);
 
-        releaseControl(*m_child.get());
-        m_child.reset();
-        forceUpdate();
+            if (!m_child)
+            {
+                return false;
+            }
+
+            oldChild = m_child;
+            releaseControl(*oldChild.get());
+            m_child.reset();
+        }
+        
+        onRemoveChild(*oldChild, 0);
 
         return true;
     }
 
     size_t ControlContainerSingle::removeAll()
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::shared_ptr<Control> oldChild;
 
-        if (!m_child)
         {
-            return 0;
-        }
+            std::lock_guard<std::mutex> lock(m_mutex);
 
-        releaseControl(*m_child.get());
-        m_child.reset();
-        forceUpdate();
+            if (!m_child)
+            {
+                return 0;
+            }
+
+            oldChild = m_child;
+            releaseControl(*oldChild.get());
+            m_child.reset();
+        }
+        
+        onRemoveChild(*oldChild, 0);
 
         return 1;
     }
 
-    // ControlContainerList implementations.
-    ControlContainerList::ControlContainerList(Canvas & canvas) :
-        ControlContainer(canvas)
-    { }
+    void ControlContainerSingle::setCanvas(Canvas * canvas)
+    {
+        ControlContainer::setCanvas(canvas);
 
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+         
+            if (m_child)
+            {
+                setControlCanvas(m_child.get());
+            }
+        }
+    }
+
+
+    // ControlContainerList implementations.
     ControlContainerList::~ControlContainerList()
     {
         removeAll();
@@ -480,6 +678,17 @@ namespace Guise
         }
     }
 
+    std::shared_ptr<Control> ControlContainerList::getChild()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_childs.size() ? m_childs[0] : nullptr;
+    }
+    std::shared_ptr<const Control> ControlContainerList::getChild() const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_childs.size() ? m_childs[0] : nullptr;
+    }
+
     std::vector<std::shared_ptr<Control> > ControlContainerList::getChilds()
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -491,65 +700,125 @@ namespace Guise
         return { m_childs.begin(), m_childs.end() };
     }
 
+    void ControlContainerList::enable()
+    {
+        if (!isEnabled())
+        {
+            Control::enable();
+
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            for (auto & child : m_childs)
+            {
+                child->enable();
+            }
+        }
+    }
+
+    void ControlContainerList::disable()
+    {
+        if (isEnabled())
+        {
+            Control::disable();
+
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            for (auto & child : m_childs)
+            {
+                child->disable();
+            }
+        }        
+    }
+
     bool ControlContainerList::add(const std::shared_ptr<Control> & control, const size_t index)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        size_t newIndex = index;
 
-        if (!control)
         {
-            return false;
-        }        
+            std::lock_guard<std::mutex> lock(m_mutex);
 
-        adoptControl(*control.get());
-        if(index >= m_childs.size())
-        {
-            m_childs.push_back(control);
-        }
-        else
-        {
-            m_childs.insert(m_childs.begin() + index, control);
+            if (!control)
+            {
+                return false;
+            }
+
+            adoptControl(*control.get());
+            if (index >= m_childs.size())
+            {
+                newIndex = m_childs.size();
+                m_childs.push_back(control);
+            }
+            else
+            {
+                m_childs.insert(m_childs.begin() + index, control);
+            }
+
+            size_t level = getLevel();
+            if (level != 0)
+            {
+                control->setLevel(level + 1);
+            }
         }
 
-        size_t level = getLevel();
-        if (level != 0)
-        {
-            control->setLevel(level + 1);
-        }
-        
-        forceUpdate();
+        onAddChild(*control, newIndex);
+
         return true;
     }
 
     bool ControlContainerList::remove(Control & control)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::shared_ptr<Control> foundControl;
+        size_t index = 0;
 
-        for (auto it = m_childs.begin(); it != m_childs.end(); it++)
         {
-            if (it->get() == &control)
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            for (auto it = m_childs.begin(); it != m_childs.end(); it++)
             {
-                releaseControl(*it->get());
-                m_childs.erase(it);
-                forceUpdate();
-                return true;
+                if (it->get() == &control)
+                {
+                    foundControl = *it;
+                    releaseControl(*it->get());
+                    m_childs.erase(it);
+                    break;
+                }
+                index++;
             }
+        }
+
+        if (foundControl)
+        {
+            onRemoveChild(*foundControl, index);
+            return true;
         }
 
         return false;
     }
     bool ControlContainerList::remove(const std::shared_ptr<Control> & control)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::shared_ptr<Control> foundControl;
+        size_t index = 0;
 
-        for (auto it = m_childs.begin(); it != m_childs.end(); it++)
         {
-            if (*it == control)
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            for (auto it = m_childs.begin(); it != m_childs.end(); it++)
             {
-                releaseControl(*it->get());
-                m_childs.erase(it);
-                forceUpdate();
-                return true;
+                if (*it == control)
+                {
+                    foundControl = *it;
+                    releaseControl(*control);
+                    m_childs.erase(it);
+                    break;
+                }
+                index++;
             }
+        }
+
+        if (foundControl)
+        {
+            onRemoveChild(*foundControl, index);
+            return true;
         }
 
         return false;
@@ -557,40 +826,64 @@ namespace Guise
 
     bool ControlContainerList::remove(const size_t index)
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::shared_ptr<Control> foundControl;
 
-        if (index >= m_childs.size())
         {
-            return false;
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            if (index >= m_childs.size())
+            {
+                return false;
+            }
+
+            foundControl = m_childs.at(index);
+            releaseControl(*foundControl);
+            m_childs.erase(m_childs.begin() + index);
         }
 
-        auto child = m_childs.at(index);
 
-        releaseControl(*child.get());
-        m_childs.erase(m_childs.begin() + index);
-        forceUpdate();
+        onRemoveChild(*foundControl, index);
 
         return true;
     }
 
     size_t ControlContainerList::removeAll()
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
+        std::vector<std::shared_ptr<Control> > oldChilds;
 
-        for (auto & child : m_childs)
         {
-            releaseControl(*child.get());
+            std::lock_guard<std::mutex> lock(m_mutex);
+            oldChilds = m_childs;
+
+            for (auto & child : m_childs)
+            {
+                releaseControl(*child);
+            }
+            m_childs.clear();
         }
 
-        size_t count = m_childs.size();
-        m_childs.clear();
-
-        if (count)
+        size_t index = 0;
+        for (auto & child : oldChilds)
         {
-            forceUpdate();
+            onRemoveChild(*child, index);
+            index++;
         }
+        
+        return oldChilds.size();
+    }
 
-        return count;
+    void ControlContainerList::setCanvas(Canvas * canvas)
+    {
+        ControlContainer::setCanvas(canvas);
+
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+
+            for (auto & child : m_childs)
+            {
+                setControlCanvas(child.get());
+            }
+        }
     }
 
 }

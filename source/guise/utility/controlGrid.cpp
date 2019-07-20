@@ -240,7 +240,7 @@ namespace Guise
                     auto controlNode = it->second;
                     if (controlNode->renderStage == m_renderStage)
                     {
-                        controlNode->control->render(renderer);
+                        controlNode->control->draw(renderer);
                         controlNode->renderStage++;
                     }
                     
@@ -256,12 +256,12 @@ namespace Guise
     {
         for (float x = m_pieceSize; x < std::min(size.x, m_gridSize.x); x += m_pieceSize)
         {
-            renderer.drawLine({ x, 0.0f }, { x, m_gridSize.y }, 1.0f, { 0.0f, 1.0f, 0.0f, 1.0f });
+            renderer.drawLine( { x, 0.0f }, { x, m_gridSize.y }, 1.0f, { 0.0f, 1.0f, 0.0f, 1.0f });
         }
 
         for (float y = m_pieceSize; y < std::min(size.y, m_gridSize.y); y += m_pieceSize)
         {
-            renderer.drawLine({ 0.0f, y }, { m_gridSize.x, y }, 1.0f, { 0.0f, 1.0f, 0.0f, 1.0f });
+            renderer.drawLine( { 0.0f, y }, { m_gridSize.x, y }, 1.0f, { 0.0f, 1.0f, 0.0f, 1.0f });
         }
     }
  

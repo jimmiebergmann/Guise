@@ -34,7 +34,7 @@ namespace Guise
 
     class Texture;
 
-    class GUISE_API Label : public Control, public Style::FontStyle
+    /*class GUISE_API Label : public Control, public Style::FontStyle
     {
 
     public:
@@ -43,8 +43,6 @@ namespace Guise
         static std::shared_ptr<Label> create(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text = L"");
 
         virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual void render(RendererInterface & rendererInterface);
 
         virtual Bounds2f getRenderBounds() const;
 
@@ -68,6 +66,8 @@ namespace Guise
         Label(std::shared_ptr<Canvas> & canvas, const std::string & font, const std::wstring & text);
         Label(const Label &) = delete;
 
+        virtual void render(RendererInterface & rendererInterface);
+
         bool                        m_changed;
         bool                        m_changedText;
         int32_t                     m_dpi;
@@ -79,7 +79,7 @@ namespace Guise
         std::wstring                m_text;
         std::shared_ptr<Texture>    m_texture;
 
-    };
+    };*/
 
 }
 

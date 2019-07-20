@@ -38,43 +38,50 @@ namespace Guise
 
     public:
 
-        static std::shared_ptr<Button> create(std::shared_ptr<Canvas> & canvas);
+        static std::shared_ptr<Button> create();
 
         virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
 
         virtual bool handleInputEvent(const Input::Event & event);
 
-        virtual void render(RendererInterface & rendererInterface);
-
-        virtual Bounds2f getRenderBounds() const;
-
-        virtual Bounds2f getSelectBounds() const;
-
         virtual ControlType getType() const;
 
-        virtual void update();
-
-        Style::ParentPaintRectStyle & getActiveStyle();
-        Style::ParentPaintRectStyle & getDisabledStyle();
-        Style::ParentPaintRectStyle & getHoverStyle();
+        Style::ParentPaintRectStyle & getStyleActive();
+        const Style::ParentPaintRectStyle & getStyleActive() const;
+        Style::ParentPaintRectStyle & getCurrentStyle();
+        const Style::ParentPaintRectStyle & getCurrentStyle() const;
+        Style::ParentPaintRectStyle & getStyleDisabled();
+        const Style::ParentPaintRectStyle & getStyleDisabled() const;
+        Style::ParentPaintRectStyle & getStyleHover();
+        const Style::ParentPaintRectStyle & getStyleHover() const;
 
         Signal<Vector2f> onPress;
         Signal<Vector2f> onRelease;
-        Signal<Vector2f> onHover;       
+        Signal<Vector2f> onHover;     
 
     private:
 
-        Button(std::shared_ptr<Canvas> & canvas);
+        Button();
         Button(const Button &) = delete;
 
-        Bounds2f m_childBounds;
-        Bounds2f m_renderBounds;
+        virtual void onAddChild(Control & control, const size_t index);
+
+        virtual void onCanvasChange(Canvas * canvas);
+
+        virtual void onDisable();
+
+        virtual void onEnable();
+
+        virtual void onRender(RendererInterface & rendererInterface);
+
+        virtual void onResize();
 
         Style::ParentPaintRectStyle *   m_currentStyle;
-        Style::ParentPaintRectStyle     m_activeStyle;
-        Style::ParentPaintRectStyle     m_disabledStyle;
-        Style::ParentPaintRectStyle     m_hoverStyle;    
         bool                            m_pressed;
+        Style::ParentPaintRectStyle     m_styleActive;
+        Style::ParentPaintRectStyle     m_styleDisabled;
+        Style::ParentPaintRectStyle     m_styleHover;
+        
 
     };
 

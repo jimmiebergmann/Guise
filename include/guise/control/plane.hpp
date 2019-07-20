@@ -31,7 +31,7 @@
 namespace Guise
 {
 
-    class GUISE_API Plane : public ControlContainerList, public Style::ParentRectStyle
+    /*class GUISE_API Plane : public ControlContainerList, public Style::ParentRectStyle
     {
 
     public:
@@ -54,7 +54,7 @@ namespace Guise
         Bounds2f m_childsBounds;
         Bounds2f m_renderBounds;  
 
-    };
+    };*/
 
 }
 
