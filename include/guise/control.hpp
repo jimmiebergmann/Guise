@@ -109,10 +109,15 @@ namespace Guise
 
         virtual std::weak_ptr<Control> getParent();
         virtual std::weak_ptr<const Control> getParent() const;
+
         virtual std::shared_ptr<Control> getChild();
         virtual std::shared_ptr<const Control> getChild() const;
         virtual std::vector<std::shared_ptr<Control> > getChilds();
         virtual std::vector<std::shared_ptr<const Control> > getChilds() const;
+        virtual void forEachChild(std::function<bool(std::shared_ptr<Control>, size_t)> callback);
+        virtual void forEachChild(std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const;
+        virtual void forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<Control>, size_t)> callback);
+        virtual void forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const;
 
         virtual bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
         virtual bool remove(Control & control);
@@ -210,9 +215,13 @@ namespace Guise
         std::shared_ptr<const Control> getChild() const;
         std::vector<std::shared_ptr<Control> > getChilds();
         std::vector<std::shared_ptr<const Control> > getChilds() const;
+        void forEachChild(std::function<bool(std::shared_ptr<Control>, size_t)> callback);
+        void forEachChild(std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const;
+        void forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<Control>, size_t)> callback);
+        void forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const;
 
-        virtual void enable();
-        virtual void disable();
+        void enable();
+        void disable();
 
         bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
         bool remove(Control & control);
@@ -242,9 +251,13 @@ namespace Guise
         std::shared_ptr<const Control> getChild() const;
         std::vector<std::shared_ptr<Control> > getChilds();
         std::vector<std::shared_ptr<const Control> > getChilds() const;
+        void forEachChild(std::function<bool(std::shared_ptr<Control>, size_t)> callback);
+        void forEachChild(std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const;
+        void forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<Control>, size_t)> callback);
+        void forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const;
 
-        virtual void enable();
-        virtual void disable();
+        void enable();
+        void disable();
 
         bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
         bool remove(Control & control);

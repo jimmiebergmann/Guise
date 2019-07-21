@@ -24,24 +24,7 @@ int main()
     appWindow1->show();
     auto canvas1 = appWindow1->getCanvas();
     
-    auto button = Button::create();
-    
-   /* canvas1->add(button);
-    button->setSize({ 40.0f, 200.0f });*/
-
-   /* auto button4 = Button::create(canvas1);
-    auto button5 = Button::create(canvas1);
-    auto button6 = Button::create(canvas1);
-    auto button7 = Button::create(canvas1);
-    auto button8 = Button::create(canvas1);
-    button4->add(button5);
-    button5->add(button6);
-    button6->add(button7);
-    button7->add(button8);
-    button8->enableInput();
-    canvas1->add(button4);
-
-    button6->disable();*/
+  
 
     auto vertGrid1 = VerticalGrid::create();
     canvas1->add(vertGrid1);
@@ -67,7 +50,7 @@ int main()
     
     auto button3 = Button::create();
     button3->setSize({ 200.0f, 40.0f });
-    button3->getStyleHover().setSize({ 200.0f, 45.0f });
+    //button3->getStyleHover().setSize({ 200.0f, 45.0f });
     button3->getStyleActive().setBorderWidth(5.0f);
     button3->onRelease = []() { std::cout << "Released button 3!" << std::endl; };
     vertGrid1->add(button3);
@@ -85,15 +68,19 @@ int main()
     checkbox2->getCheckedStyle().setSize({30.0f, 30.0f});
     horiGrid1->add(checkbox1);
     horiGrid1->add(checkbox2);
+    horiGrid1->add(Checkbox::create());
+    horiGrid1->add(Checkbox::create());
+    horiGrid1->add(Checkbox::create());
+    horiGrid1->add(Checkbox::create());
+    horiGrid1->add(Checkbox::create());
+    horiGrid1->add(Checkbox::create());
+    horiGrid1->add(Checkbox::create());
+    horiGrid1->add(Checkbox::create());
 
     auto button4 = Button::create();
     button4->setSize({ 200.0f, 40.0f });
     vertGrid1->add(button4);
 
-
-
-    //auto textbox1 = TextBox::create(canvas1);
-    //vertGrid1->add(textbox1);
 
     // Signal dependency tests.
     button1->onHover = { { button2 }, [&button2]()
@@ -141,61 +128,42 @@ int main()
         }
         
     } };
-
+    
    
     
- 
 
-
-    //auto textbox2 = TextBox::create(canvas1);
-    //vertGrid1->add(textbox2);
-
-    /*button1->onPressed = []()
-    {
-        std::cout << "Lamda: Pressed button." << std::endl;
-    };
-
-    button1->onReleased = []()
-    {
-        std::cout << "Lamda: Release button." << std::endl;
-    };
-
-    button1->onHover = []()
-    {
-        std::cout << "Lamda: hover button." << std::endl;
-    };*/
 
 
 
 
 /*
-    auto button1 = Button::create(canvas1);
+    auto button1 = Button::create();
     button1->setSize({ 200.0f, 60.0f });
 
-    auto button2 = Button::create(canvas1);
+    auto button2 = Button::create();
     button2->setSize({ 300.0f, 80.0f });
-    auto inButton = Button::create(canvas1);
+    auto inButton = Button::create();
  
     button2->add(inButton);
     auto newPadding = button2->getPadding();
     newPadding.x = 100.0f;
     button2->setPadding(newPadding);
     //inButton->enableInput();
-    inButton->add(Label::create(canvas1, "arial",   L"The quick brown fox jumps over the lazy dog."));
-    auto button3 = Button::create(canvas1);
+    inButton->add(Label::create("arial",   L"The quick brown fox jumps over the lazy dog."));
+    auto button3 = Button::create();
     button3->setSize({ 200.0f, 40.0f });
     button3->setBorderWidth(1.0f);
 
-    auto verticalGrid1 = VerticalGrid::create(canvas1);
+    auto verticalGrid1 = VerticalGrid::create();
     verticalGrid1->getSlotStyle().setSize({ 0.0f, 0.0f });
 
-    auto label1 = Label::create(canvas1,  "arial",  std::wstring(1, wchar_t(0x0ED4)) );
+    auto label1 = Label::create( "arial",  std::wstring(1, wchar_t(0x0ED4)) );
     //auto label2 = Label::create(canvas1, L"Hello world");
 
     //verticalGrid1->add(button1);
     verticalGrid1->add(button2);
     //verticalGrid1->add(button3);
-    verticalGrid1->add(Label::create(canvas1, "arial", L"Jimmie o'boy"));
+    verticalGrid1->add(Label::create("arial", L"Jimmie o'boy"));
     button1->add(label1);
     //verticalGrid1->add(label2);
 
@@ -204,15 +172,15 @@ int main()
     std::shared_ptr<const Control> a = inButton;
     auto childs = a->getChilds();
 
-    button2->onPressed = [](Vector2f val)
+    button2->onPress = [](Vector2f val)
     {
         std::cout << "Button 2 is pressed! :" << val.x << " " << val.y << std::endl;
-    };*/
+    };
     
 
-   /* auto appWindow2 = context->addAppWindow(false, L"Example 2", { 400, 400 });
+    auto appWindow2 = context->addAppWindow(L"Example 2", { 400, 400 });
     auto canvas2 = appWindow2->getCanvas();
-    canvas2->add(Button::create(canvas2));
+    canvas2->add(Button::create());
     */
     /*for (int i = 0; i < 100; i++)
     {
@@ -229,6 +197,7 @@ int main()
             label1->setText(L"World");
         }
     }*/
+   
 
     // Wait for application window to close.
     Semaphore closeSemaphore;

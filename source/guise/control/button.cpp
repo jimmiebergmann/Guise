@@ -177,20 +177,22 @@ namespace Guise
     {
         rendererInterface.drawRect(getBounds(), getCurrentStyle());
 
-        if (auto child = getChild())
+        forEachChild([&](std::shared_ptr<Control> child, size_t)
         {
             child->draw(rendererInterface);
-        }
+            return true;
+        });
     }
 
     void Button::onResize()
     {
         setBounds(calcStyledBounds(getCurrentStyle(), getBounds(), getScale()));
 
-        if (auto child = getChild())
+        forEachChild([&](std::shared_ptr<Control> child, size_t)
         {
             child->setBounds(getBounds().cutEdges(scale(getCurrentStyle().getPadding())));
-        }
+            return true;
+        });
     }
 
 }

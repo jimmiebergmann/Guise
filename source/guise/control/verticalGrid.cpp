@@ -83,13 +83,11 @@ namespace Guise
 
     void VerticalGrid::onRender(RendererInterface & rendererInterface)
     {
-        //rendererInterface.drawQuad(getBounds(), Vector4f(0.0f, 1.0f, 0.0f, 0.4f));
-
-        auto childs = getChilds();
-        for (auto it = childs.begin(); it != childs.begin() + m_childRenderCount; it++)
+        forEachChild(0, m_childRenderCount, [&](std::shared_ptr<Control> child, size_t)
         {
-            (*it)->draw(rendererInterface);
-        }
+            child->draw(rendererInterface);
+            return true;
+        });
     }
 
     void VerticalGrid::onResize()
@@ -106,10 +104,9 @@ namespace Guise
         float maxWidth = 0.0f;
 
         m_childRenderCount = 0;
-        auto childs = getChilds();
-        for (auto it = childs.begin(); it != childs.end(); it++)
+
+        forEachChild([&](std::shared_ptr<Control> child, size_t)
         {
-            auto child = *it;
             auto cutBoundsLeft = Bounds2f(boundsLeft).cutEdges(slotPadding);
             child->setBounds(cutBoundsLeft);
 
@@ -124,9 +121,11 @@ namespace Guise
             m_childRenderCount++;
             if (!boundsLeft.size.x)
             {
-                break;
+                return false;
             }
-        }
+
+            return true;
+        });
 
         maxWidth += padding.x + padding.z + slotPadding.x + slotPadding.z;
         maxWidth = std::min(maxWidth, getBounds().size.x);

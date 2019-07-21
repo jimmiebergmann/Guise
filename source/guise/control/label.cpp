@@ -63,6 +63,7 @@ namespace Guise
         if (text != m_text)
         {
             m_text = text;
+            m_changedText = true;
             onChange(m_text);
             update();
         }
@@ -106,7 +107,7 @@ namespace Guise
         updateEmptyProperties(canvas->getStyleSheet()->getSelector("label"));
         m_font = FontLibrary::get(getFontFamily());
 
-        onUpdate();
+        update();
     }
 
     void Label::onRender(RendererInterface & rendererInterface)

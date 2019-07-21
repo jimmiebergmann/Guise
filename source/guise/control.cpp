@@ -186,6 +186,19 @@ namespace Guise
     {
         return {};
     }
+    void Control::forEachChild(std::function<bool(std::shared_ptr<Control>, size_t)> )
+    {
+    }
+    void Control::forEachChild(std::function<bool(std::shared_ptr<const Control>, size_t)> ) const
+    {
+    }
+    void Control::forEachChild(size_t , size_t , std::function<bool(std::shared_ptr<Control>, size_t)> )
+    {
+    }
+    void Control::forEachChild(size_t , size_t , std::function<bool(std::shared_ptr<const Control>, size_t)> ) const
+    {
+    }
+    
 
     bool Control::add(const std::shared_ptr<Control> &, const size_t)
     {
@@ -498,6 +511,58 @@ namespace Guise
         return { m_child };
     }
 
+    void ControlContainerSingle::forEachChild(std::function<bool(std::shared_ptr<Control>, size_t)> callback)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_child)
+        {
+            return;
+        }
+
+        callback(m_child, 0);
+    }
+    void ControlContainerSingle::forEachChild(std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_child)
+        {
+            return;
+        }
+
+        callback(m_child, 0);
+    }
+
+    void ControlContainerSingle::forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<Control>, size_t)> callback)
+    {
+        if (position != 0 || count != 1)
+        {
+            return;
+        }
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_child)
+        {
+            return;
+        }
+
+        callback(m_child, 0);
+    }
+    void ControlContainerSingle::forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const
+    {
+        if (position != 0 || count != 1)
+        {
+            return;
+        }
+
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_child)
+        {
+            return;
+        }
+
+        callback(m_child, 0);
+    }
+
     void ControlContainerSingle::enable()
     {
         if (!isEnabled())
@@ -707,6 +772,81 @@ namespace Guise
         std::lock_guard<std::mutex> lock(m_mutex);
         return { m_childs.begin(), m_childs.end() };
     }
+
+    void ControlContainerList::forEachChild(std::function<bool(std::shared_ptr<Control>, size_t)> callback)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        size_t index = 0;
+        for (auto & child : m_childs)
+        {
+            if (!callback(child, index))
+            {
+                break;
+            }
+            index++;
+        }
+    }
+    void ControlContainerList::forEachChild(std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        size_t index = 0;
+        for (auto & child : m_childs)
+        {
+            if (!callback(child, index))
+            {
+                break;
+            }
+            index++;
+        }
+    }
+
+    void ControlContainerList::forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<Control>, size_t)> callback)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if (count == 0 || position >= m_childs.size())
+        {
+            return;
+        }
+
+        auto start = m_childs.begin() + position;
+        auto end = m_childs.begin() + std::min(position + (count), m_childs.size());
+
+        size_t index = 0;
+        for (auto it = start; it != end; it++)
+        {
+            if (!callback(*it, index))
+            {
+                break;
+            }
+            index++;
+        }
+    }
+
+    void ControlContainerList::forEachChild(size_t position, size_t count, std::function<bool(std::shared_ptr<const Control>, size_t)> callback) const
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+
+        if (count == 0 || position >= m_childs.size())
+        {
+            return;
+        }
+
+        auto start = m_childs.begin() + position;
+        auto end = m_childs.begin() + std::min(position + (count), m_childs.size());
+
+        size_t index = 0;
+        for (auto it = start; it != end; it++)
+        {
+            if (!callback(*it, index))
+            {
+                break;
+            }
+            index++;
+        }
+    }
+
+    
 
     void ControlContainerList::enable()
     {
