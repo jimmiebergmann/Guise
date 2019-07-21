@@ -41,6 +41,7 @@ int main()
         //"/usr/share/fonts/truetype/freefont/freesans.ttf"¨
         //"arial", L"The quick brown fox jumps over the lazy dog."));
     button1->add(button1_1);
+    button1->add(button1_1);
     //button1_1->enableInput();
 
     auto button2 = Button::create();
@@ -67,7 +68,7 @@ int main()
     auto checkbox2 = Checkbox::create();
     checkbox2->getCheckedStyle().setSize({30.0f, 30.0f});
     horiGrid1->add(checkbox1);
-    horiGrid1->add(checkbox2);
+    horiGrid1->add(checkbox1);
     horiGrid1->add(Checkbox::create());
     horiGrid1->add(Checkbox::create());
     horiGrid1->add(Checkbox::create());

@@ -599,6 +599,13 @@ namespace Guise
         {
             return false;
         }
+        if (auto parent = control->getParent().lock())
+        {
+            if (parent.get() == this)
+            {
+                return true;
+            }
+        }
 
         removeAll();
 
@@ -880,15 +887,22 @@ namespace Guise
 
     bool ControlContainerList::add(const std::shared_ptr<Control> & control, const size_t index)
     {
+        if (!control)
+        {
+            return false;
+        }
+        if (auto parent = control->getParent().lock())
+        {
+            if (parent.get() == this)
+            {
+                return true;
+            }
+        }
+
         size_t newIndex = index;
 
         {
-            std::lock_guard<std::mutex> lock(m_mutex);
-
-            if (!control)
-            {
-                return false;
-            }
+            std::lock_guard<std::mutex> lock(m_mutex);          
 
             adoptControl(*control.get());
             if (index >= m_childs.size())
