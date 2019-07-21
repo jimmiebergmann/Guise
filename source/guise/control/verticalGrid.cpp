@@ -119,7 +119,7 @@ namespace Guise
             maxWidth = std::max(maxWidth, childBounds.size.x);
 
             m_childRenderCount++;
-            if (!boundsLeft.size.x)
+            if (boundsLeft.size.y <= 0.0f)
             {
                 return false;
             }

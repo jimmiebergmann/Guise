@@ -350,9 +350,15 @@ namespace Guise
     {
         return Vector4f::ceil(vector * getScale());
     }
+
     Vector2f Control::scale(const Vector2f & vector) const
     {
         return Vector2f::ceil(vector * getScale());
+    }
+
+    float Control::scale(const float scalar) const
+    {
+        return std::ceil(scalar * getScale());
     }
 
     void Control::update()

@@ -87,7 +87,6 @@ namespace Guise
         m_font(FontLibrary::get(font)),
         m_fontSequence(m_font),
         m_text(text),
-        m_texture(nullptr),
         m_textureSize(0, 0)
     {
     }

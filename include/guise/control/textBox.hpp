@@ -36,37 +36,44 @@
 namespace Guise
 {
 
-    /*class GUISE_API TextBox : public Control, public Style::ParentPaintRectStyle
+    class GUISE_API TextBox : public Control, public MultiStyleControl<Style::ParentPaintRectStyle>
     {
 
     public:
 
-        static std::shared_ptr<TextBox> create(std::shared_ptr<Canvas> & canvas);
+        static std::shared_ptr<TextBox> create();
+        
+        const std::wstring & getText() const;
 
-        virtual bool handleInputEvent(const Input::Event & event);
-
-        virtual Bounds2f getRenderBounds() const;
-
-        virtual Bounds2f getSelectBounds() const;
+        Style::FontStyle & getTextStyle();
+        const Style::FontStyle & getTextStyle() const;
 
         virtual ControlType getType() const;
 
-        virtual void update();
+        virtual bool handleInputEvent(const Input::Event & event);
 
         Signal<const std::wstring &> onChange;
-
-        Style::FontStyle & getTextStyle();
-
-        const std::wstring & getText() const;
 
         void setText(const std::wstring & text);
 
     private:
 
-        TextBox(std::shared_ptr<Canvas> & canvas);
+        TextBox();
         TextBox(const TextBox &) = delete;
 
-        virtual void render(RendererInterface & rendererInterface);
+        virtual void onCanvasChange(Canvas * canvas);
+
+        virtual void onDisable();
+
+        virtual void onEnable();
+
+        virtual void onRender(RendererInterface & rendererInterface);
+
+        virtual void onResize();
+
+        virtual void onUpdate();
+
+        void calcTextBounds();
 
         void onActiveChange(bool active);
 
@@ -80,23 +87,23 @@ namespace Guise
         bool intersectTextInterpolated(const float point, size_t & index);
 
         bool                                    m_active;
-        bool                                    m_changed;
         bool                                    m_changedText;
         std::chrono::system_clock::time_point   m_cursorBlinkTimer;
         size_t                                  m_cursorIndex;
         size_t                                  m_cursorSelectIndex;
-        bool                                    m_mousePressed;
-        int32_t                                 m_dpi;
+        uint32_t                                m_dpi;
         std::shared_ptr<Font>                   m_font;
         FontSequence                            m_fontSequence;
-        Bounds2f                                m_renderBounds;
+        std::unique_ptr<uint8_t[]>              m_loadData;
+        bool                                    m_mousePressed;
         Bounds2f                                m_textBounds;
         std::wstring                            m_text;
-        std::shared_ptr<Texture>                m_textTexture; 
+        std::shared_ptr<Texture>                m_texture; 
+        Vector2<size_t>                         m_textureSize;
 
         Style::FontStyle                        m_textStyle;
 
-    };*/
+    };
 
 }
 

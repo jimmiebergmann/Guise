@@ -32,293 +32,23 @@ namespace Guise
 {
 
     // Text box implementations.
-    /*std::shared_ptr<TextBox> TextBox::create(std::shared_ptr<Canvas> & canvas)
+    std::shared_ptr<TextBox> TextBox::create()
     {
-        return std::shared_ptr<TextBox>(new TextBox(canvas));
+        return std::shared_ptr<TextBox>(new TextBox());
     }
 
-    bool TextBox::handleInputEvent(const Input::Event & e)
+    const std::wstring & TextBox::getText() const
     {
-        const Input & input = m_canvas.getInput();
-        const bool isShiftPressed = input.getKeyState(Input::Key::ShiftLeft) || input.getKeyState(Input::Key::ShiftRight);
-        const bool isControlPressed = input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight);
-        const bool isSelected = m_cursorIndex != m_cursorSelectIndex;
-
-        switch (e.type)
-        {
-            case Input::EventType::MouseJustPressed:
-            {
-                if (e.button != 0)
-                {
-                    break;
-                }
-
-                size_t index = 0;
-                if (intersectTextInterpolated(e.position.x, index))
-                {                  
-                    if (!isShiftPressed)
-                    {
-                        m_cursorIndex = index;
-                    }
-                     
-                    m_cursorSelectIndex = index;                    
-                    m_cursorBlinkTimer = std::chrono::system_clock::now();
-                }
-                else
-                {
-                    m_cursorIndex = 0;
-                    m_cursorSelectIndex = 0;
-                }
-
-                m_mousePressed = true;
-            }
-            break;
-            case Input::EventType::MouseRelease:
-            {
-                if (e.button != 0)
-                {
-                    break;
-                }
-
-                m_mousePressed = false;
-            }
-            break;
-            case Input::EventType::MouseMove:
-            {
-                if (m_mousePressed)
-                {
-                    size_t index = 0;
-                    if (intersectTextInterpolated(e.position.x, index))
-                    {
-                        //if (!shiftPressed)
-                        //{
-                        //    m_cursorIndex = index;
-                        //}
-                
-                        m_cursorSelectIndex = index;
-                        m_cursorBlinkTimer = std::chrono::system_clock::now();
-                    }
-                    else
-                    {
-                        m_cursorIndex = 0;
-                        m_cursorSelectIndex = 0;
-                    }
-                }
-            }
-            break;
-            case Input::EventType::Texting:
-            {
-                if(e.character > 0x1F && e.character != 0x7F)
-                {
-                    eraseSelected();
-
-                    m_text.insert(m_text.begin() + m_cursorIndex, e.character);
-                    m_cursorIndex++;
-                    m_cursorSelectIndex = m_cursorIndex;
-
-                    m_changedText = true;
-                    onChange(m_text);
-                    m_cursorBlinkTimer = std::chrono::system_clock::now();
-                }
-            }
-            break;
-            case Input::EventType::KeyboardJustPressed:
-            {
-                switch (e.key)
-                {
-                    case Input::Key::Home:
-                    {
-                        m_cursorIndex = 0;
-                        if (!isShiftPressed)
-                        {
-                            m_cursorSelectIndex = m_cursorIndex;
-                        }
-
-                        m_cursorBlinkTimer = std::chrono::system_clock::now();
-  
-                    }
-                    break;
-                    case Input::Key::End:
-                    {
-                        m_cursorIndex = m_fontSequence.getCount();
-                        if (!isShiftPressed)
-                        {
-                            m_cursorSelectIndex = m_cursorIndex;
-                        }
-
-                        m_cursorBlinkTimer = std::chrono::system_clock::now();
-                    }
-                    break;
-                    default: break;
-                }
-            }
-            break;
-            case Input::EventType::KeyboardPress:
-            {
-                switch (e.key)
-                {
-                    case Input::Key::Backspace:
-                    {
-                        if (eraseSelected())
-                        {
-                            m_changedText = true;
-                            m_cursorBlinkTimer = std::chrono::system_clock::now();
-                        }
-                        else if (m_cursorIndex && m_text.size())
-                        {
-                            m_text.erase(m_text.begin() + (m_cursorIndex - 1));
-                            m_cursorIndex--;
-                            m_cursorSelectIndex = m_cursorIndex;
-
-                            m_changedText = true;
-                            onChange(m_text);
-                            m_cursorBlinkTimer = std::chrono::system_clock::now();
-                        }
-                    }
-                    break;
-                    case Input::Key::Delete:
-                    {
-                        if (eraseSelected())
-                        {
-                            m_changedText = true;
-                            m_cursorBlinkTimer = std::chrono::system_clock::now();
-                        }
-                        else if (m_text.size() && m_cursorIndex < m_text.size())
-                        {
-                            m_text.erase(m_text.begin() + m_cursorIndex);
-
-                            m_changedText = true;
-                            onChange(m_text);
-                            m_cursorBlinkTimer = std::chrono::system_clock::now();
-                        }
-                    }
-                    break;
-                    case Input::Key::X:
-                    {
-                        if (isControlPressed)
-                        {
-                            auto cutText = getSelected();
-                            if (cutText.size() && Platform::setClipboardText(cutText))
-                            {
-                                eraseSelected();
-                                m_changedText = true;
-                                onChange(m_text);
-                                m_cursorBlinkTimer = std::chrono::system_clock::now();
-                            }
-                        }                 
-                    }
-                    break;
-                    case Input::Key::C:
-                    {
-                        if (isControlPressed)
-                        {
-                            auto copyText = getSelected();
-                            if (copyText.size())
-                            {
-                                Platform::setClipboardText(copyText);
-                            }
-                        }  
-                    }
-                    break;
-                    case Input::Key::V:
-                    {
-                        if (isControlPressed)
-                        {
-                            eraseSelected();
-
-                            auto clipboard = Platform::getClipboardText();
-                            if (clipboard.size())
-                            {
-                                m_text.insert(m_text.begin() + m_cursorIndex, clipboard.begin(), clipboard.end());
-                                m_cursorIndex += clipboard.size();
-                                m_cursorSelectIndex = m_cursorIndex;
-                                m_changedText = true;
-                                onChange(m_text);
-                                m_cursorBlinkTimer = std::chrono::system_clock::now();
-                            }
-                        }
-
-                        m_cursorBlinkTimer = std::chrono::system_clock::now();
-                    }
-                    break;
-                    case Input::Key::A:
-                    {
-                        if (isControlPressed)
-                        {
-                            m_cursorIndex = 0;
-                            m_cursorSelectIndex = m_fontSequence.getCount() ? m_fontSequence.getCount() : 0;
-                        }
-                    }
-                    break;
-                    case Input::Key::Left:
-                    {
-                        if (m_cursorIndex > 0)
-                        {
-                            if (isShiftPressed)
-                            {
-                                m_cursorIndex--;
-                            }
-                            else
-                            {
-                                if (isSelected)
-                                {
-                                    m_cursorIndex = std::min(m_cursorIndex, m_cursorSelectIndex);
-                                }
-                                else
-                                {
-                                    m_cursorIndex--;
-                                }
-                                m_cursorSelectIndex = m_cursorIndex;
-                            }
-
-                            m_cursorBlinkTimer = std::chrono::system_clock::now();
-                        }
-                    }
-                    break;
-                    case Input::Key::Right:
-                    {
-                        if (m_cursorIndex < m_fontSequence.getCount())
-                        {
-                            if (isShiftPressed)
-                            {
-                                m_cursorIndex++;
-                            }
-                            else
-                            {
-                                if (isSelected)
-                                {
-                                    m_cursorIndex = std::max(m_cursorIndex, m_cursorSelectIndex);
-                                }
-                                else
-                                {
-                                    m_cursorIndex++;
-                                }
-
-                                m_cursorSelectIndex = m_cursorIndex;
-                            }
-
-                            m_cursorBlinkTimer = std::chrono::system_clock::now();
-                        }
-                    }
-                    break;
-                    default: break;
-                }
-            }
-            break;
-            default: break;
-        }
-
-        return true;
+        return m_text;
     }
 
-    Bounds2f TextBox::getRenderBounds() const
+    Style::FontStyle & TextBox::getTextStyle()
     {
-        return m_renderBounds;
+        return m_textStyle;
     }
-
-    Bounds2f TextBox::getSelectBounds() const
+    const Style::FontStyle & TextBox::getTextStyle() const
     {
-        return m_renderBounds;
+        return m_textStyle;
     }
 
     ControlType TextBox::getType() const
@@ -326,25 +56,282 @@ namespace Guise
         return ControlType::TextBox;
     }
 
-    void TextBox::update()
+    bool TextBox::handleInputEvent(const Input::Event & e)
     {
-        m_canvas.reportControlChange(this);
-        auto renderBounds = calcRenderBounds(*this);
-        if (renderBounds != m_renderBounds)
+        const Input & input = getCanvas()->getInput(); // FIX!
+        const bool isShiftPressed = input.getKeyState(Input::Key::ShiftLeft) || input.getKeyState(Input::Key::ShiftRight);
+        const bool isControlPressed = input.getKeyState(Input::Key::ControlLeft) || input.getKeyState(Input::Key::ControlRight);
+        const bool isSelected = m_cursorIndex != m_cursorSelectIndex;
+
+        switch (e.type)
         {
-            m_renderBounds = renderBounds;
-            m_changed = true;
+        case Input::EventType::MouseJustPressed:
+        {
+            if (e.button != 0)
+            {
+                break;
+            }
+
+            size_t index = 0;
+            if (intersectTextInterpolated(e.position.x, index))
+            {
+                if (!isShiftPressed)
+                {
+                    m_cursorIndex = index;
+                }
+
+                m_cursorSelectIndex = index;
+                m_cursorBlinkTimer = std::chrono::system_clock::now();
+            }
+            else
+            {
+                m_cursorIndex = 0;
+                m_cursorSelectIndex = 0;
+            }
+
+            m_mousePressed = true;
         }
-    }
+        break;
+        case Input::EventType::MouseRelease:
+        {
+            if (e.button != 0)
+            {
+                break;
+            }
 
-    Style::FontStyle & TextBox::getTextStyle()
-    {
-        return m_textStyle;
-    }
+            m_mousePressed = false;
+        }
+        break;
+        case Input::EventType::MouseMove:
+        {
+            if (m_mousePressed)
+            {
+                size_t index = 0;
+                if (intersectTextInterpolated(e.position.x, index))
+                {
+                    m_cursorSelectIndex = index;
+                    m_cursorBlinkTimer = std::chrono::system_clock::now();
+                }
+                else
+                {
+                    m_cursorIndex = 0;
+                    m_cursorSelectIndex = 0;
+                }
+            }
+        }
+        break;
+        case Input::EventType::Texting:
+        {
+            if (e.character > 0x1F && e.character != 0x7F)
+            {
+                eraseSelected();
 
-    const std::wstring & TextBox::getText() const
-    {
-        return m_text;
+                m_text.insert(m_text.begin() + m_cursorIndex, e.character);
+                m_cursorIndex++;
+                m_cursorSelectIndex = m_cursorIndex;
+
+                m_changedText = true;
+                onChange(m_text);
+                update();
+                m_cursorBlinkTimer = std::chrono::system_clock::now();
+            }
+        }
+        break;
+        case Input::EventType::KeyboardJustPressed:
+        {
+            switch (e.key)
+            {
+            case Input::Key::Home:
+            {
+                m_cursorIndex = 0;
+                if (!isShiftPressed)
+                {
+                    m_cursorSelectIndex = m_cursorIndex;
+                }
+
+                m_cursorBlinkTimer = std::chrono::system_clock::now();
+
+            }
+            break;
+            case Input::Key::End:
+            {
+                m_cursorIndex = m_fontSequence.getCount();
+                if (!isShiftPressed)
+                {
+                    m_cursorSelectIndex = m_cursorIndex;
+                }
+
+                m_cursorBlinkTimer = std::chrono::system_clock::now();
+            }
+            break;
+            default: break;
+            }
+        }
+        break;
+        case Input::EventType::KeyboardPress:
+        {
+            switch (e.key)
+            {
+            case Input::Key::Backspace:
+            {
+                if (eraseSelected())
+                {
+                    m_changedText = true;
+                    onChange(m_text);
+                    update();
+                    m_cursorBlinkTimer = std::chrono::system_clock::now();
+                }
+                else if (m_cursorIndex && m_text.size())
+                {
+                    m_text.erase(m_text.begin() + (m_cursorIndex - 1));
+                    m_cursorIndex--;
+                    m_cursorSelectIndex = m_cursorIndex;
+
+                    m_changedText = true;
+                    onChange(m_text);
+                    update();
+                    m_cursorBlinkTimer = std::chrono::system_clock::now();
+                }
+            }
+            break;
+            case Input::Key::Delete:
+            {
+                if (eraseSelected())
+                {
+                    m_changedText = true;
+                    onChange(m_text);
+                    update();
+                    m_cursorBlinkTimer = std::chrono::system_clock::now();
+                }
+                else if (m_text.size() && m_cursorIndex < m_text.size())
+                {
+                    m_text.erase(m_text.begin() + m_cursorIndex);
+
+                    m_changedText = true;
+                    onChange(m_text);
+                    update();
+                    m_cursorBlinkTimer = std::chrono::system_clock::now();
+                }
+            }
+            break;
+            case Input::Key::X:
+            {
+                if (isControlPressed)
+                {
+                    auto cutText = getSelected();
+                    if (cutText.size() && Platform::setClipboardText(cutText))
+                    {
+                        eraseSelected();
+                        m_changedText = true;
+                        onChange(m_text);
+                        update();
+                        m_cursorBlinkTimer = std::chrono::system_clock::now();
+                    }
+                }
+            }
+            break;
+            case Input::Key::C:
+            {
+                if (isControlPressed)
+                {
+                    auto copyText = getSelected();
+                    if (copyText.size())
+                    {
+                        Platform::setClipboardText(copyText);
+                    }
+                }
+            }
+            break;
+            case Input::Key::V:
+            {
+                if (isControlPressed)
+                {
+                    eraseSelected();
+
+                    auto clipboard = Platform::getClipboardText();
+                    if (clipboard.size())
+                    {
+                        m_text.insert(m_text.begin() + m_cursorIndex, clipboard.begin(), clipboard.end());
+                        m_cursorIndex += clipboard.size();
+                        m_cursorSelectIndex = m_cursorIndex;
+                        m_changedText = true;
+                        onChange(m_text);
+                        update();
+                        m_cursorBlinkTimer = std::chrono::system_clock::now();
+                    }
+                }
+
+                m_cursorBlinkTimer = std::chrono::system_clock::now();
+            }
+            break;
+            case Input::Key::A:
+            {
+                if (isControlPressed)
+                {
+                    m_cursorIndex = 0;
+                    m_cursorSelectIndex = m_fontSequence.getCount() ? m_fontSequence.getCount() : 0;
+                }
+            }
+            break;
+            case Input::Key::Left:
+            {
+                if (m_cursorIndex > 0)
+                {
+                    if (isShiftPressed)
+                    {
+                        m_cursorIndex--;
+                    }
+                    else
+                    {
+                        if (isSelected)
+                        {
+                            m_cursorIndex = std::min(m_cursorIndex, m_cursorSelectIndex);
+                        }
+                        else
+                        {
+                            m_cursorIndex--;
+                        }
+                        m_cursorSelectIndex = m_cursorIndex;
+                    }
+
+                    m_cursorBlinkTimer = std::chrono::system_clock::now();
+                }
+            }
+            break;
+            case Input::Key::Right:
+            {
+                if (m_cursorIndex < m_fontSequence.getCount())
+                {
+                    if (isShiftPressed)
+                    {
+                        m_cursorIndex++;
+                    }
+                    else
+                    {
+                        if (isSelected)
+                        {
+                            m_cursorIndex = std::max(m_cursorIndex, m_cursorSelectIndex);
+                        }
+                        else
+                        {
+                            m_cursorIndex++;
+                        }
+
+                        m_cursorSelectIndex = m_cursorIndex;
+                    }
+
+                    m_cursorBlinkTimer = std::chrono::system_clock::now();
+                }
+            }
+            break;
+            default: break;
+            }
+        }
+        break;
+        default: break;
+        }
+
+        return true;
     }
 
     void TextBox::setText(const std::wstring & text)
@@ -359,34 +346,20 @@ namespace Guise
         }
     }
 
-    TextBox::TextBox(std::shared_ptr<Canvas> & canvas) :       
-        Control(*canvas),
-        Style::ParentPaintRectStyle(canvas->getStyleSheet()->getSelector("text-box")),
+    TextBox::TextBox() :       
+        MultiStyleControl<Style::ParentPaintRectStyle>(this),
         m_active(false),
-        m_changed(true),
         m_changedText(false),
         m_cursorIndex(0),
         m_cursorSelectIndex(0),
-        m_dpi(canvas->getDpi()),
-        m_renderBounds(0.0f, 0.0f, 0.0f, 0.0f),
-        m_textBounds(0.0f, 0.0f, 0.0f, 0.0f)
+        m_dpi(0),
+        m_mousePressed(false),
+        m_textBounds(0.0f, 0.0f, 0.0f, 0.0f),
+        m_textureSize(0, 0)
     {
-        if (auto textStyle = canvas->getStyleSheet()->getSelector("text-box-text"))
-        {
-            m_textStyle = { textStyle };
-            m_font = FontLibrary::get(m_textStyle.getFontFamily());
-            m_fontSequence = FontSequence(m_font);
-        }
-
-        m_canvas.onDpiChange.connectAnonymously([this](uint32_t dpi)
-        {
-            m_dpi = dpi;
-            m_changedText = true;
-            forceUpdate();
-        });
     }
 
-    void TextBox::render(RendererInterface & renderer)
+    /*void TextBox::render(RendererInterface & renderer)
     {
         const float scale = m_canvas.getScale();
 
@@ -488,8 +461,130 @@ namespace Guise
                 renderer.drawQuad(cursorBounds, m_textStyle.getFontColor());
             }
         }
+    }*/
+
+
+
+    void TextBox::onCanvasChange(Canvas * canvas)
+    {
+        m_dpi = canvas->getDpi();
+
+        // We need to get rid of old connection...
+        canvas->onDpiChange.connectAnonymously([this](uint32_t dpi)
+        {
+            m_dpi = dpi;
+            m_changedText = true;
+            update();
+        });
+
+        updateEmptyProperties(canvas->getStyleSheet()->getSelector("text-box"));
+        m_textStyle.updateEmptyProperties(canvas->getStyleSheet()->getSelector("text-box-text"));
+        m_font = FontLibrary::get(m_textStyle.getFontFamily());
+        m_fontSequence = FontSequence(m_font);
     }
 
+    void TextBox::onDisable()
+    {}
+
+    void TextBox::onEnable()
+    {}
+
+    void TextBox::onRender(RendererInterface & rendererInterface)
+    {
+        if (m_changedText)
+        {
+            m_changedText = false;
+
+            if (m_loadData)
+            {
+                if (!m_texture)
+                {
+                    m_texture = rendererInterface.createTexture();
+                }
+
+                m_texture->load(m_loadData.get(), Texture::PixelFormat::RGBA8, m_textureSize);
+                m_loadData.reset();
+            }
+        }
+
+        // Render background.
+        rendererInterface.drawRect(getBounds(), getCurrentStyle());
+
+        rendererInterface.pushMask(getBounds().cutEdges(scale(getPadding())));
+
+        // Render text.
+        if (m_texture)
+        {          
+            rendererInterface.drawQuad(m_textBounds, m_texture, m_textStyle.getFontColor());
+        }
+
+        if (m_active)
+        {
+            // Render cursor.
+            std::chrono::duration<double> duration = std::chrono::system_clock::now() - m_cursorBlinkTimer;            
+            if ((static_cast<int>(duration.count() * 1000.0f) % 1000) < 500)
+            {
+                Bounds2f cursorBounds = getBounds().cutEdges(scale(getPadding()));
+                cursorBounds.position.x = getBounds().position.x + getCursorPosition(m_cursorIndex);
+                cursorBounds.size.x = 1.0f;
+
+                rendererInterface.drawQuad(cursorBounds, m_textStyle.getFontColor());
+            }
+
+            // Render selection.
+            if (m_cursorIndex != m_cursorSelectIndex)
+            {
+                float selectLow = getCursorPosition(m_cursorSelectIndex);
+                float selectHigh = getCursorPosition(m_cursorIndex);
+                if (selectLow > selectHigh)
+                {
+                    std::swap(selectLow, selectHigh);
+                }
+
+                Bounds2f selectBounds =
+                {
+                    { selectLow + m_textBounds.position.x, m_textBounds.position.y },
+                    { selectHigh - selectLow, m_textBounds.size.y }
+                };
+
+                rendererInterface.drawQuad(selectBounds, { 0.0f, 0.45f, 0.85f, 0.7f });
+            }
+        }
+
+        rendererInterface.popMask();
+    }
+
+    void TextBox::onResize()
+    {
+        setBounds(calcStyledBounds(getCurrentStyle(), getBounds(), getScale()));
+        calcTextBounds();
+    }
+
+    void TextBox::onUpdate()
+    {
+        if (m_changedText)
+        {
+            m_fontSequence.createSequence(m_text, m_textStyle.getFontSize(), m_dpi);
+
+            m_loadData.reset();
+            if (m_fontSequence.createBitmapRgba(m_loadData, m_textureSize))
+            {
+                calcTextBounds();
+            }
+            else
+            {
+                m_texture.reset();
+                m_changedText = false;
+            }
+        }
+    }
+
+    void TextBox::calcTextBounds()
+    {
+        m_textBounds = getBounds().cutEdges(scale(getPadding()));
+        m_textBounds.position.y += m_fontSequence.calcVerticalPosition(m_textBounds.size.y);
+        m_textBounds.size = m_textureSize;
+    }
 
     void TextBox::onActiveChange(bool active)
     {
@@ -566,7 +661,7 @@ namespace Guise
     bool TextBox::intersectText(const float point, size_t & index)
     {
         index = 0;
-        if (!m_textTexture || !m_fontSequence.getCount())
+        if (!m_texture || !m_fontSequence.getCount())
         {           
             return false;
         }
@@ -648,6 +743,6 @@ namespace Guise
         }
 
         return true;
-    }*/
+    }
 
 }

@@ -121,7 +121,7 @@ namespace Guise
             maxHeight = std::max(maxHeight, childBounds.size.y);
 
             m_childRenderCount++;
-            if (!boundsLeft.size.x)
+            if (boundsLeft.size.x <= 0.0f)
             {
                 return false;
             }

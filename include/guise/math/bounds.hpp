@@ -106,9 +106,7 @@ namespace Guise
     public:
 
         static Bounds<2, T> ceil(const Bounds<2, T> & in);
-        static Bounds<2, T> clamp(const Bounds<2, T> & in, const Bounds<2, T> & bounds);
         static Bounds<2, T> floor(const Bounds<2, T> & in);
-        //static Bounds<2, T> min(const Bounds<2, T> & left, const Bounds<2, T> & right);
 
         Bounds();
         Bounds(const Vector<2, T> & position, const Vector<2, T> & size);
@@ -130,6 +128,7 @@ namespace Guise
         Bounds<2, T> & cutLeft(const T value);
         Bounds<2, T> & cutTop(const T value);
 
+        Bounds<2, T> & innerJoin(const Bounds<2, T> & right);
 
         Bounds<2, T> & operator = (const Bounds<2, T> & bounds);
 

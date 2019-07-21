@@ -40,8 +40,16 @@ namespace Guise
     {
         return m_styleChecked;
     }
+    const Style::PaintRectStyle & Checkbox::getCheckedStyle() const
+    {
+        return m_styleChecked;
+    }
 
     Style::PaintRectStyle & Checkbox::getCheckedHoverStyle()
+    {
+        return m_styleCheckedHover;
+    }
+    const Style::PaintRectStyle & Checkbox::getCheckedHoverStyle() const
     {
         return m_styleCheckedHover;
     }
@@ -50,13 +58,25 @@ namespace Guise
     {
         return m_styleCheckedDisabled;
     }
+    const Style::PaintRectStyle & Checkbox::getCheckedDisabledStyle() const
+    {
+        return m_styleCheckedDisabled;
+    }
 
     Style::PaintRectStyle & Checkbox::getDisabledStyle()
     {
         return m_styleDisabled;
     }
+    const Style::PaintRectStyle & Checkbox::getDisabledStyle() const
+    {
+        return m_styleDisabled;
+    }
 
     Style::PaintRectStyle & Checkbox::getHoverStyle()
+    {
+        return m_styleHover;
+    }
+    const Style::PaintRectStyle & Checkbox::getHoverStyle() const
     {
         return m_styleHover;
     }

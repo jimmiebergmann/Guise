@@ -165,6 +165,7 @@ namespace Guise
         Bounds2f scale(const Bounds2f & bounds) const;
         Vector4f scale(const Vector4f & vector) const;
         Vector2f scale(const Vector2f & vector) const;
+        float scale(const float scalar) const;
 
         void update();
 

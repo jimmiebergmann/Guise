@@ -25,7 +25,6 @@ int main()
     auto canvas1 = appWindow1->getCanvas();
     
   
-
     auto vertGrid1 = VerticalGrid::create();
     canvas1->add(vertGrid1);
 
@@ -51,7 +50,7 @@ int main()
     
     auto button3 = Button::create();
     button3->setSize({ 200.0f, 40.0f });
-    //button3->getStyleHover().setSize({ 200.0f, 45.0f });
+    button3->getStyleHover().setSize({ 200.0f, 45.0f });
     button3->getStyleActive().setBorderWidth(5.0f);
     button3->onRelease = []() { std::cout << "Released button 3!" << std::endl; };
     vertGrid1->add(button3);
@@ -60,28 +59,25 @@ int main()
     label1->setFontSize(10);
     vertGrid1->add(label1);
 
+    vertGrid1->add(TextBox::create());
+
     auto horiGrid1 = HorizontalGrid::create();
     vertGrid1->add(horiGrid1);
-    //horiGrid1->setSize({ 200.0f, 40.0f });
     auto checkbox1 = Checkbox::create();
     checkbox1->setPosition({10.0, 0.0f});
     auto checkbox2 = Checkbox::create();
     checkbox2->getCheckedStyle().setSize({30.0f, 30.0f});
     horiGrid1->add(checkbox1);
     horiGrid1->add(checkbox1);
-    horiGrid1->add(Checkbox::create());
-    horiGrid1->add(Checkbox::create());
-    horiGrid1->add(Checkbox::create());
-    horiGrid1->add(Checkbox::create());
-    horiGrid1->add(Checkbox::create());
-    horiGrid1->add(Checkbox::create());
-    horiGrid1->add(Checkbox::create());
-    horiGrid1->add(Checkbox::create());
+    horiGrid1->add(checkbox2);
+    for (int i = 0; i < 8; i++)
+    {
+        horiGrid1->add(Checkbox::create());
+    }
 
     auto button4 = Button::create();
     button4->setSize({ 200.0f, 40.0f });
     vertGrid1->add(button4);
-
 
     // Signal dependency tests.
     button1->onHover = { { button2 }, [&button2]()
@@ -131,75 +127,6 @@ int main()
     } };
     
    
-    
-
-
-
-
-
-/*
-    auto button1 = Button::create();
-    button1->setSize({ 200.0f, 60.0f });
-
-    auto button2 = Button::create();
-    button2->setSize({ 300.0f, 80.0f });
-    auto inButton = Button::create();
- 
-    button2->add(inButton);
-    auto newPadding = button2->getPadding();
-    newPadding.x = 100.0f;
-    button2->setPadding(newPadding);
-    //inButton->enableInput();
-    inButton->add(Label::create("arial",   L"The quick brown fox jumps over the lazy dog."));
-    auto button3 = Button::create();
-    button3->setSize({ 200.0f, 40.0f });
-    button3->setBorderWidth(1.0f);
-
-    auto verticalGrid1 = VerticalGrid::create();
-    verticalGrid1->getSlotStyle().setSize({ 0.0f, 0.0f });
-
-    auto label1 = Label::create( "arial",  std::wstring(1, wchar_t(0x0ED4)) );
-    //auto label2 = Label::create(canvas1, L"Hello world");
-
-    //verticalGrid1->add(button1);
-    verticalGrid1->add(button2);
-    //verticalGrid1->add(button3);
-    verticalGrid1->add(Label::create("arial", L"Jimmie o'boy"));
-    button1->add(label1);
-    //verticalGrid1->add(label2);
-
-    canvas1->add(verticalGrid1);
-
-    std::shared_ptr<const Control> a = inButton;
-    auto childs = a->getChilds();
-
-    button2->onPress = [](Vector2f val)
-    {
-        std::cout << "Button 2 is pressed! :" << val.x << " " << val.y << std::endl;
-    };
-    
-
-    auto appWindow2 = context->addAppWindow(L"Example 2", { 400, 400 });
-    auto canvas2 = appWindow2->getCanvas();
-    canvas2->add(Button::create());
-    */
-    /*for (int i = 0; i < 100; i++)
-    {
-        std::this_thread::sleep_for(std::chrono::duration<double>(0.5f));
-
-        if (i % 2)
-        {
-            label1->setFontSize(80);
-            label1->setText(L"Hello");
-        }
-        else 
-        {
-            label1->setFontSize(40);
-            label1->setText(L"World");
-        }
-    }*/
-   
-
     // Wait for application window to close.
     Semaphore closeSemaphore;
     appWindow1->onClose = [&closeSemaphore]()

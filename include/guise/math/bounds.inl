@@ -137,25 +137,10 @@ namespace Guise
     }
 
     template <typename T>
-    Bounds<2, T> Bounds<2, T>::clamp(const Bounds<2, T> & in, const Bounds<2, T> & bounds)
-    {
-        Vector2f low = Vector2f::clamp(in.position, bounds.position, bounds.position + bounds.size);
-        Vector2f high = Vector2f::clamp(in.position + in.size, bounds.position, bounds.position + bounds.size);
-
-        return { low , high - low };
-    }
-
-    template <typename T>
     Bounds<2, T> Bounds<2, T>::floor(const Bounds<2, T> & in)
     {
         return { Vector2f::floor(in.position), Vector2f::floor(in.size) };
     }
-
-    /*template <typename T>
-    Bounds<2, T> Bounds<2, T>::min(const Bounds<2, T> & left, const Bounds<2, T> & right)
-    {
-
-    }*/
 
     template <typename T>
     inline Bounds<2, T>::Bounds()
@@ -226,6 +211,17 @@ namespace Guise
     {
         position.y += value;
         size.y -= value;
+        return *this;
+    }
+
+    template <typename T>
+    inline Bounds<2, T> & Bounds<2, T>::innerJoin(const Bounds<2, T> & right)
+    {
+        
+        size = Vector<2, T>::min(position + size, right.position + right.size);
+        position = Vector<2, T>::max(position, right.position);
+        size = Vector<2, T>::max({ 0, 0 }, size - position);  
+        
         return *this;
     }
 

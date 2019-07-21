@@ -60,7 +60,7 @@ namespace Guise
 
         if (m_maskStack.size())
         {
-            newBounds = Bounds2f::clamp(newBounds, m_maskStack.top());
+            newBounds.innerJoin(m_maskStack.top());
         }
 
         glDisable(GL_TEXTURE_2D);
@@ -88,17 +88,18 @@ namespace Guise
                 newBounds.position, newBounds.position + newBounds.size
             };
 
-            newBounds = Bounds2f::clamp(newBounds, m_maskStack.top());
+            newBounds.innerJoin(m_maskStack.top());
 
             Vector2f maskVec[2] =
             {
                 newBounds.position, newBounds.position + newBounds.size
-            };
+            };            
             
             newTexCoords[0].x =        ((maskVec[0].x - boundsVec[0].x) / (boundsVec[1].x - boundsVec[0].x));
             newTexCoords[0].y = 1.0f - ((maskVec[1].y - boundsVec[0].y) / (boundsVec[1].y - boundsVec[0].y));
             newTexCoords[1].x =        ((maskVec[1].x - boundsVec[0].x) / (boundsVec[1].x - boundsVec[0].x));
             newTexCoords[1].y = 1.0f - ((maskVec[0].y - boundsVec[0].y) / (boundsVec[1].y - boundsVec[0].y));
+
         }
 
         glEnable(GL_TEXTURE_2D);

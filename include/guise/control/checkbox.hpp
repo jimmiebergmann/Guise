@@ -41,10 +41,15 @@ namespace Guise
         static std::shared_ptr<Checkbox> create();
 
         Style::PaintRectStyle & getCheckedStyle();
+        const Style::PaintRectStyle & getCheckedStyle() const;
         Style::PaintRectStyle & getCheckedHoverStyle();
+        const Style::PaintRectStyle & getCheckedHoverStyle() const;
         Style::PaintRectStyle & getCheckedDisabledStyle();
+        const Style::PaintRectStyle & getCheckedDisabledStyle() const;
         Style::PaintRectStyle & getDisabledStyle();
+        const Style::PaintRectStyle & getDisabledStyle() const;
         Style::PaintRectStyle & getHoverStyle();
+        const Style::PaintRectStyle & getHoverStyle() const;
 
         virtual ControlType getType() const;
 
