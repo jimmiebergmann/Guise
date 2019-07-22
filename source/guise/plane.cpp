@@ -23,51 +23,48 @@
 *
 */
 
-#ifndef GUISE_CONTROL_HORIZONTAL_GRID_HPP
-#define GUISE_CONTROL_HORIZONTAL_GRID_HPP
-
-#include "guise/control.hpp"
+#include "guise/plane.hpp"
+#include "guise/canvas.hpp"
+#include <iostream>
 
 namespace Guise
 {
 
-    class GUISE_API HorizontalGrid : public ControlContainerList, public Style::ParentRectStyle
+    // Plane implementations.
+    std::shared_ptr<Plane> Plane::create()
     {
+        return std::shared_ptr<Plane>(new Plane());
+    }
 
-    public:
+    ControlType Plane::getType() const
+    {
+        return ControlType::Plane;
+    }
 
-        static std::shared_ptr<HorizontalGrid> create();
+    Plane::Plane()
+    { }
 
-        Style::ParentRectStyle & getSlotStyle();
-        const Style::ParentRectStyle & getSlotStyle() const;
+    void Plane::onRender(RendererInterface & rendererInterface)
+    {
+        forEachChild([&](std::shared_ptr<Control> child, size_t)
+        {
+            child->draw(rendererInterface);
+            return true;
+        });
+    }
 
-        virtual ControlType getType() const;
+    void Plane::onResize()
+    {
+        forEachChild([&](std::shared_ptr<Control> child, size_t)
+        {
+            child->setBounds(getBounds());
+            return true;
+        });
+    }
 
-    protected:
-
-        HorizontalGrid();
-
-    private:
-
-        HorizontalGrid(const HorizontalGrid &) = delete;
-
-        virtual void onAddChild(Control & control, const size_t index);
-
-        virtual void onCanvasChange(Canvas * canvas);
-
-        virtual void onRemoveChild(Control & control, const size_t index);
-
-        virtual void onRender(RendererInterface & rendererInterface);
-
-        virtual void onResize();
-
-        void resizeChilds();
-
-        Style::ParentRectStyle  m_slotStyle;
-        size_t                  m_childRenderCount;
-
-    };
+    void Plane::setCanvas(Canvas * canvas)
+    {
+        ControlContainerList::setCanvas(canvas);
+    }
 
 }
-
-#endif

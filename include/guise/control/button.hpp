@@ -57,9 +57,12 @@ namespace Guise
         Signal<Vector2f> onRelease;
         Signal<Vector2f> onHover;     
 
-    private:
+    protected:
 
         Button();
+
+    private:
+        
         Button(const Button &) = delete;
 
         virtual void onAddChild(Control & control, const size_t index);
@@ -78,7 +81,6 @@ namespace Guise
         Style::ParentPaintRectStyle     m_styleActive;
         Style::ParentPaintRectStyle     m_styleDisabled;
         Style::ParentPaintRectStyle     m_styleHover;
-        
 
     };
 

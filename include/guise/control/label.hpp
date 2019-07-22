@@ -52,10 +52,13 @@ namespace Guise
 
         Signal<const std::wstring &> onChange;
 
+    protected:
+
+        Label(const std::wstring & text = L"");
+        Label(const std::string & font, const std::wstring & text = L"");
+
     private:
 
-        Label(const std::wstring & text);
-        Label(const std::string & font, const std::wstring & text);
         Label(const Label &) = delete;
 
         virtual void onCanvasChange(Canvas * canvas);

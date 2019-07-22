@@ -159,7 +159,6 @@ namespace Guise
 
         auto backgroundColor = m_canvas->getBackgroundColor();
         m_renderer->setClearColor(backgroundColor);
-        m_renderer->clearColor();
         m_canvas->render(*m_renderer.get());
         m_renderer->present();
     }

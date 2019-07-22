@@ -89,6 +89,8 @@ namespace Guise
 
         void clearColor();
 
+        void clearDepth();
+
         void present();
 
     private:

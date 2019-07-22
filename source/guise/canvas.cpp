@@ -66,12 +66,21 @@ namespace Guise
     Canvas::~Canvas()
     { }
 
-    bool Canvas::add(const std::shared_ptr<Control> & control, const size_t)
+    /*bool Canvas::add(const std::shared_ptr<Control> & control, const size_t)
     {
         m_childs.push_back(control);
         control->setCanvas(this);
         control->setLevel(1);
         control->setBounds({ { 0.0f, 0.0f }, m_size });
+        return true;
+    }*/
+
+    bool Canvas::add(const std::shared_ptr<Plane> & plane, const size_t)
+    {
+        m_planes.push_back(plane);
+        plane->setCanvas(this);
+        plane->setLevel(1);
+        plane->setBounds({ { 0.0f, 0.0f }, m_size });
         return true;
     }
 
@@ -182,12 +191,18 @@ namespace Guise
         m_updateControls.clear();
     }
 
-    void Canvas::render(RendererInterface & renderInterface)
+    void Canvas::render(Renderer & render)
     {
-        for (auto & child : m_childs)
+        render.clearColor();
+        for (auto & plane : m_planes)
+        {
+            render.clearDepth();
+            plane->draw(render);
+        }
+        /*for (auto & child : m_childs)
         {
             child->draw(renderInterface);
-        }
+        }*/
     }
 
     const Input & Canvas::getInput() const
@@ -213,10 +228,15 @@ namespace Guise
     {
         m_size = size;
 
-        for (auto & child : m_childs)
+        for (auto & plane : m_planes)
+        {
+            plane->setBounds({ { 0.0f, 0.0f }, size });
+        }
+
+        /*for (auto & child : m_childs)
         {
             child->setBounds({ {0.0f, 0.0f}, size });
-        }
+        }*/
     }
 
     void Canvas::setDpi(const uint32_t dpi)
@@ -329,13 +349,37 @@ namespace Guise
             }
             else
             {
-                const size_t level = itControl->second;
-                const size_t controlLevel = control->getLevel();
-
+                const size_t currentLevel = control->getLevel();
+                const size_t oldLevel = itControl->second;
+                
                 // Level has been changed.
-                if (level != controlLevel)
+                if (currentLevel != oldLevel)
                 {
-                    // IMPLEMENT THIS!
+                    auto itLevel = m_selectControlLevels.find(oldLevel);
+                    if (itLevel != m_selectControlLevels.end())
+                    {
+                        auto itControl2 = std::find(itLevel->second.begin(), itLevel->second.end(), control);
+                        if (itControl2 != itLevel->second.end())
+                        {
+                            itLevel->second.erase(itControl2);
+                            
+                            if (!itLevel->second.size())
+                            {
+                                m_selectControlLevels.erase(itLevel);
+                            }
+
+                            itLevel = m_selectControlLevels.find(currentLevel);
+                            if (itLevel == m_selectControlLevels.end())
+                            {
+                                itLevel = m_selectControlLevels.insert({ currentLevel, {} }).first;
+                            }
+
+                            itLevel->second.push_back(control);
+                            m_selectControls.insert({ control, currentLevel });
+                            itControl->second = currentLevel;
+
+                        }
+                    }
                 }
             }
         }

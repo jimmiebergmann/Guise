@@ -343,22 +343,22 @@ namespace Guise
 
     Bounds2f Control::scale(const Bounds2f & bounds) const
     {
-        return Bounds2f::ceil(bounds * getScale());
+        return Bounds2f::floor(bounds * getScale());
     }
 
     Vector4f Control::scale(const Vector4f & vector) const
     {
-        return Vector4f::ceil(vector * getScale());
+        return Vector4f::floor(vector * getScale());
     }
 
     Vector2f Control::scale(const Vector2f & vector) const
     {
-        return Vector2f::ceil(vector * getScale());
+        return Vector2f::floor(vector * getScale());
     }
 
     float Control::scale(const float scalar) const
     {
-        return std::ceil(scalar * getScale());
+        return std::floor(scalar * getScale());
     }
 
     void Control::update()

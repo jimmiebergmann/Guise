@@ -23,67 +23,49 @@
 *
 */
 
-#ifndef GUISE_CONTROL_CHECKBOX_HPP
-#define GUISE_CONTROL_CHECKBOX_HPP
+#ifndef GUISE_CONTROL_TAB_WINDOW_HPP
+#define GUISE_CONTROL_TAB_WINDOW_HPP
 
-#include "guise/control.hpp"
+#include "guise/plane.hpp"
 #include "guise/signal.hpp"
 #include <functional>
 
 namespace Guise
 {
 
-    class GUISE_API Checkbox : public Control, public MultiStyleControl<Style::PaintRectStyle>
+    class GUISE_API TabWindow : public Plane, public Style::ParentPaintRectStyle
     {
 
     public:
 
-        static std::shared_ptr<Checkbox> create();
+        static std::shared_ptr<TabWindow> create();
 
-        Style::PaintRectStyle & getCheckedStyle();
-        const Style::PaintRectStyle & getCheckedStyle() const;
-        Style::PaintRectStyle & getCheckedHoverStyle();
-        const Style::PaintRectStyle & getCheckedHoverStyle() const;
-        Style::PaintRectStyle & getCheckedDisabledStyle();
-        const Style::PaintRectStyle & getCheckedDisabledStyle() const;
-        Style::PaintRectStyle & getDisabledStyle();
-        const Style::PaintRectStyle & getDisabledStyle() const;
-        Style::PaintRectStyle & getHoverStyle();
-        const Style::PaintRectStyle & getHoverStyle() const;
+        Style::ParentPaintRectStyle & getStyleTab();
+        const Style::ParentPaintRectStyle & getStyleTab() const;
 
         virtual ControlType getType() const;
 
         virtual bool handleInputEvent(const Input::Event & event);
 
-        Signal<bool>        onChanged;
-        Signal<Vector2f>    onPressed;
-        Signal<Vector2f>    onReleased;
-        Signal<Vector2f>    onHover;
-
     protected:
 
-        Checkbox();
+        TabWindow();
 
     private:
 
-        Checkbox(const Checkbox &) = delete;
+        TabWindow(const TabWindow &) = delete;
+
+        virtual void onAddChild(Control & control, const size_t index);
 
         virtual void onCanvasChange(Canvas * canvas);
-
-        virtual void onDisable();
-
-        virtual void onEnable();
 
         virtual void onRender(RendererInterface & rendererInterface);
 
         virtual void onResize();
 
-        bool                    m_checked;
-        Style::PaintRectStyle   m_styleChecked;
-        Style::PaintRectStyle   m_styleCheckedHover;
-        Style::PaintRectStyle   m_styleCheckedDisabled;
-        Style::PaintRectStyle   m_styleDisabled;
-        Style::PaintRectStyle   m_styleHover;
+        Style::ParentPaintRectStyle m_styleTab;
+        Bounds2f                    m_bodyBounds;
+        Bounds2f                    m_tabBounds;
 
     };
 

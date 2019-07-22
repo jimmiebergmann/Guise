@@ -31,30 +31,32 @@
 namespace Guise
 {
 
-    /*class GUISE_API Plane : public ControlContainerList, public Style::ParentRectStyle
+    class GUISE_API Plane : public ControlContainerList
     {
 
     public:
 
-        static std::shared_ptr<Plane> create(std::shared_ptr<Canvas> & canvas);
-
-        virtual Bounds2f getRenderBounds() const;
-
-        virtual Bounds2f getSelectBounds() const;
+        static std::shared_ptr<Plane> create();
 
         virtual ControlType getType() const;
 
-        virtual void update();
+    protected:
+
+        Plane();
+
+        virtual void onRender(RendererInterface & rendererInterface);
+
+        virtual void onResize();
+
+        virtual void setCanvas(Canvas * canvas);
 
     private:
 
-        Plane(std::shared_ptr<Canvas> & canvas);
+        friend class Canvas;
+
         Plane(const Plane &) = delete;   
 
-        Bounds2f m_childsBounds;
-        Bounds2f m_renderBounds;  
-
-    };*/
+    };
 
 }
 

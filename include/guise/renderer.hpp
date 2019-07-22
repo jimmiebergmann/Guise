@@ -96,6 +96,8 @@ namespace Guise
 
         virtual void clearColor() = 0;
 
+        virtual void clearDepth() = 0;
+
         virtual void present() = 0;
 
     };

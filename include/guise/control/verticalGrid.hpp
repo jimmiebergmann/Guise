@@ -43,9 +43,12 @@ namespace Guise
 
         virtual ControlType getType() const;
 
-    private:
+    protected:
 
         VerticalGrid();
+
+    private:
+
         VerticalGrid(const VerticalGrid &) = delete;
 
         virtual void onAddChild(Control & control, const size_t index);

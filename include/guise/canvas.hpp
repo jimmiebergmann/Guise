@@ -29,6 +29,7 @@
 #include "guise/build.hpp"
 #include "guise/signal.hpp"
 #include "guise/control.hpp"
+#include "guise/plane.hpp"
 #include "guise/renderer.hpp"
 #include "guise/style.hpp"
 #include "guise/input.hpp"
@@ -74,11 +75,11 @@ namespace Guise
         
         ~Canvas();
 
-        bool add(const std::shared_ptr<Control> & control, const size_t index = std::numeric_limits<size_t>::max());
+        bool add(const std::shared_ptr<Plane> & plane, const size_t index = std::numeric_limits<size_t>::max());
 
         void update();
 
-        void render(RendererInterface & renderInterface);
+        void render(Renderer & render);
 
         const Input & getInput() const;
         Input & getInput();
@@ -119,7 +120,8 @@ namespace Guise
         uint32_t                                    m_dpi;
         float                                       m_scale;
         Input                                       m_input;
-        std::vector<std::shared_ptr<Control> >      m_childs;
+        //std::vector<std::shared_ptr<Control> >    m_childs;
+        std::vector<std::shared_ptr<Plane> >        m_planes;
         Control *                                   m_selectedControl;
         Vector2ui32                                 m_size;
         std::shared_ptr<Style::Sheet>               m_styleSheet;

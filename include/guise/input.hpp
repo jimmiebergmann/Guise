@@ -27,6 +27,7 @@
 #define GUISE_INPUT_HPP
 
 #include "guise/build.hpp"
+#include "guise/math/vector.hpp"
 #include <queue>
 #include <set>
 #include <map>

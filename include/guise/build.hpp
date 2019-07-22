@@ -123,39 +123,6 @@
 #include <stddef.h>
 #include <cstring>
 
-// Math types
-#include "guise/math/matrix.hpp"
-#include "guise/math/vector.hpp"
-namespace Guise
-{
-    ///< Typedefs of common vector types.
-    template<typename T>
-    using Vector2       = Vector<2, T>;
-    using Vector2i32    = Vector<2, int32_t>;
-    using Vector2ui32   = Vector<2, uint32_t>;
-    using Vector2f      = Vector<2, float>;
-    using Vector2d      = Vector<2, double>;
-
-    template<typename T>
-    using Vector3       = Vector<3, T>;
-    using Vector3i32    = Vector<3, int32_t>;
-    using Vector3ui32   = Vector<3, uint32_t>;
-    using Vector3f      = Vector<3, float>;
-    using Vector3d      = Vector<3, double>;
-
-    template<typename T>
-    using Vector4       = Vector<4, T>;
-    using Vector4i32    = Vector<4, int32_t>;
-    using Vector4ui32   = Vector<4, uint32_t>;
-    using Vector4f      = Vector<4, float>;
-    using Vector4d      = Vector<4, double>;
-
-    // Typedefs of common matrix types
-    template<typename T>
-    using Matrix4x4     = Matrix<4, 4, T>;
-    using Matrix4x4f    = Matrix<4, 4, float>;
-    using Matrix4x4d    = Matrix<4, 4, double>;
-}
 
 // Renderer settings.
 #define GUISE_OPENGL_RENDERER 0

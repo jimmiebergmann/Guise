@@ -138,6 +138,24 @@ namespace Guise
                 }
             );
 
+            static const Selector tabWindow = Selector(
+                {
+                    { "size",               { Vector2f  { 200.0f, 300.0f } } },
+                    { "padding",            { Vector4f  { 3.0f, 20.0f, 3.0f, 3.0f } } },
+                    { "background-color",   { Vector4f  { 0.9f, 0.9f, 0.9f, 1.0f } } },
+                    { "border-style",                   { Property::BorderStyle::Solid } },
+                    { "border-width",                   { 1.0f } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
+                }
+            );
+
+            static const Selector tabWindowTab = Selector(
+                {
+                    { "size",               { Vector2f  { 50.0f, 20.0f } } },
+                    { "position",           { Vector2f  { 10.0f, 1.0f } } }
+                }
+            );
+
             static const Selector textBox = Selector(
                 {
                     { "size",               { Vector2f  { 0.0f, 80.0f } } },
@@ -145,7 +163,7 @@ namespace Guise
                     { "background-color",   { Vector4f  { 0.8f, 0.8f, 0.8f, 1.0f } } },
                     { "border-style",                   { Property::BorderStyle::Solid } },
                     { "border-width",                   { 1.0f } },
-                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } },
+                    { "border-color",       { Vector4f  { 0.05f, 0.05f, 0.05f, 1.0f } } }
                 }
             );
 

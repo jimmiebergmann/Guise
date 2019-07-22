@@ -203,6 +203,11 @@ namespace Guise
     {
         position.x += value;
         size.x     -= value;
+
+        T overflow = std::min<T>(0, size.x);
+        size.x -= overflow;
+        position.x += overflow;
+
         return *this;
     }
 
@@ -211,6 +216,11 @@ namespace Guise
     {
         position.y += value;
         size.y -= value;
+
+        T overflow = std::min<T>(0, size.y);
+        size.y -= overflow;
+        position.y += overflow;
+
         return *this;
     }
 

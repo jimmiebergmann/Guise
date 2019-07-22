@@ -56,9 +56,12 @@ namespace Guise
 
         void setText(const std::wstring & text);
 
-    private:
+    protected:
 
         TextBox();
+
+    private:
+
         TextBox(const TextBox &) = delete;
 
         virtual void onCanvasChange(Canvas * canvas);

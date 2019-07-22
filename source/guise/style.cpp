@@ -635,6 +635,8 @@ namespace Guise
                     { "horizontal-grid-slot", DefaultStyles::horizontalGridSlot },
                     { "label", DefaultStyles::label },
                     { "plane",  DefaultStyles::plane },
+                    { "tab-window", DefaultStyles::tabWindow },
+                    { "tab-window-tab", DefaultStyles::tabWindowTab },
                     { "text-box", DefaultStyles::textBox },
                     { "text-box-text", DefaultStyles::textBoxText },
                     { "vertical-grid", DefaultStyles::verticalGrid },

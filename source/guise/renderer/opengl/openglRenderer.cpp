@@ -28,6 +28,7 @@
 #if !defined(GUISE_DISABLE_OPENGL)
 
 #include "guise/renderer/opengl/openglTexture.hpp"
+#include "guise/math/matrix.hpp"
 #include "guise/appWindow.hpp"
 
 namespace Guise
@@ -99,7 +100,6 @@ namespace Guise
             newTexCoords[0].y = 1.0f - ((maskVec[1].y - boundsVec[0].y) / (boundsVec[1].y - boundsVec[0].y));
             newTexCoords[1].x =        ((maskVec[1].x - boundsVec[0].x) / (boundsVec[1].x - boundsVec[0].x));
             newTexCoords[1].y = 1.0f - ((maskVec[0].y - boundsVec[0].y) / (boundsVec[1].y - boundsVec[0].y));
-
         }
 
         glEnable(GL_TEXTURE_2D);
@@ -248,7 +248,12 @@ namespace Guise
 
     void OpenGLRenderer::clearColor()
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    void OpenGLRenderer::clearDepth()
+    {
+        glClear(GL_DEPTH_BUFFER_BIT);
     }
 
     void OpenGLRenderer::present()

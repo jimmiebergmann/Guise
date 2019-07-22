@@ -27,6 +27,7 @@
 #define GUISE_RENDERER_TEXTURE_HPP
 
 #include "guise/build.hpp"
+#include "guise/math/vector.hpp"
 
 namespace Guise
 {

@@ -1,7 +1,6 @@
 #include "test.hpp"
-//#include "window_test.hpp"
-#include "button_test.hpp"
-//#include "docking_test.hpp"*/
+#include "math_test.hpp"
+
 
 int main(int argc, char ** argv)
 {

@@ -60,6 +60,7 @@ namespace Guise
         HorizontalGrid,
         Label,
         Plane,
+        TabWindow,
         TextBox,
         VerticalGrid,
         Window
@@ -229,10 +230,12 @@ namespace Guise
         bool remove(const std::shared_ptr<Control> & control);
         bool remove(const size_t index);
         size_t removeAll();
-
-    private:
+    
+    protected:
 
         virtual void setCanvas(Canvas * canvas);
+
+    private:
 
         std::shared_ptr<Control>    m_child;
         mutable std::mutex          m_mutex;
@@ -266,9 +269,11 @@ namespace Guise
         bool remove(const size_t index);
         size_t removeAll();
 
-    private:
+    protected:
 
         virtual void setCanvas(Canvas * canvas);
+
+    private:
 
         std::vector<std::shared_ptr<Control> >  m_childs;
         mutable std::mutex                      m_mutex;
