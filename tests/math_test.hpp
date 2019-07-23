@@ -160,4 +160,65 @@ TEST(Bounds, Transform)
             EXPECT_EQ(bounds.cutTop(400), Bounds2i32({ 50, 400 }, { 200, 0 }));
         }
     }
+    {
+        {
+            Bounds2i32 bounds = { { 0, 0 },{ 100, 200 } };
+            EXPECT_EQ(bounds.cutLeft(40), Bounds2i32({ 40, 0 }, { 60, 200 }));
+        }
+        {
+            Bounds2i32 bounds = { { 50, 100 },{ 200, 300 } };
+            EXPECT_EQ(bounds.cutLeft(50), Bounds2i32({ 100, 100 }, { 150, 300 }));
+        }
+        {
+            Bounds2i32 bounds = { { 50, 100 },{ 200, 300 } };
+            EXPECT_EQ(bounds.cutLeft(400), Bounds2i32({ 250, 100 }, { 0, 300 }));
+        }
+    }
+    {
+        {
+            Bounds2i32 bounds = { { 0, 0 },{ 100, 200 } };
+            EXPECT_EQ(bounds.cutEdges(10), Bounds2i32({ 10, 10 }, { 80, 180 }));
+        }
+        {
+            Bounds2i32 bounds = { { 50, 100 },{ 200, 300 } };
+            EXPECT_EQ(bounds.cutEdges(20), Bounds2i32({ 70, 120 }, { 160, 260 }));
+        }
+        /*{
+            Bounds2i32 bounds = { { 50, 100 },{ 200, 300 } };
+            EXPECT_EQ(bounds.cutEdges(200), Bounds2i32({ 150, 200 }, { 0, 100 }));
+        }
+        {
+            Bounds2i32 bounds = { { 50, 100 },{ 400, 400 } };
+            EXPECT_EQ(bounds.cutEdges(1000), Bounds2i32({ 250, 300 }, { 0, 0 }));
+        }
+        {
+            Bounds2i32 bounds = { { 50, 100 },{ 400, 200 } };
+            EXPECT_EQ(bounds.cutEdges(1000), Bounds2i32({ 150, 200 }, { 200, 0 }));
+        }
+        {
+            Bounds2i32 bounds = { { 50, 100 },{ 200, 400 } };
+            EXPECT_EQ(bounds.cutEdges(1000), Bounds2i32({ 150, 200 }, { 0, 200 }));
+        }*/
+    }
+    {
+        {
+            Bounds2i32 bounds = { { 0, 0 },{ 100, 200 } };
+            EXPECT_EQ(bounds.cutEdges({10, 20}), Bounds2i32({ 10, 20 }, { 80, 160 }));
+        }
+        {
+            Bounds2i32 bounds = { { 50, 100 },{ 300, 300 } };
+            EXPECT_EQ(bounds.cutEdges({ 30, 40 }), Bounds2i32({ 80, 140 }, { 240, 220 }));
+        }
+        /*{
+            Bounds2i32 bounds = { { 50, 100 },{ 400, 200 } };
+            EXPECT_EQ(bounds.cutEdges({ 1000, 50 }), Bounds2i32({ 250, 150 }, { 0, 100 }));
+            EXPECT_EQ(1, 1);
+        }
+        {
+            Bounds2i32 bounds = { { 50, 100 },{ 400, 200 } };
+            EXPECT_EQ(bounds.cutEdges({ 1000, 500 }), Bounds2i32({ 250, 150 }, { 200, 0 }));
+            EXPECT_EQ(1, 1);
+        }*/
+
+    }
 }

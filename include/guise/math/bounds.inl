@@ -179,6 +179,25 @@ namespace Guise
     {
         position += {value, value};
         size     -= {value * T(2), value * T(2)};
+
+        /*if (size.x < T(0) && size.y < T(0))
+        {
+            T minOverflow = std::min<T>(size.x, size.y);
+            Vector2<T> overflow = { minOverflow, minOverflow };
+            size -= overflow;
+            position += overflow / T(2);
+        }
+        else if (size.x < T(0))
+        {
+            position.x += size.x / T(2);
+            size.x = T(0);
+        }
+        else if (size.y < T(0))
+        {
+            position.y += size.y / T(2);
+            size.y = T(0);
+        }*/
+
         return *this;
     }
 
@@ -186,7 +205,26 @@ namespace Guise
     inline Bounds<2, T> & Bounds<2, T>::cutEdges(const Vector2<T> & value)
     {
         position += value;
-        size     -= value * T(2);
+        size -= value * T(2);
+
+        /*if (size.x < T(0) && size.y < T(0))
+        {
+            T minOverflow = std::min<T>(size.x, size.y);
+            Vector2<T> overflow = { minOverflow, minOverflow };
+            size -= overflow;
+            position += overflow / T(2);
+        }
+        else if (size.x < T(0))
+        {
+            position.x += size.x / T(2);
+            size.x = T(0);
+        }
+        else if (size.y < T(0))
+        {
+            position.y += size.y / T(2);
+            size.y = T(0);
+        }*/
+
         return *this;
     }
 
@@ -195,6 +233,25 @@ namespace Guise
     {
         position += {value.x, value.y};
         size     -= {value.x + value.z, value.y + value.w};
+
+        /*if (size.x < T(0) && size.y < T(0))
+        {
+            T minOverflow = std::min<T>(size.x, size.y);
+            Vector2<T> overflow = { minOverflow, minOverflow };
+            size -= overflow;
+            position += overflow / T(2);
+        }
+        else if (size.x < T(0))
+        {
+            position.x += size.x / T(2);
+            size.x = T(0);
+        }
+        else if (size.y < T(0))
+        {
+            position.y += size.y / T(2);
+            size.y = T(0);
+        }*/
+
         return *this;
     }
 
